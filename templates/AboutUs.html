@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Us - ChainTrack</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"></link>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Open Sans', sans-serif;
+            background-color: rgba(8, 118, 155, 0.15);
+        }
+
+	/* Dropdown Show/Hide */
+        .dropdown:hover .dropdown-content {
+            display: block;
+        }
+
+        /* Dropdown Link Styles */
+        .dropdown-content a {
+            color: black;
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+            white-space: nowrap;
+        }
+
+        .dropdown-content a:hover {
+            background-color: #f1f1f1;
+        }
+
+        /* Dropdown Positioning */
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            min-width: 160px;
+            z-index: 1;
+            left: 0;
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+        }
+        /* Additional custom styles if needed */
+    </style>
+</head>
+
+<body>
+    <header class="bg-white px-8 py-4 shadow-md flex justify-between items-center">
+      <a href="/">
+	<img src="{{ url_for('static', filename='images/output-onlinepngtools.png') }}" alt="ChainTrack logo" class="h-12">
+	</a>
+        <div class="space-x-4">
+            <div class="dropdown inline-block relative">
+                <a href="#" class="text-gray-600 hover:text-blue-600 inline-flex items-center">
+                    Solutions <i class="fas fa-caret-down ml-1"></i>
+                </a>
+                <div class="dropdown-content absolute hidden">
+                    <a href="/product_registration" class="block px-4 py-2 hover:bg-gray-100">Product Registration</a>
+                    <a href="/product_verification" class="block px-4 py-2 hover:bg-gray-100">Product Verification</a>
+                    <a href="/product_tracking" class="block px-4 py-2 hover:bg-gray-100">Product Tracking</a>
+                </div>
+            </div>
+            <a href="#" class="text-gray-600 hover:text-blue-600">Industries</a>
+            <a href="#" class="text-gray-600 hover:text-blue-600">Our Customers</a>
+            <a href="#" class="text-blue-700 font-bold">About Us</a> <!-- Highlighted Link -->
+            <a href="/login" class="text-gray-600 hover:text-blue-600">Log in</a>
+        </div>
+    </header>    
+
+    <main class="px-8 py-16">
+        <section>
+            <h1 class="text-3xl font-bold text-gray-800">Our Mission</h1>
+            <p>“We're dedicated to revolutionizing the supply chain industry by introducing unparalleled transparency, security, and efficiency through blockchain technology. Our mission is to empower manufacturers, distributors, retailers, and consumers with real-time, trusted data about the products they create, sell, buy, and use. We envision a world where every product's journey is traceable, ensuring authenticity, reducing fraud, and promoting ethical practices across global supply chains.”</p>
+        </section>
+
+        <section>
+            <h2 class="text-2xl font-bold text-gray-800 mt-10">Our Story</h2>
+            <p>ChainTrack was born out of a shared frustration with the opacity and complexities of traditional supply chains. Our founders, a diverse team of technology enthusiasts, blockchain experts, and supply chain veterans, realized the immense potential of leveraging blockchain to solve these endemic issues. With a passion for innovation and a deep commitment to sustainability and ethical business practices, we embarked on a journey to build a solution that not only addresses these challenges but also sets a new standard for supply chain management.</p>
+        </section>
+
+        <section class="mt-10">
+            <h2 class="text-2xl font-bold text-gray-800">Why ChainTrack</h2>
+            <div class="flex flex-col md:flex-row flex-wrap md:-mx-4">
+                <div class="md:w-1/2 md:px-4 mb-6 md:mb-0">
+                    <img src="{{ url_for('static', filename='images/Transparency.jpg') }}" alt="Placeholder image for innovation" class="w-full h-auto mb-4 md:mb-0">
+                    <h3 class="text-xl font-bold text-gray-700">Transparency</h3>
+                    <p>Our platform offers an immutable ledger for all transactions within the supply chain, providing all stakeholders with a transparent view of the product lifecycle from manufacture to final sale.</p>
+                </div>
+                <div class="md:w-1/2 md:px-4 mb-6 md:mb-0">
+                    <div class="md:order-1">
+                        <h3 class="text-xl font-bold text-gray-700">Security</h3>
+                        <p>Leveraging the power of blockchain technology, ChainTrack ensures that all data is secure, tamper-proof, and verifiable by all parties involved, fostering trust and reliability.</p>
+                    </div>
+                    <div class="md:order-0">
+                        <img src="{{ url_for('static', filename='images/Security.jpg') }}" alt="Placeholder image for security" class="w-full h-auto mb-4 md:mb-0">
+                    </div>
+                </div>
+                <div class="md:w-1/2 md:px-4 mb-6 md:mb-0">
+                    <img src="{{ url_for('static', filename='images/Efficiency.jpg') }}" alt="Placeholder image for efficiency" class="w-full h-auto mb-4 md:mb-0">
+                    <h3 class="text-xl font-bold text-gray-700">Efficiency</h3>
+                    <p>By automating key processes and reducing the need for intermediaries, we streamline operations, reduce costs, and significantly improve the speed of transactions within the supply chain ecosystem.</p>
+                </div>
+                <div class="md:w-1/2 md:px-4 mb-6 md:mb-0">
+                    <div class="md:order-1">
+                        <h3 class="text-xl font-bold text-gray-700">Sustainability</h3>
+                        <p>ChainTrack is committed to promoting sustainable practices within the supply chain. By providing visibility into the sourcing and handling of products, we empower consumers and companies to make informed, ethical choices.</p>
+                    </div>
+                    <div class="md:order-0">
+                        <img src="{{ url_for('static', filename='images/Sustainability.jpg') }}" alt="Placeholder image for sustainability" class="w-full h-auto mb-4 md:mb-0">
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+    </main>
+
+    <footer class="bg-gray-800 text-white py-8 px-4">
+        <!-- Footer content -->
+        <div class="flex justify-between">
+            <p>&copy; ChainTrack 2024</p>
+            <div class="flex space-x-4">
+                <a href="#" class="hover:text-gray-300">Privacy Policy</a>
+                <a href="#" class="hover:text-gray-300">Terms and Conditions</a>
+                <a href="#" class="hover:text-gray-300">Assistance</a>
+                <a href="#" class="hover:text-gray-300">Blog</a>
+            </div>
+            <div class="flex space-x-4">
+                <a href="#" class="hover:text-gray-300"><i class="fab fa-twitter"></i></a>
+                <a href="#" class="hover:text-gray-300"><i class="fab fa-facebook-f"></i></a>
+                <a href="#" class="hover:text-gray-300"><i class="fab fa-linkedin-in"></i></a>
+                <a href="#" class="hover:text-gray-300"><i class="fab fa-youtube"></i></a>
+            </div>
+        </div>
+    </footer>
+
+</body>
+
+</html>

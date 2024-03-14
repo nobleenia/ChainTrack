@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChainTrack Login</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"></link>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Open Sans', sans-serif;
+            background-color: rgba(8, 118, 155, 0.15);
+        }
+
+        .divider:after,
+        .divider:before {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: #d1d5db;
+        }
+        .divider {
+            display: flex;
+            align-items: center;
+            text-align: center;
+            margin: 16px 0;
+        }
+        .divider:before {
+            margin-right: .25rem;
+        }
+        .divider:after {
+            margin-left: .25rem;
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="bg-white px-8 py-4 shadow-md flex justify-between items-center">
+      <a href="/">
+	<img src="{{ url_for('static', filename='images/output-onlinepngtools.png') }}" alt="ChainTrack logo" class="h-12">
+	</a>
+        <div class="space-x-4">
+            <a href="#" class="text-gray-600 hover:text-blue-600">Solutions</a>
+            <a href="#" class="text-gray-600 hover:text-blue-600">Industries</a>
+            <a href="#" class="text-gray-600 hover:text-blue-600">Our Customers</a>
+            <a href="/about" class="text-gray-600 hover:text-blue-600">About Us</a>
+            <a href="#" class="text-blue-600 hover:text-blue-700 font-bold">Log in</a>
+        </div>
+    </nav>
+
+    <div class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-md w-full space-y-8">
+            <div>
+                <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">Log in</h2>
+                <p class="mt-2 text-center text-sm text-gray-600">
+                    New to ChainTrack? <a href="/register" class="font-medium text-indigo-600 hover:text-indigo-500">Get Started</a>
+                </p>
+            </div>
+            <form class="mt-8 space-y-6" action="#" method="POST">
+                <input type="hidden" name="remember" value="true">
+                <div class="rounded-md shadow-sm -space-y-px">
+                    <div>
+                        <label for="email-address" class="sr-only">Email address</label>
+                        <input id="email-address" name="email" type="email" autocomplete="email" required class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm" placeholder="Email">
+                    </div>
+                </div>
+
+                <div>
+                    <button type="submit" class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500">
+                        Continue with email
+                    </button>
+                </div>
+
+                <div class="divider">
+                    OR
+                </div>
+
+                <div class="flex flex-col space-y-4">
+                    <button type="button" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded">
+                        Continue with Apple
+                    </button>
+                    <button type="button" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded">
+                        Continue with Facebook
+                    </button>
+                    <button type="button" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded">
+                        Continue with Google
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <footer class="bg-gray-800 text-white py-8 px-4">
+        <!-- Footer content -->
+        <div class="flex justify-between">
+            <p>&copy; ChainTrack 2024</p>
+            <div class="flex space-x-4">
+                <a href="#" class="hover:text-gray-300">Privacy Policy</a>
+                <a href="#" class="hover:text-gray-300">Terms and Conditions</a>
+                <a href="#" class="hover:text-gray-300">Assistance</a>
+                <a href="#" class="hover:text-gray-300">Blog</a>
+            </div>
+            <div class="flex space-x-4">
+                <a href="#" class="hover:text-gray-300"><i class="fab fa-twitter"></i></a>
+                <a href="#" class="hover:text-gray-300"><i class="fab fa-facebook-f"></i></a>
+                <a href="#" class="hover:text-gray-300"><i class="fab fa-linkedin-in"></i></a>
+                <a href="#" class="hover:text-gray-300"><i class="fab fa-youtube"></i></a>
+            </div>
+        </div>
+    </footer>
+
+</body>
+
+</html>

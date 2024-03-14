@@ -1,6 +1,0 @@
-{
-  "dependencies": {
-    "react-router-dom": "^6.22.2",
-    "web3": "^4.5.0"
-  }
-}
