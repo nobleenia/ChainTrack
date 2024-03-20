@@ -89,15 +89,15 @@
     <section id="contact" class="bg-white py-16 px-8 shadow-md">
         <form action="/contact_us" method="POST">
             <div class="grid grid-cols-2 gap-4 mb-4">
-                <input type="text" placeholder="First Name" class="border-2 p-2" required>
-                <input type="text" placeholder="Last Name" class="border-2 p-2" required>
+                <input type="text" name="first_name" placeholder="First Name" class="border-2 p-2" required>
+                <input type="text" name="last_name" placeholder="Last Name" class="border-2 p-2" required>
             </div>
             <div class="grid grid-cols-2 gap-4 mb-4">
-                <input type="email" placeholder="Business Email" class="border-2 p-2" required>
-                <input type="text" placeholder="Job Title" class="border-2 p-2">
+                <input type="email" name="email" placeholder="Business Email" class="border-2 p-2" required>
+                <input type="text" name="job_title" placeholder="Job Title" class="border-2 p-2">
             </div>
-            <input type="tel" placeholder="Phone Number" class="border-2 p-2 w-full mb-4" required>
-            <textarea placeholder="How can we help you?" class="border-2 p-2 w-full mb-4" required></textarea>
+            <input type="tel" name="phone_number" placeholder="Phone Number" class="border-2 p-2 w-full mb-4" required>
+            <textarea name="message" placeholder="How can we help you?" class="border-2 p-2 w-full mb-4" required></textarea>
             <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
                 Let's Connect
             </button>

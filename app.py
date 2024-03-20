@@ -1,9 +1,11 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, redirect, render_template, request, jsonify, url_for
 from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
 # Import for hashing passwords (if managing user accounts)
 from werkzeug.security import generate_password_hash, check_password_hash
 # HTTP request with route handlers
 # import requests
+from datetime import datetime
 
 app = Flask(__name__)
 
@@ -14,14 +16,20 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False  # Optional: to suppress a 
 # Initialize the database
 db = SQLAlchemy(app)
 
+# Initialize Flask Migrate
+migrate = Migrate(app, db)
+
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(80), nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
+    telephone = db.Column(db.String(20), nullable=False)
     password_hash = db.Column(db.String(128))
 
 class Product(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(80), nullable=False)
+    product_id = db.Column(db.Text, unique=True, nullable=False)
     production_date = db.Column(db.Date, nullable=False)
     location = db.Column(db.String(255), nullable=False)
     description = db.Column(db.Text, nullable=True)
@@ -67,12 +75,14 @@ def product_tracking():
 @app.route('/signup', methods=['POST'])
 def signup():
     # Assuming your form has fields for email and password
+    name = request.form.get('name')
     email = request.form.get('email')
+    telephone = request.form.get('telephone')
     password = request.form.get('password')
     hashed_password = generate_password_hash(password)
     
     # Creating a new User instance
-    user = User(email=email, password_hash=hashed_password)
+    user = User(name=name, email=email, telephone=telephone, password_hash=hashed_password)
     db.session.add(user)
     db.session.commit()
     return jsonify({"message": "User created successfully."}), 201
@@ -90,15 +100,22 @@ def login():
 def register_product():
     # Extracting form data
     name = request.form.get('name')
-    product_id = request.form.get('batch')
+    product_id = request.form.get('product_id')
     date = request.form.get('date')
     location = request.form.get('location')
     description = request.form.get('description')
+
+    # Convert the date to a datetime.date object
+    if date:
+        production_date = datetime.strptime(date, '%Y-%m-%d').date()
+    else:
+        production_date = None
     
     # Creating a new Product instance
-    product = Product(name=name, batch=batch, production_date=date, location=location, description=description)
+    product = Product(name=name, product_id=product_id, production_date=production_date, location=location, description=description)
     db.session.add(product)
     db.session.commit()
+    return redirect(url_for('dashboard'))  # Assuming 'dashboard' is the route to your dashboard
     return jsonify({"message": f"Product {name} registered successfully."}), 201
 
 @app.route('/verify_product', methods=['GET'])
