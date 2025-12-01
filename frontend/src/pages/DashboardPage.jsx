@@ -194,7 +194,7 @@ export default function DashboardPage() {
             <p className="text-gray-500 mb-4">No products registered yet</p>
             {user?.role !== 'consumer' && (
               <Link
-                to="/products/register"
+                to="/products/new"
                 className="inline-flex items-center px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition"
               >
                 <Plus size={20} className="mr-2" />
@@ -218,7 +218,7 @@ export default function DashboardPage() {
               Add new products to the blockchain and generate QR codes.
             </p>
             <Link
-              to="/products/register"
+              to="/products/new"
               className="inline-flex items-center text-white font-medium hover:underline"
             >
               Get Started <ArrowRight size={16} className="ml-1" />
