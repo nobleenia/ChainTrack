@@ -1,0 +1,81 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  db:
+    image: postgres:15-alpine
+    container_name: chaintrack-db
+    environment:
+      POSTGRES_USER: ${DB_USER:-chaintrack}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-chaintrack123}
+      POSTGRES_DB: ${DB_NAME:-chaintrack}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-chaintrack}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # Flask Backend API
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: chaintrack-backend
+    environment:
+      - FLASK_ENV=${FLASK_ENV:-development}
+      - DATABASE_URL=postgresql://${DB_USER:-chaintrack}:${DB_PASSWORD:-chaintrack123}@db:5432/${DB_NAME:-chaintrack}
+      - SECRET_KEY=${SECRET_KEY:-dev-secret-key}
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY:-jwt-dev-secret}
+      - CORS_ORIGINS=${CORS_ORIGINS:-http://localhost:5173}
+      - ETHEREUM_RPC_URL=${ETHEREUM_RPC_URL:-}
+      - CONTRACT_ADDRESS=${CONTRACT_ADDRESS:-}
+      - DEPLOYER_PRIVATE_KEY=${DEPLOYER_PRIVATE_KEY:-}
+    volumes:
+      - ./backend:/app
+    ports:
+      - "5000:5000"
+    depends_on:
+      db:
+        condition: service_healthy
+    command: >
+      sh -c "flask db upgrade && gunicorn --bind 0.0.0.0:5000 --reload run:app"
+
+  # React Frontend (Development)
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    container_name: chaintrack-frontend
+    environment:
+      - VITE_API_URL=http://localhost:5000/api
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
+    command: npm run dev -- --host
+
+  # Redis for caching (optional, for production)
+  redis:
+    image: redis:7-alpine
+    container_name: chaintrack-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    profiles:
+      - production
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  default:
+    name: chaintrack-network

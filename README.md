@@ -1,35 +1,206 @@
-# ChainTrack: Secure Supply Chain Ledger
+# 🔗 ChainTrack v2.0
 
-ChainTrack is an innovative web-based application designed to revolutionize the supply chain industry by leveraging the power of blockchain technology. This platform aims to provide a secure, transparent, and immutable ledger for tracking the lifecycle of products from manufacture to end consumer. By integrating smart contracts, ChainTrack ensures authenticity, reduces counterfeits, and enhances trust across the supply chain network.
+<div align="center">
+  <img src="docs/assets/logo.png" alt="ChainTrack Logo" width="200" />
+  
+  **Blockchain-Powered Supply Chain Transparency Platform**
+  
+  [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+  [![Ethereum](https://img.shields.io/badge/Ethereum-Sepolia-purple.svg)](https://sepolia.etherscan.io/)
+  [![React](https://img.shields.io/badge/React-18-61DAFB.svg)](https://reactjs.org/)
+  [![Flask](https://img.shields.io/badge/Flask-3.0-000000.svg)](https://flask.palletsprojects.com/)
+  
+  [Live Demo](https://chaintrack.vercel.app) · [API Docs](docs/API.md) · [Report Bug](https://github.com/nobleenia/ChainTrack/issues)
+</div>
 
-## Features:
+---
 
-- [ ] Product Registration: Manufacturers can register products on the blockchain, creating a digital passport that tracks each product's journey through the supply chain.
-- [ ] Real-Time Tracking: Distributors, retailers, and consumers can view and update the journey of products in real time, ensuring transparency and trust.
-- [ ] Authenticity Verification: Consumers can verify product authenticity before purchase, significantly reducing the risk of buying counterfeit goods.
-- [ ] Secure and Immutable Records: Utilizes Ethereum blockchain to provide a secure and unalterable record of all transactions within the supply chain.
+## 🌟 Overview
 
-## Technologies Used:
+ChainTrack is a full-stack supply chain transparency platform that leverages Ethereum blockchain to provide immutable product tracking from manufacture to consumer. Every product registration and custody transfer is recorded on-chain, enabling instant verification and complete traceability.
 
-- Frontend: React.js for a dynamic and responsive user interface.
-- Backend: Node.js with Express.js framework for RESTful API services.
-- Blockchain: Ethereum for deploying smart contracts and handling transactions.
-- Database: MySQL for storing off-chain data efficiently.
-- DevOps: Docker for containerization, ensuring consistency across development and production environments.
+### ✨ Key Features
 
-## Getting Started:
+- **🔐 Immutable Records** - Product data stored permanently on Ethereum blockchain
+- **📱 QR Code Verification** - Instant product authenticity check via mobile scanning
+- **🔄 Real-Time Tracking** - Monitor products as they move through the supply chain
+- **👥 Role-Based Access** - Separate dashboards for manufacturers, distributors, retailers, and consumers
+- **📊 Analytics Dashboard** - Visualize supply chain performance and verification metrics
+- **🎯 Guided Tour** - Interactive onboarding for new users
 
-Installation instructions, API documentation, and more can be found in the Wiki and Documentation sections of this repository.
+---
 
-## Contribution:
+## 🏗️ Architecture
 
-We welcome contributions! Please refer to our contribution guidelines for more information on how to get involved.
+```
+ChainTrack/
+├── frontend/          # React + Vite + Tailwind CSS
+├── backend/           # Flask REST API + SQLAlchemy
+├── contracts/         # Solidity smart contracts (Hardhat)
+└── docs/              # Documentation
+```
 
-## License:
+### Tech Stack
 
-ChainTrack is licensed under MIT License.
+| Layer | Technology |
+|-------|------------|
+| **Frontend** | React 18, Vite, Tailwind CSS, Framer Motion, ethers.js |
+| **Backend** | Flask, SQLAlchemy, Flask-JWT-Extended, Web3.py |
+| **Blockchain** | Solidity, Hardhat, Ethereum Sepolia Testnet |
+| **Database** | PostgreSQL (production), SQLite (development) |
 
-## Connect with Us:
+---
 
-- For more information, visit our website.
-- Follow us on Twitter for updates.
+## 🚀 Quick Start
+
+### Prerequisites
+
+- Node.js 18+ and npm
+- Python 3.10+
+- Docker & Docker Compose (optional)
+- MetaMask wallet (for blockchain features)
+
+### Option 1: Docker (Recommended)
+
+```bash
+# Clone the repository
+git clone https://github.com/nobleenia/ChainTrack.git
+cd ChainTrack
+
+# Copy environment file and configure
+cp .env.example .env
+
+# Start all services
+docker-compose up -d
+
+# Access the application
+# Frontend: http://localhost:5173
+# Backend:  http://localhost:5000
+```
+
+### Option 2: Manual Setup
+
+#### Backend
+
+```bash
+cd backend
+
+# Create virtual environment
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Copy environment file
+cp .env.example .env
+
+# Initialize database
+flask db upgrade
+flask seed-demo  # Optional: Add demo data
+
+# Run the server
+flask run
+```
+
+#### Frontend
+
+```bash
+cd frontend
+
+# Install dependencies
+npm install
+
+# Start development server
+npm run dev
+```
+
+#### Smart Contracts
+
+```bash
+cd contracts
+
+# Install dependencies
+npm install
+
+# Compile contracts
+npm run compile
+
+# Run tests
+npm run test
+
+# Deploy to Sepolia (requires .env configuration)
+npm run deploy:sepolia
+```
+
+---
+
+## 📚 Documentation
+
+- [API Documentation](docs/API.md)
+- [Architecture Overview](docs/ARCHITECTURE.md)
+- [Smart Contract Reference](docs/CONTRACTS.md)
+- [Deployment Guide](docs/DEPLOYMENT.md)
+
+---
+
+## 🔧 Configuration
+
+### Environment Variables
+
+See [`.env.example`](.env.example) for all configuration options.
+
+Key variables:
+- `ETHEREUM_RPC_URL` - Infura/Alchemy endpoint for Sepolia
+- `CONTRACT_ADDRESS` - Deployed ProductRegistry address
+- `DATABASE_URL` - PostgreSQL connection string
+
+---
+
+## 🧪 Testing
+
+```bash
+# Backend tests
+cd backend
+pytest
+
+# Smart contract tests
+cd contracts
+npm run test
+
+# Frontend tests
+cd frontend
+npm run test
+```
+
+---
+
+## 🤝 Contributing
+
+Contributions are welcome! Please read our [Contributing Guide](CONTRIBUTING.md) first.
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+---
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+---
+
+## 🙏 Acknowledgements
+
+- [OpenZeppelin](https://openzeppelin.com/) for secure smart contract libraries
+- [Tailwind CSS](https://tailwindcss.com/) for the utility-first CSS framework
+- [Shepherd.js](https://shepherdjs.dev/) for the guided tour functionality
+
+---
+
+<div align="center">
+  Made with ❤️ by <a href="https://github.com/nobleenia">Noble Enia</a>
+</div>
