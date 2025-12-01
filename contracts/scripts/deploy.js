@@ -20,9 +20,14 @@ async function main() {
   const contractAddress = await productRegistry.getAddress();
   console.log("ProductRegistry deployed to:", contractAddress);
 
-  // Wait for a few block confirmations before verification
-  console.log("Waiting for block confirmations...");
-  await productRegistry.deploymentTransaction().wait(5);
+  // Wait for block confirmations (skip on localhost for speed)
+  if (hre.network.name !== "hardhat" && hre.network.name !== "localhost") {
+    console.log("Waiting for block confirmations...");
+    await productRegistry.deploymentTransaction().wait(5);
+  } else {
+    // On local network, just wait for deployment transaction
+    await productRegistry.deploymentTransaction().wait(1);
+  }
 
   // Verify on Etherscan (only works on public networks)
   if (hre.network.name !== "hardhat" && hre.network.name !== "localhost") {

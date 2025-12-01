@@ -97,10 +97,16 @@ class BlockchainService:
             # Build transaction
             nonce = self.w3.eth.get_transaction_count(account.address)
             
+            # Convert product_hash to bytes32 (pad to 32 bytes if needed)
+            hash_bytes = bytes.fromhex(product_hash.replace('0x', ''))
+            if len(hash_bytes) < 32:
+                hash_bytes = hash_bytes.ljust(32, b'\x00')
+            elif len(hash_bytes) > 32:
+                hash_bytes = hash_bytes[:32]
+            
             tx = self.contract.functions.registerProduct(
                 product_id,
-                bytes.fromhex(product_hash),
-                Web3.to_checksum_address(manufacturer_address)
+                hash_bytes  # Only 2 args: productId and productHash
             ).build_transaction({
                 'from': account.address,
                 'nonce': nonce,
@@ -108,9 +114,9 @@ class BlockchainService:
                 'gasPrice': self.w3.eth.gas_price
             })
             
-            # Sign and send transaction
+            # Sign and send transaction (web3.py 6.x uses raw_transaction instead of rawTransaction)
             signed_tx = self.w3.eth.account.sign_transaction(tx, self.private_key)
-            tx_hash = self.w3.eth.send_raw_transaction(signed_tx.rawTransaction)
+            tx_hash = self.w3.eth.send_raw_transaction(signed_tx.raw_transaction)
             
             # Wait for receipt
             receipt = self.w3.eth.wait_for_transaction_receipt(tx_hash)
@@ -163,7 +169,7 @@ class BlockchainService:
             })
             
             signed_tx = self.w3.eth.account.sign_transaction(tx, self.private_key)
-            tx_hash = self.w3.eth.send_raw_transaction(signed_tx.rawTransaction)
+            tx_hash = self.w3.eth.send_raw_transaction(signed_tx.raw_transaction)
             
             receipt = self.w3.eth.wait_for_transaction_receipt(tx_hash)
             
