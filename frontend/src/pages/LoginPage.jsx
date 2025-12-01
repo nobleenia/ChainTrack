@@ -118,7 +118,7 @@ export default function LoginPage() {
         </p>
 
         {/* Demo credentials */}
-        <div className="bg-gray-50 rounded-lg p-4 text-sm">
+        {/* <div className="bg-gray-50 rounded-lg p-4 text-sm">
           <p className="font-medium text-gray-700 mb-2">Demo Credentials:</p>
           <p className="text-gray-600">
             <strong>Manufacturer:</strong> manufacturer@demo.com / demo1234
@@ -126,7 +126,7 @@ export default function LoginPage() {
           <p className="text-gray-600">
             <strong>Consumer:</strong> consumer@demo.com / demo1234
           </p>
-        </div>
+        </div> */}
       </motion.div>
     </div>
   )

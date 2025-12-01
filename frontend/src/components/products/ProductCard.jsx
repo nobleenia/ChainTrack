@@ -53,7 +53,7 @@ export default function ProductCard({
 
   return (
     <CardWrapper
-      to={onClick ? undefined : `/products/${id}`}
+      to={onClick ? undefined : `/products/${product_id}`}
       onClick={onClick}
       className="block"
       whileHover={{ y: -4 }}
