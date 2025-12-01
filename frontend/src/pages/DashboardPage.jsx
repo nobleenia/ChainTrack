@@ -97,7 +97,7 @@ export default function DashboardPage() {
         </div>
         {user?.role !== 'consumer' && (
           <Link
-            to="/products/register"
+            to="/products/new"
             className="mt-4 sm:mt-0 inline-flex items-center px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition"
           >
             <Plus size={20} className="mr-2" />

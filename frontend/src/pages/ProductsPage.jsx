@@ -114,7 +114,7 @@ export default function ProductsPage() {
 
         {/* Add Product Button - Only for manufacturers */}
         {isManufacturer && (
-          <Link to="/products/register">
+          <Link to="/products/new">
             <Button leftIcon={<Plus size={20} />}>
               Register Product
             </Button>
@@ -236,7 +236,7 @@ export default function ProductsPage() {
               : 'Get started by registering your first product'}
           </p>
           {isManufacturer && !search && !statusFilter && !categoryFilter && (
-            <Link to="/products/register">
+            <Link to="/products/new">
               <Button leftIcon={<Plus size={20} />}>
                 Register Product
               </Button>

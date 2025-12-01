@@ -6,7 +6,7 @@
  */
 
 import { useState, useEffect } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { useSearchParams, useParams } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { 
   QrCode, 
@@ -30,8 +30,10 @@ import { productService } from '../services/productService'
 import { Button, LoadingSpinner, StatusBadge } from '../components/common'
 
 export default function VerifyPage() {
+  const { productId: paramProductId } = useParams()
   const [searchParams] = useSearchParams()
-  const initialProductId = searchParams.get('id') || ''
+  // Support both route param /verify/123 and query param /verify?id=123
+  const initialProductId = paramProductId || searchParams.get('id') || ''
   
   // State
   const [productId, setProductId] = useState(initialProductId)
