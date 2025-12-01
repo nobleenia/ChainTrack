@@ -25,7 +25,7 @@ def get_products():
     - Admins see all products
     """
     current_user_id = get_jwt_identity()
-    user = User.query.get(current_user_id)
+    user = User.query.get(int(current_user_id))
     
     if not user:
         return jsonify({'error': 'User not found'}), 404
@@ -103,7 +103,7 @@ def register_product():
         - manufacturing_location: string (required)
     """
     current_user_id = get_jwt_identity()
-    user = User.query.get(current_user_id)
+    user = User.query.get(int(current_user_id))
     
     if not user:
         return jsonify({'error': 'User not found'}), 404
@@ -183,7 +183,7 @@ def register_product():
 def update_product(product_id):
     """Update product details (limited fields)"""
     current_user_id = get_jwt_identity()
-    user = User.query.get(current_user_id)
+    user = User.query.get(int(current_user_id))
     
     product = Product.query.filter_by(product_id=product_id).first()
     
@@ -215,7 +215,7 @@ def update_product(product_id):
 def get_product_stats():
     """Get product statistics for dashboard"""
     current_user_id = get_jwt_identity()
-    user = User.query.get(current_user_id)
+    user = User.query.get(int(current_user_id))
     
     if not user:
         return jsonify({'error': 'User not found'}), 404

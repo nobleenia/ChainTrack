@@ -18,7 +18,7 @@ bp = Blueprint('transfers', __name__)
 def get_transfers():
     """Get transfers for the current user"""
     current_user_id = get_jwt_identity()
-    user = User.query.get(current_user_id)
+    user = User.query.get(int(current_user_id))
     
     if not user:
         return jsonify({'error': 'User not found'}), 404
@@ -67,7 +67,7 @@ def create_transfer():
         - notes: string (optional) - Additional notes
     """
     current_user_id = get_jwt_identity()
-    user = User.query.get(current_user_id)
+    user = User.query.get(int(current_user_id))
     
     if not user:
         return jsonify({'error': 'User not found'}), 404
@@ -164,7 +164,7 @@ def create_transfer():
 @jwt_required()
 def confirm_transfer(transfer_id):
     """Confirm receipt of a transfer"""
-    current_user_id = get_jwt_identity()
+    current_user_id = int(get_jwt_identity())
     
     transfer = Transfer.query.get(transfer_id)
     

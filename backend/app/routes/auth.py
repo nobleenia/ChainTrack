@@ -62,9 +62,9 @@ def register():
     db.session.add(user)
     db.session.commit()
     
-    # Generate tokens
-    access_token = create_access_token(identity=user.id)
-    refresh_token = create_refresh_token(identity=user.id)
+    # Generate tokens (use string identity for Flask-JWT-Extended compatibility)
+    access_token = create_access_token(identity=str(user.id))
+    refresh_token = create_refresh_token(identity=str(user.id))
     
     return jsonify({
         'message': 'User registered successfully',
@@ -100,9 +100,9 @@ def login():
     user.last_login = datetime.utcnow()
     db.session.commit()
     
-    # Generate tokens
-    access_token = create_access_token(identity=user.id)
-    refresh_token = create_refresh_token(identity=user.id)
+    # Generate tokens (use string identity for Flask-JWT-Extended compatibility)
+    access_token = create_access_token(identity=str(user.id))
+    refresh_token = create_refresh_token(identity=str(user.id))
     
     return jsonify({
         'message': 'Login successful',
@@ -129,7 +129,7 @@ def refresh():
 def get_current_user():
     """Get the current authenticated user's profile"""
     current_user_id = get_jwt_identity()
-    user = User.query.get(current_user_id)
+    user = User.query.get(int(current_user_id))
     
     if not user:
         return jsonify({'error': 'User not found'}), 404
@@ -142,7 +142,7 @@ def get_current_user():
 def update_current_user():
     """Update the current user's profile"""
     current_user_id = get_jwt_identity()
-    user = User.query.get(current_user_id)
+    user = User.query.get(int(current_user_id))
     
     if not user:
         return jsonify({'error': 'User not found'}), 404
@@ -176,7 +176,7 @@ def update_current_user():
 def change_password():
     """Change the current user's password"""
     current_user_id = get_jwt_identity()
-    user = User.query.get(current_user_id)
+    user = User.query.get(int(current_user_id))
     
     if not user:
         return jsonify({'error': 'User not found'}), 404
