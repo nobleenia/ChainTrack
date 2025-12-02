@@ -23,6 +23,8 @@ import {
 } from 'lucide-react'
 import { useAuthStore } from '../../store/authStore'
 import { useTour } from '../../hooks/useTour'
+import ThemeToggle from '../common/ThemeToggle'
+import WalletConnect from '../common/WalletConnect'
 
 // Navigation items - all roles get Verify Product and Shipments, consumers don't see Products/Transfers
 const getNavigation = (userRole) => {
@@ -120,7 +122,7 @@ export default function DashboardLayout() {
   }, [])
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
       {TourComponent}
       
       {/* Mobile sidebar backdrop */}
@@ -133,20 +135,20 @@ export default function DashboardLayout() {
 
       {/* Sidebar */}
       <aside className={`
-        fixed top-0 left-0 z-50 h-full w-64 bg-white shadow-lg transform transition-transform duration-300
+        fixed top-0 left-0 z-50 h-full w-64 bg-white dark:bg-gray-800 shadow-lg transform transition-transform duration-300
         lg:translate-x-0 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
       `}>
         <div className="flex flex-col h-full">
           {/* Logo */}
-          <div className="flex items-center justify-between h-16 px-4 border-b">
+          <div className="flex items-center justify-between h-16 px-4 border-b dark:border-gray-700">
             <Link to="/dashboard" className="flex items-center space-x-2">
               <div className="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center">
                 <span className="text-white font-bold text-lg">C</span>
               </div>
-              <span className="text-xl font-bold text-gray-900">ChainTrack</span>
+              <span className="text-xl font-bold text-gray-900 dark:text-white">ChainTrack</span>
             </Link>
             <button 
-              className="lg:hidden text-gray-500"
+              className="lg:hidden text-gray-500 dark:text-gray-400"
               onClick={() => setSidebarOpen(false)}
             >
               <X size={24} />
@@ -165,8 +167,8 @@ export default function DashboardLayout() {
                   className={`
                     flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors
                     ${isActive 
-                      ? 'bg-primary-50 text-primary-600' 
-                      : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                      ? 'bg-primary-50 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400' 
+                      : 'text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white'
                     }
                   `}
                 >
@@ -179,7 +181,7 @@ export default function DashboardLayout() {
 
           {/* Quick Actions */}
           {user?.role !== 'consumer' && (
-            <div className="px-4 py-4 border-t">
+            <div className="px-4 py-4 border-t dark:border-gray-700">
               <Link
                 to="/products/new"
                 className="flex items-center justify-center space-x-2 w-full bg-primary-600 text-white px-4 py-3 rounded-lg hover:bg-primary-700 transition"
@@ -192,16 +194,16 @@ export default function DashboardLayout() {
           )}
 
           {/* User Info */}
-          <div className="px-4 py-4 border-t">
+          <div className="px-4 py-4 border-t dark:border-gray-700">
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-primary-100 rounded-full flex items-center justify-center">
-                <User size={20} className="text-primary-600" />
+              <div className="w-10 h-10 bg-primary-100 dark:bg-primary-900/50 rounded-full flex items-center justify-center">
+                <User size={20} className="text-primary-600 dark:text-primary-400" />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-gray-900 truncate">
+                <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
                   {user?.name}
                 </p>
-                <p className="text-xs text-gray-500 capitalize">
+                <p className="text-xs text-gray-500 dark:text-gray-400 capitalize">
                   {user?.role}
                 </p>
               </div>
@@ -213,18 +215,18 @@ export default function DashboardLayout() {
       {/* Main Content */}
       <div className="lg:pl-64">
         {/* Top Bar */}
-        <header className="sticky top-0 z-30 bg-white shadow-sm">
+        <header className="sticky top-0 z-30 bg-white dark:bg-gray-800 shadow-sm transition-colors duration-300">
           <div className="flex items-center justify-between h-16 px-4 sm:px-6 lg:px-8">
             {/* Mobile menu button */}
             <button
-              className="lg:hidden text-gray-600"
+              className="lg:hidden text-gray-600 dark:text-gray-400"
               onClick={() => setSidebarOpen(true)}
             >
               <Menu size={24} />
             </button>
 
             {/* Page Title */}
-            <h1 className="text-xl font-semibold text-gray-900 hidden sm:block">
+            <h1 className="text-xl font-semibold text-gray-900 dark:text-white hidden sm:block">
               {getNavigation(user?.role).find(n => 
                 location.pathname === n.href || 
                 (n.href !== '/dashboard' && location.pathname.startsWith(n.href))
@@ -233,6 +235,12 @@ export default function DashboardLayout() {
 
             {/* Right side actions */}
             <div className="flex items-center space-x-4">
+              {/* Wallet Connect */}
+              <WalletConnect className="hidden sm:flex" />
+
+              {/* Theme Toggle */}
+              <ThemeToggle />
+
               {/* Notifications */}
               <div className="relative notifications-dropdown">
                 <button 
@@ -240,7 +248,7 @@ export default function DashboardLayout() {
                     setNotificationsOpen(!notificationsOpen)
                     setUserMenuOpen(false)
                   }}
-                  className="notifications-btn relative text-gray-600 hover:text-gray-900 p-2 rounded-lg hover:bg-gray-100 transition"
+                  className="notifications-btn relative text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition"
                 >
                   <Bell size={20} />
                   {notifications.filter(n => !n.read).length > 0 && (
@@ -258,11 +266,11 @@ export default function DashboardLayout() {
                       animate={{ opacity: 1, y: 0, scale: 1 }}
                       exit={{ opacity: 0, y: -10, scale: 0.95 }}
                       transition={{ duration: 0.15 }}
-                      className="fixed sm:absolute inset-x-4 sm:inset-x-auto sm:right-0 top-16 sm:top-auto sm:mt-2 w-auto sm:w-96 bg-white rounded-xl shadow-xl border border-gray-200 overflow-hidden z-50"
+                      className="fixed sm:absolute inset-x-4 sm:inset-x-auto sm:right-0 top-16 sm:top-auto sm:mt-2 w-auto sm:w-96 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-200 dark:border-gray-700 overflow-hidden z-50"
                     >
                       {/* Header */}
-                      <div className="px-4 py-3 bg-gray-50 border-b border-gray-200 flex items-center justify-between">
-                        <h3 className="font-semibold text-gray-900">Notifications</h3>
+                      <div className="px-4 py-3 bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600 flex items-center justify-between">
+                        <h3 className="font-semibold text-gray-900 dark:text-white">Notifications</h3>
                         {notifications.length > 0 && (
                           <button
                             onClick={() => {
@@ -374,10 +382,10 @@ export default function DashboardLayout() {
                     setUserMenuOpen(!userMenuOpen)
                     setNotificationsOpen(false)
                   }}
-                  className="user-menu-btn flex items-center space-x-2 text-gray-600 hover:text-gray-900"
+                  className="user-menu-btn flex items-center space-x-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
                 >
-                  <div className="w-8 h-8 bg-primary-100 rounded-full flex items-center justify-center">
-                    <User size={16} className="text-primary-600" />
+                  <div className="w-8 h-8 bg-primary-100 dark:bg-primary-900/50 rounded-full flex items-center justify-center">
+                    <User size={16} className="text-primary-600 dark:text-primary-400" />
                   </div>
                   <ChevronDown size={16} />
                 </button>
@@ -388,18 +396,18 @@ export default function DashboardLayout() {
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -10 }}
-                    className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-1 z-50"
+                    className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg py-1 z-50 border dark:border-gray-700"
                   >
                     <Link
                       to="/settings"
-                      className="block px-4 py-2 text-gray-700 hover:bg-gray-50"
+                      className="block px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
                       onClick={() => setUserMenuOpen(false)}
                     >
                       Settings
                     </Link>
                     <button
                       onClick={handleLogout}
-                      className="w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-50 flex items-center space-x-2"
+                      className="w-full text-left px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center space-x-2"
                     >
                       <LogOut size={16} />
                       <span>Log Out</span>

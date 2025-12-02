@@ -3,6 +3,7 @@ import { motion } from 'framer-motion'
 import { Menu, X } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { useAuthStore } from '../../store/authStore'
+import ThemeToggle from '../common/ThemeToggle'
 
 export default function MainLayout() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
@@ -40,9 +41,9 @@ export default function MainLayout() {
   }, [location])
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-white dark:bg-gray-900 transition-colors duration-300">
       {/* Navigation */}
-      <nav className="bg-white shadow-sm sticky top-0 z-50">
+      <nav className="bg-white dark:bg-gray-800 shadow-sm sticky top-0 z-50 transition-colors duration-300">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16">
             {/* Logo */}
@@ -51,7 +52,7 @@ export default function MainLayout() {
                 <div className="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center">
                   <span className="text-white font-bold text-lg">C</span>
                 </div>
-                <span className="text-xl font-bold text-gray-900">ChainTrack</span>
+                <span className="text-xl font-bold text-gray-900 dark:text-white">ChainTrack</span>
               </Link>
             </div>
 
@@ -60,20 +61,22 @@ export default function MainLayout() {
               <a 
                 href="#features" 
                 onClick={(e) => handleHashNavigation(e, '#features')}
-                className="text-gray-600 hover:text-primary-600 transition cursor-pointer"
+                className="text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition cursor-pointer"
               >
                 Features
               </a>
               <a 
                 href="#how-it-works" 
                 onClick={(e) => handleHashNavigation(e, '#how-it-works')}
-                className="text-gray-600 hover:text-primary-600 transition cursor-pointer"
+                className="text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition cursor-pointer"
               >
                 How It Works
               </a>
-              <Link to="/verify" className="text-gray-600 hover:text-primary-600 transition">
+              <Link to="/verify" className="text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition">
                 Verify Product
               </Link>
+              
+              <ThemeToggle />
               
               {isAuthenticated ? (
                 <Link 
@@ -84,7 +87,7 @@ export default function MainLayout() {
                 </Link>
               ) : (
                 <div className="flex items-center space-x-4">
-                  <Link to="/login" className="text-gray-600 hover:text-primary-600 transition">
+                  <Link to="/login" className="text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition">
                     Log In
                   </Link>
                   <Link 
@@ -115,27 +118,31 @@ export default function MainLayout() {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            className="md:hidden bg-white border-t"
+            className="md:hidden bg-white dark:bg-gray-800 border-t dark:border-gray-700"
           >
             <div className="px-4 py-4 space-y-4">
               <a 
                 href="#features" 
                 onClick={(e) => handleHashNavigation(e, '#features')}
-                className="block text-gray-600 hover:text-primary-600 cursor-pointer"
+                className="block text-gray-600 dark:text-gray-300 hover:text-primary-600 cursor-pointer"
               >
                 Features
               </a>
               <a 
                 href="#how-it-works" 
                 onClick={(e) => handleHashNavigation(e, '#how-it-works')}
-                className="block text-gray-600 hover:text-primary-600 cursor-pointer"
+                className="block text-gray-600 dark:text-gray-300 hover:text-primary-600 cursor-pointer"
               >
                 How It Works
               </a>
-              <Link to="/verify" className="block text-gray-600 hover:text-primary-600">
+              <Link to="/verify" className="block text-gray-600 dark:text-gray-300 hover:text-primary-600">
                 Verify Product
               </Link>
-              <hr />
+              <div className="flex items-center justify-between">
+                <span className="text-gray-600 dark:text-gray-300">Theme</span>
+                <ThemeToggle />
+              </div>
+              <hr className="dark:border-gray-700" />
               {isAuthenticated ? (
                 <Link 
                   to="/dashboard" 
@@ -145,7 +152,7 @@ export default function MainLayout() {
                 </Link>
               ) : (
                 <>
-                  <Link to="/login" className="block text-gray-600 hover:text-primary-600">
+                  <Link to="/login" className="block text-gray-600 dark:text-gray-300 hover:text-primary-600">
                     Log In
                   </Link>
                   <Link 
