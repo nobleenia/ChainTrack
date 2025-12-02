@@ -35,6 +35,7 @@ def get_products():
     per_page = request.args.get('per_page', 20, type=int)
     status = request.args.get('status')
     search = request.args.get('search')
+    category = request.args.get('category')
     
     # Base query based on role
     if user.role.value == 'admin':
@@ -51,6 +52,9 @@ def get_products():
             query = query.filter_by(status=status_enum)
         except ValueError:
             pass
+    
+    if category:
+        query = query.filter(Product.category.ilike(f'%{category}%'))
     
     if search:
         query = query.filter(

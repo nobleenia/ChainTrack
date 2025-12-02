@@ -7,7 +7,7 @@
  */
 
 import { useState, useEffect } from 'react'
-import { useSearchParams, useParams, Link } from 'react-router-dom'
+import { useSearchParams, useParams, Link, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { 
   QrCode, 
@@ -19,6 +19,7 @@ import {
   Calendar,
   User,
   Building,
+  ArrowLeft,
   ArrowRight,
   RefreshCw,
   Camera,
@@ -38,6 +39,7 @@ import { Button, LoadingSpinner, StatusBadge, QRScanner } from '../components/co
 export default function VerifyPage() {
   const { productId: paramProductId } = useParams()
   const [searchParams] = useSearchParams()
+  const navigate = useNavigate()
   // Support both route param /verify/123 and query param /verify?id=123
   const initialProductId = paramProductId || searchParams.get('id') || ''
   const { isAuthenticated, user } = useAuthStore()
@@ -106,6 +108,17 @@ export default function VerifyPage() {
   return (
     <div className="min-h-[calc(100vh-4rem)] py-8 px-4">
       <div className="max-w-3xl mx-auto">
+        {/* Back Button */}
+        <motion.button
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          onClick={() => navigate(-1)}
+          className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-6 transition-colors"
+        >
+          <ArrowLeft size={20} />
+          <span>Back</span>
+        </motion.button>
+
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}

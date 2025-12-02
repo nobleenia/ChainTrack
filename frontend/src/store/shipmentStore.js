@@ -32,15 +32,24 @@ const useShipmentStore = create((set, get) => ({
     set({ loading: true, error: null })
     try {
       const response = await shipmentApi.getShipments(params)
+      // Backend returns count, not pagination object - calculate pagination
+      const total = response.count || response.shipments?.length || 0
+      const perPage = params.per_page || 10
+      const currentPage = params.page || 1
       set({
-        shipments: response.shipments,
-        pagination: response.pagination,
+        shipments: response.shipments || [],
+        pagination: response.pagination || {
+          page: currentPage,
+          per_page: perPage,
+          total: total,
+          pages: Math.ceil(total / perPage) || 1
+        },
         loading: false
       })
       return response
     } catch (error) {
       const message = error.response?.data?.error || 'Failed to fetch shipments'
-      set({ error: message, loading: false })
+      set({ error: message, loading: false, shipments: [] })
       throw error
     }
   },

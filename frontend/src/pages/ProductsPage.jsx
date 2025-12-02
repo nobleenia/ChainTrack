@@ -24,12 +24,13 @@ import { useAuthStore } from '../store/authStore'
 import ProductCard, { ProductCardSkeleton } from '../components/products/ProductCard'
 import { Button, LoadingSpinner } from '../components/common'
 
-// Status filter options
+// Status filter options - match backend ProductStatus enum
 const statusOptions = [
   { value: '', label: 'All Status' },
-  { value: 'active', label: 'Active' },
+  { value: 'registered', label: 'Registered' },
   { value: 'in_transit', label: 'In Transit' },
   { value: 'delivered', label: 'Delivered' },
+  { value: 'verified', label: 'Verified' },
   { value: 'recalled', label: 'Recalled' },
 ]
 
