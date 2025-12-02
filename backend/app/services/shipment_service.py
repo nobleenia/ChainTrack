@@ -24,6 +24,12 @@ def get_notification_service():
     return notification_service
 
 
+def get_shipment_blockchain_service():
+    """Lazy import to avoid circular dependencies"""
+    from .shipment_blockchain_service import get_shipment_blockchain_service as get_svc
+    return get_svc()
+
+
 class ShipmentService:
     """Service class for shipment operations"""
 
@@ -45,7 +51,8 @@ class ShipmentService:
         delivery_city: Optional[str] = None,
         sender_photo_url: Optional[str] = None,
         sender_photo_ipfs_hash: Optional[str] = None,
-        send_notification: bool = True
+        send_notification: bool = True,
+        record_on_blockchain: bool = True
     ) -> Shipment:
         """
         Create a new shipment
@@ -53,6 +60,9 @@ class ShipmentService:
         Returns:
             Shipment object with generated ID and PIN
         """
+        sender = User.query.get(sender_id)
+        sender_name = sender.name if sender else 'Sender'
+        
         shipment = Shipment(
             sender_id=sender_id,
             receiver_name=receiver_name,
@@ -76,11 +86,27 @@ class ShipmentService:
         db.session.add(shipment)
         db.session.commit()
         
+        # Record on blockchain
+        if record_on_blockchain:
+            try:
+                blockchain_svc = get_shipment_blockchain_service()
+                tx_hash, block_number = blockchain_svc.register_shipment(
+                    shipment_id=shipment.shipment_id,
+                    sender_name=sender_name,
+                    receiver_name=receiver_name,
+                    origin=pickup_city or pickup_address,
+                    destination=delivery_city or delivery_address
+                )
+                shipment.blockchain_hash = tx_hash
+                shipment.blockchain_block = block_number
+                db.session.commit()
+                logger.info(f"Shipment {shipment.shipment_id} registered on blockchain: {tx_hash}")
+            except Exception as e:
+                logger.error(f"Failed to record shipment on blockchain: {e}")
+        
         # Send notification to receiver
         if send_notification and (receiver_email or receiver_phone):
             try:
-                sender = User.query.get(sender_id)
-                sender_name = sender.name if sender else 'Sender'
                 notification_svc = get_notification_service()
                 notification_svc.notify_shipment_created(shipment, sender_name)
             except Exception as e:
@@ -163,7 +189,8 @@ class ShipmentService:
         notes: Optional[str] = None,
         photo_url: Optional[str] = None,
         photo_ipfs_hash: Optional[str] = None,
-        send_notification: bool = True
+        send_notification: bool = True,
+        record_on_blockchain: bool = True
     ) -> ShipmentCheckpoint:
         """
         Record a checkpoint/scan event
@@ -206,6 +233,24 @@ class ShipmentService:
         db.session.add(checkpoint)
         db.session.commit()
         
+        # Record checkpoint on blockchain
+        if record_on_blockchain:
+            try:
+                blockchain_svc = get_shipment_blockchain_service()
+                effective_handler = handler_name or (User.query.get(handler_id).name if handler_id else 'Courier')
+                tx_hash, block_number = blockchain_svc.record_checkpoint(
+                    shipment_id=shipment.shipment_id,
+                    handler_name=effective_handler,
+                    action=action.value,
+                    location=location or 'Unknown',
+                    ipfs_hash=photo_ipfs_hash or ''
+                )
+                checkpoint.blockchain_hash = tx_hash
+                db.session.commit()
+                logger.info(f"Checkpoint for {shipment.shipment_id} recorded on blockchain: {tx_hash}")
+            except Exception as e:
+                logger.error(f"Failed to record checkpoint on blockchain: {e}")
+        
         # Send notifications based on action
         if send_notification:
             try:
@@ -234,7 +279,9 @@ class ShipmentService:
         signature_data: Optional[str] = None,
         condition_notes: Optional[str] = None,
         photo_ipfs_hash: Optional[str] = None,
-        send_notification: bool = True
+        signature_ipfs_hash: Optional[str] = None,
+        send_notification: bool = True,
+        record_on_blockchain: bool = True
     ) -> DeliveryProof:
         """
         Confirm delivery with proof (photo, optional signature)
@@ -262,6 +309,23 @@ class ShipmentService:
         
         db.session.add(proof)
         db.session.commit()
+        
+        # Record confirmation on blockchain
+        if record_on_blockchain:
+            try:
+                blockchain_svc = get_shipment_blockchain_service()
+                confirmed_by = receiver_name or shipment.receiver_name
+                tx_hash, block_number = blockchain_svc.confirm_delivery(
+                    shipment_id=shipment.shipment_id,
+                    receiver_confirmation=confirmed_by,
+                    signature_hash=signature_ipfs_hash or '',
+                    photo_hash=photo_ipfs_hash or ''
+                )
+                proof.blockchain_hash = tx_hash
+                db.session.commit()
+                logger.info(f"Delivery for {shipment.shipment_id} confirmed on blockchain: {tx_hash}")
+            except Exception as e:
+                logger.error(f"Failed to record delivery confirmation on blockchain: {e}")
         
         # Send notification to sender
         if send_notification:

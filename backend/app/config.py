@@ -32,6 +32,7 @@ class Config:
     ETHEREUM_NETWORK = os.environ.get('ETHEREUM_NETWORK', 'sepolia')
     ETHEREUM_RPC_URL = os.environ.get('ETHEREUM_RPC_URL', '')
     CONTRACT_ADDRESS = os.environ.get('CONTRACT_ADDRESS', '')
+    SHIPMENT_REGISTRY_ADDRESS = os.environ.get('SHIPMENT_REGISTRY_ADDRESS', '')
     
     # QR Code
     QR_CODE_BASE_URL = os.environ.get('QR_CODE_BASE_URL', 'http://localhost:5173/verify')
