@@ -179,8 +179,8 @@ export default function DashboardLayout() {
             })}
           </nav>
 
-          {/* Quick Actions */}
-          {user?.role !== 'consumer' && (
+          {/* Quick Actions - Only manufacturers can register products */}
+          {user?.role === 'manufacturer' && (
             <div className="px-4 py-4 border-t dark:border-gray-700">
               <Link
                 to="/products/new"

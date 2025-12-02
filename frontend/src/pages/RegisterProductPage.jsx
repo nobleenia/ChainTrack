@@ -90,7 +90,11 @@ export default function RegisterProductPage() {
     }
     if (step === 2) {
       if (!formData.origin.trim()) {
-        setError('Origin/Location is required')
+        setError('Manufacturing location is required')
+        return false
+      }
+      if (!formData.manufacturing_date) {
+        setError('Manufacturing date is required')
         return false
       }
     }
@@ -112,9 +116,17 @@ export default function RegisterProductPage() {
     setError(null)
 
     try {
-      // Clean up empty metadata fields
+      // Map frontend field names to backend expected names
+      // Backend expects: production_date, manufacturing_location
+      // Frontend uses: manufacturing_date, origin
       const cleanedData = {
-        ...formData,
+        name: formData.name,
+        description: formData.description,
+        category: formData.category,
+        production_date: formData.manufacturing_date, // Map to backend field
+        manufacturing_location: formData.origin,       // Map to backend field
+        batch_number: formData.batch_number,
+        expiry_date: formData.expiry_date,
         metadata: Object.fromEntries(
           Object.entries(formData.metadata).filter(([_, v]) => v.trim())
         ),
