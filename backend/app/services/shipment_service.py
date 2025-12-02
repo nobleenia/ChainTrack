@@ -317,7 +317,7 @@ class ShipmentService:
                 confirmed_by = receiver_name or shipment.receiver_name
                 tx_hash, block_number = blockchain_svc.confirm_delivery(
                     shipment_id=shipment.shipment_id,
-                    receiver_confirmation=confirmed_by,
+                    receiver_name=confirmed_by,
                     signature_hash=signature_ipfs_hash or '',
                     photo_hash=photo_ipfs_hash or ''
                 )

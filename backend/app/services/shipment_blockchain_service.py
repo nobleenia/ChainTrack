@@ -171,6 +171,7 @@ class ShipmentBlockchainService:
             tx_func = self.contract.functions.recordCheckpoint(
                 shipment_id,
                 action,
+                handler_name,
                 location,
                 ipfs_hash
             )
@@ -185,7 +186,7 @@ class ShipmentBlockchainService:
     def confirm_delivery(
         self,
         shipment_id: str,
-        receiver_confirmation: str,
+        receiver_name: str,
         signature_hash: str = "",
         photo_hash: str = ""
     ) -> Tuple[str, int]:
@@ -194,7 +195,7 @@ class ShipmentBlockchainService:
         
         Args:
             shipment_id: Unique shipment identifier
-            receiver_confirmation: Receiver's confirmation message or code
+            receiver_name: Name of the receiver
             signature_hash: IPFS hash of signature image
             photo_hash: IPFS hash of proof of delivery photo
         
@@ -205,18 +206,11 @@ class ShipmentBlockchainService:
             return self._mock_transaction(f"{shipment_id}_delivered")
         
         try:
-            # Create receiver hash from confirmation
-            receiver_hash = hashlib.sha256(receiver_confirmation.encode()).digest()
-            if len(receiver_hash) < 32:
-                receiver_hash = receiver_hash.ljust(32, b'\x00')
-            elif len(receiver_hash) > 32:
-                receiver_hash = receiver_hash[:32]
-            
             tx_func = self.contract.functions.confirmDelivery(
                 shipment_id,
-                receiver_hash,
-                signature_hash,
-                photo_hash
+                receiver_name,
+                photo_hash,
+                signature_hash
             )
             
             return self._build_and_send_tx(tx_func, gas=250000)
