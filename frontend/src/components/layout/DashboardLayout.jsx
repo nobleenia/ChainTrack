@@ -17,7 +17,8 @@ import {
   CheckCircle,
   AlertTriangle,
   Info,
-  Trash2
+  Trash2,
+  Gift
 } from 'lucide-react'
 import { useAuthStore } from '../../store/authStore'
 import { useTour } from '../../hooks/useTour'
@@ -28,6 +29,7 @@ const getNavigation = (userRole) => {
     return [
       { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
       { name: 'Verify Product', href: '/verify', icon: ShieldCheck },
+      { name: 'Rewards', href: '/rewards', icon: Gift },
       { name: 'Settings', href: '/settings', icon: Settings },
     ]
   }
@@ -35,6 +37,7 @@ const getNavigation = (userRole) => {
     { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
     { name: 'Products', href: '/products', icon: Package },
     { name: 'Transfers', href: '/transfers', icon: ArrowRightLeft },
+    { name: 'Rewards', href: '/rewards', icon: Gift },
     { name: 'Settings', href: '/settings', icon: Settings },
   ]
 }

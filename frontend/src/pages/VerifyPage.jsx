@@ -3,10 +3,11 @@
  * 
  * Public page to verify product authenticity.
  * Supports QR code scanning and manual product ID entry.
+ * Logged-in users earn reward points for verifications.
  */
 
 import { useState, useEffect } from 'react'
-import { useSearchParams, useParams } from 'react-router-dom'
+import { useSearchParams, useParams, Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { 
   QrCode, 
@@ -25,9 +26,13 @@ import {
   CheckCircle,
   Clock,
   Package,
-  Barcode
+  Barcode,
+  Gift,
+  Star,
+  LogIn
 } from 'lucide-react'
 import { productService } from '../services/productService'
+import { useAuthStore } from '../store/authStore'
 import { Button, LoadingSpinner, StatusBadge, QRScanner } from '../components/common'
 
 export default function VerifyPage() {
@@ -35,12 +40,14 @@ export default function VerifyPage() {
   const [searchParams] = useSearchParams()
   // Support both route param /verify/123 and query param /verify?id=123
   const initialProductId = paramProductId || searchParams.get('id') || ''
+  const { isAuthenticated, user } = useAuthStore()
   
   // State
   const [productId, setProductId] = useState(initialProductId)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState(null)
   const [result, setResult] = useState(null)
+  const [pointsEarned, setPointsEarned] = useState(null)
   const [showScanner, setShowScanner] = useState(false)
 
   // Auto-verify if ID is in URL
@@ -66,10 +73,15 @@ export default function VerifyPage() {
     setIsLoading(true)
     setError(null)
     setResult(null)
+    setPointsEarned(null)
 
     try {
       const data = await productService.verifyProduct(id.trim())
       setResult(data)
+      // Check if points were earned (only for authenticated users)
+      if (data.rewards) {
+        setPointsEarned(data.rewards)
+      }
     } catch (err) {
       if (err.response?.status === 404) {
         setError('Product not found. Please check the ID and try again.')
@@ -235,6 +247,73 @@ export default function VerifyPage() {
                 </div>
               </div>
 
+              {/* Points Earned Notification (for logged-in users) */}
+              {pointsEarned && (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  className="bg-gradient-to-r from-purple-50 to-indigo-50 border border-purple-200 rounded-xl p-4 flex items-center justify-between"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-full flex items-center justify-center">
+                      <Star className="text-white" size={24} />
+                    </div>
+                    <div>
+                      <p className="font-semibold text-purple-900">
+                        +{pointsEarned.points_earned} Points Earned!
+                      </p>
+                      <p className="text-sm text-purple-600">
+                        Total balance: {pointsEarned.total_points} points • {pointsEarned.tier} tier
+                      </p>
+                    </div>
+                  </div>
+                  <Link to="/rewards">
+                    <Button size="sm" className="bg-purple-600 hover:bg-purple-700">
+                      <Gift size={16} className="mr-1" />
+                      View Rewards
+                    </Button>
+                  </Link>
+                </motion.div>
+              )}
+
+              {/* Sign up prompt for anonymous users */}
+              {!isAuthenticated && result.access_level === 'basic' && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="bg-gradient-to-r from-blue-50 to-cyan-50 border border-blue-200 rounded-xl p-4"
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                        <Gift className="text-blue-600" size={20} />
+                      </div>
+                      <div>
+                        <p className="font-medium text-blue-900">
+                          Want full verification details & earn rewards?
+                        </p>
+                        <p className="text-sm text-blue-600">
+                          Create an account to see product journey, earn points, and convert to crypto!
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex gap-2">
+                      <Link to="/login">
+                        <Button variant="outline" size="sm">
+                          <LogIn size={16} className="mr-1" />
+                          Login
+                        </Button>
+                      </Link>
+                      <Link to="/register">
+                        <Button size="sm">
+                          Sign Up Free
+                        </Button>
+                      </Link>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+
               {/* Product Details */}
               <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
                 <div className="px-6 py-4 bg-gray-50 border-b border-gray-200">
@@ -390,6 +469,7 @@ export default function VerifyPage() {
                   onClick={() => {
                     setResult(null)
                     setProductId('')
+                    setPointsEarned(null)
                   }}
                   leftIcon={<RefreshCw size={18} />}
                 >

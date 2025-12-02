@@ -11,10 +11,14 @@ import {
   Clock,
   ShieldCheck,
   Scan,
-  History
+  History,
+  Gift,
+  Star,
+  Coins
 } from 'lucide-react'
 import { useAuthStore } from '../store/authStore'
 import { productService } from '../services/productService'
+import { rewardsService } from '../services/rewardsService'
 
 const statCards = [
   { 
@@ -92,11 +96,20 @@ export default function DashboardPage() {
     total_verifications: 0
   })
   const [recentProducts, setRecentProducts] = useState([])
+  const [rewards, setRewards] = useState(null)
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
     const fetchData = async () => {
       try {
+        // Fetch rewards for all users
+        try {
+          const rewardsData = await rewardsService.getRewardsSummary()
+          setRewards(rewardsData)
+        } catch (err) {
+          console.log('Rewards not available:', err)
+        }
+        
         // For consumers, we might not need product stats
         if (user?.role === 'consumer') {
           setIsLoading(false)
@@ -304,6 +317,61 @@ export default function DashboardPage() {
             </Link>
           </motion.div>
         </div>
+      )}
+
+      {/* Rewards Card - All Users */}
+      {rewards && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-gradient-to-br from-purple-500 via-indigo-500 to-purple-600 rounded-xl p-6 text-white"
+        >
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
+                <Gift size={24} />
+              </div>
+              <div>
+                <h3 className="font-semibold text-lg">My Rewards</h3>
+                <p className="text-purple-200 text-sm">{rewards.tier} Tier</p>
+              </div>
+            </div>
+            <Link
+              to="/rewards"
+              className="px-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg text-sm font-medium transition"
+            >
+              View All
+            </Link>
+          </div>
+          
+          <div className="grid grid-cols-3 gap-4">
+            <div className="bg-white/10 rounded-lg p-3 text-center">
+              <div className="flex items-center justify-center gap-1 mb-1">
+                <Star size={16} />
+                <span className="text-2xl font-bold">{rewards.points_balance?.toLocaleString() || 0}</span>
+              </div>
+              <p className="text-xs text-purple-200">Points</p>
+            </div>
+            <div className="bg-white/10 rounded-lg p-3 text-center">
+              <div className="flex items-center justify-center gap-1 mb-1">
+                <Coins size={16} />
+                <span className="text-2xl font-bold">{rewards.tokens_balance?.toFixed(2) || '0.00'}</span>
+              </div>
+              <p className="text-xs text-purple-200">CTK Tokens</p>
+            </div>
+            <div className="bg-white/10 rounded-lg p-3 text-center">
+              <div className="flex items-center justify-center gap-1 mb-1">
+                <ShieldCheck size={16} />
+                <span className="text-2xl font-bold">{rewards.total_verifications || 0}</span>
+              </div>
+              <p className="text-xs text-purple-200">Verifications</p>
+            </div>
+          </div>
+          
+          <p className="mt-4 text-sm text-purple-200 text-center">
+            🎯 Verify products to earn points! Convert 1,000 points to 1 CTK token.
+          </p>
+        </motion.div>
       )}
 
       {/* Quick Actions for different roles */}

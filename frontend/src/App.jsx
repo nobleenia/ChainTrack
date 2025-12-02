@@ -15,6 +15,7 @@ import ProductDetailPage from './pages/ProductDetailPage'
 import RegisterProductPage from './pages/RegisterProductPage'
 import TransfersPage from './pages/TransfersPage'
 import VerifyPage from './pages/VerifyPage'
+import RewardsPage from './pages/RewardsPage'
 import SettingsPage from './pages/SettingsPage'
 import NotFoundPage from './pages/NotFoundPage'
 
@@ -71,6 +72,7 @@ function App() {
         <Route path="/products/:productId" element={<ProductDetailPage />} />
         <Route path="/transfers" element={<TransfersPage />} />
         <Route path="/verify" element={<VerifyPage />} />
+        <Route path="/rewards" element={<RewardsPage />} />
         <Route path="/settings" element={<SettingsPage />} />
       </Route>
 
