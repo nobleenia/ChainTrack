@@ -35,6 +35,12 @@ class Config:
     
     # QR Code
     QR_CODE_BASE_URL = os.environ.get('QR_CODE_BASE_URL', 'http://localhost:5173/verify')
+    
+    # Pinata/IPFS Configuration
+    PINATA_API_KEY = os.environ.get('PINATA_API_KEY', '')
+    PINATA_API_SECRET = os.environ.get('PINATA_API_SECRET', '')
+    PINATA_JWT = os.environ.get('PINATA_JWT', '')
+    PINATA_GATEWAY_URL = os.environ.get('PINATA_GATEWAY_URL', 'https://gateway.pinata.cloud/ipfs')
 
 
 class DevelopmentConfig(Config):

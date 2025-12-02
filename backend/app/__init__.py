@@ -48,12 +48,14 @@ def create_app(config_name='development'):
     
     # Register blueprints
     from .routes import auth, products, transfers, verification, rewards, shipments
+    from .routes.uploads import uploads_bp
     app.register_blueprint(auth.bp, url_prefix='/api/auth')
     app.register_blueprint(products.bp, url_prefix='/api/products')
     app.register_blueprint(transfers.bp, url_prefix='/api/transfers')
     app.register_blueprint(verification.bp, url_prefix='/api/verify')
     app.register_blueprint(rewards.bp, url_prefix='/api/rewards')
     app.register_blueprint(shipments.bp, url_prefix='/api/shipments')
+    app.register_blueprint(uploads_bp, url_prefix='/api/uploads')
     
     # Health check endpoint
     @app.route('/api/health')
