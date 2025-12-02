@@ -31,7 +31,7 @@ import {
   X
 } from 'lucide-react'
 import useShipmentStore from '../../store/shipmentStore'
-import useAuthStore from '../../store/authStore'
+import { useAuthStore } from '../../store/authStore'
 
 const statusConfig = {
   created: {

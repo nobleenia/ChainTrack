@@ -23,7 +23,7 @@ import {
   Copy
 } from 'lucide-react'
 import useShipmentStore from '../../store/shipmentStore'
-import useAuthStore from '../../store/authStore'
+import { useAuthStore } from '../../store/authStore'
 
 export default function CreateShipmentPage() {
   const navigate = useNavigate()
