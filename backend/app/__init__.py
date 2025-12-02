@@ -61,7 +61,34 @@ def create_app(config_name='development'):
     # Health check endpoint
     @app.route('/api/health')
     def health_check():
+        """Basic health check"""
         return {'status': 'healthy', 'service': 'chaintrack-api'}
+    
+    @app.route('/api/health/ready')
+    def readiness_check():
+        """
+        Readiness check - verifies all dependencies are available.
+        Used by hosting platforms to know when the app is ready to receive traffic.
+        """
+        checks = {
+            'database': False,
+            'service': 'chaintrack-api'
+        }
+        
+        # Check database connectivity
+        try:
+            db.session.execute(db.text('SELECT 1'))
+            checks['database'] = True
+        except Exception as e:
+            app.logger.error(f"Database health check failed: {e}")
+            checks['database'] = False
+        
+        # Overall status
+        all_healthy = all([checks['database']])
+        checks['status'] = 'ready' if all_healthy else 'not ready'
+        
+        status_code = 200 if all_healthy else 503
+        return checks, status_code
     
     # Shell context for flask shell
     @app.shell_context_processor
