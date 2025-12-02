@@ -70,6 +70,7 @@ function App() {
         <Route path="/products/new" element={<RegisterProductPage />} />
         <Route path="/products/:productId" element={<ProductDetailPage />} />
         <Route path="/transfers" element={<TransfersPage />} />
+        <Route path="/verify" element={<VerifyPage />} />
         <Route path="/settings" element={<SettingsPage />} />
       </Route>
 

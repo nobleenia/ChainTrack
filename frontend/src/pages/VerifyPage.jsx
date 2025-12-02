@@ -24,10 +24,11 @@ import {
   AlertCircle,
   CheckCircle,
   Clock,
-  Package
+  Package,
+  Barcode
 } from 'lucide-react'
 import { productService } from '../services/productService'
-import { Button, LoadingSpinner, StatusBadge } from '../components/common'
+import { Button, LoadingSpinner, StatusBadge, QRScanner } from '../components/common'
 
 export default function VerifyPage() {
   const { productId: paramProductId } = useParams()
@@ -52,7 +53,12 @@ export default function VerifyPage() {
   // Handle verification
   const handleVerify = async (e) => {
     e?.preventDefault()
-    if (!productId.trim()) {
+    verifyProductById(productId)
+  }
+
+  // Verify product by ID (used by form and scanner)
+  const verifyProductById = async (id) => {
+    if (!id?.trim()) {
       setError('Please enter a product ID')
       return
     }
@@ -62,7 +68,7 @@ export default function VerifyPage() {
     setResult(null)
 
     try {
-      const data = await productService.verifyProduct(productId.trim())
+      const data = await productService.verifyProduct(id.trim())
       setResult(data)
     } catch (err) {
       if (err.response?.status === 404) {
@@ -141,15 +147,26 @@ export default function VerifyPage() {
               <div className="flex-1 border-t border-gray-200" />
             </div>
 
-            <Button
-              type="button"
-              variant="outline"
-              fullWidth
-              onClick={() => setShowScanner(true)}
-              leftIcon={<Camera size={20} />}
-            >
-              Scan QR Code
-            </Button>
+            <div className="grid grid-cols-2 gap-3">
+              <Button
+                type="button"
+                variant="outline"
+                fullWidth
+                onClick={() => setShowScanner(true)}
+                leftIcon={<Camera size={20} />}
+              >
+                Scan QR Code
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                fullWidth
+                onClick={() => setShowScanner(true)}
+                leftIcon={<Barcode size={20} />}
+              >
+                Scan Barcode
+              </Button>
+            </div>
           </form>
         </motion.div>
 
@@ -383,26 +400,17 @@ export default function VerifyPage() {
           )}
         </AnimatePresence>
 
-        {/* QR Scanner Modal Placeholder */}
-        {showScanner && (
-          <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-            <motion.div
-              initial={{ scale: 0.95, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              className="bg-white rounded-xl p-6 max-w-md w-full text-center"
-            >
-              <QrCode size={64} className="mx-auto text-gray-400 mb-4" />
-              <h3 className="text-lg font-semibold mb-2">QR Scanner</h3>
-              <p className="text-gray-500 mb-4">
-                Camera-based QR scanning requires additional setup.
-                For now, please enter the product ID manually.
-              </p>
-              <Button onClick={() => setShowScanner(false)}>
-                Close
-              </Button>
-            </motion.div>
-          </div>
-        )}
+        {/* QR/Barcode Scanner Modal */}
+        <QRScanner
+          isOpen={showScanner}
+          onClose={() => setShowScanner(false)}
+          onScan={(scannedId) => {
+            setProductId(scannedId)
+            setShowScanner(false)
+            // Directly verify with scanned ID
+            verifyProductById(scannedId)
+          }}
+        />
       </div>
     </div>
   )

@@ -8,7 +8,10 @@ import {
   TrendingUp,
   Plus,
   ArrowRight,
-  Clock
+  Clock,
+  ShieldCheck,
+  Scan,
+  History
 } from 'lucide-react'
 import { useAuthStore } from '../store/authStore'
 import { productService } from '../services/productService'
@@ -44,6 +47,42 @@ const statCards = [
   },
 ]
 
+// Consumer-specific stat cards
+const consumerStatCards = [
+  { 
+    key: 'products_verified', 
+    label: 'Products Verified', 
+    icon: ShieldCheck, 
+    color: 'bg-green-500',
+    bgColor: 'bg-green-50',
+    value: 0
+  },
+  { 
+    key: 'scans_today', 
+    label: 'Scans Today', 
+    icon: Scan, 
+    color: 'bg-blue-500',
+    bgColor: 'bg-blue-50',
+    value: 0
+  },
+  { 
+    key: 'recent_checks', 
+    label: 'Recent Checks', 
+    icon: History, 
+    color: 'bg-amber-500',
+    bgColor: 'bg-amber-50',
+    value: 0
+  },
+  { 
+    key: 'authentic_found', 
+    label: 'Authentic Found', 
+    icon: CheckCircle, 
+    color: 'bg-purple-500',
+    bgColor: 'bg-purple-50',
+    value: 0
+  },
+]
+
 export default function DashboardPage() {
   const { user } = useAuthStore()
   const [stats, setStats] = useState({
@@ -58,6 +97,12 @@ export default function DashboardPage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        // For consumers, we might not need product stats
+        if (user?.role === 'consumer') {
+          setIsLoading(false)
+          return
+        }
+        
         const [statsData, productsData] = await Promise.all([
           productService.getStats(),
           productService.getProducts({ per_page: 5 })
@@ -72,7 +117,7 @@ export default function DashboardPage() {
     }
 
     fetchData()
-  }, [])
+  }, [user?.role])
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -92,7 +137,10 @@ export default function DashboardPage() {
             Welcome back, {user?.name?.split(' ')[0]}! 👋
           </h1>
           <p className="text-gray-600 mt-1">
-            Here's what's happening with your supply chain today.
+            {user?.role === 'consumer' 
+              ? 'Verify product authenticity and track supply chain journeys.'
+              : "Here's what's happening with your supply chain today."
+            }
           </p>
         </div>
         {user?.role !== 'consumer' && (
@@ -104,11 +152,20 @@ export default function DashboardPage() {
             Register Product
           </Link>
         )}
+        {user?.role === 'consumer' && (
+          <Link
+            to="/verify"
+            className="mt-4 sm:mt-0 inline-flex items-center px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition"
+          >
+            <ShieldCheck size={20} className="mr-2" />
+            Verify Product
+          </Link>
+        )}
       </div>
 
-      {/* Stats Grid */}
+      {/* Stats Grid - Different for consumers */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6" id="tour-stats">
-        {statCards.map((stat, index) => (
+        {(user?.role === 'consumer' ? consumerStatCards : statCards).map((stat, index) => (
           <motion.div
             key={stat.key}
             initial={{ opacity: 0, y: 20 }}
@@ -123,7 +180,9 @@ export default function DashboardPage() {
                   {isLoading ? (
                     <span className="inline-block w-16 h-8 bg-gray-200 rounded animate-pulse" />
                   ) : (
-                    stats[stat.key]?.toLocaleString() || 0
+                    user?.role === 'consumer' 
+                      ? (stat.value || 0).toLocaleString()
+                      : (stats[stat.key]?.toLocaleString() || 0)
                   )}
                 </p>
               </div>
@@ -135,7 +194,8 @@ export default function DashboardPage() {
         ))}
       </div>
 
-      {/* Recent Products */}
+      {/* Recent Products - hide for consumers */}
+      {user?.role !== 'consumer' && (
       <div className="bg-white rounded-xl shadow-sm" id="tour-recent-products">
         <div className="px-6 py-4 border-b flex items-center justify-between">
           <h2 className="text-lg font-semibold text-gray-900">Recent Products</h2>
@@ -204,6 +264,47 @@ export default function DashboardPage() {
           </div>
         )}
       </div>
+      )}
+
+      {/* Consumer-specific Quick Actions */}
+      {user?.role === 'consumer' && (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl p-6 text-white"
+          >
+            <h3 className="font-semibold text-lg mb-2">🔍 Verify a Product</h3>
+            <p className="text-primary-100 text-sm mb-4">
+              Scan a QR code or enter a product ID to verify authenticity and view its complete supply chain journey.
+            </p>
+            <Link
+              to="/verify"
+              className="inline-flex items-center text-white font-medium hover:underline"
+            >
+              Start Verification <ArrowRight size={16} className="ml-1" />
+            </Link>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="bg-gradient-to-br from-green-500 to-green-600 rounded-xl p-6 text-white"
+          >
+            <h3 className="font-semibold text-lg mb-2">📱 Scan QR Code</h3>
+            <p className="text-green-100 text-sm mb-4">
+              Use your camera to scan product QR codes or barcodes for instant verification.
+            </p>
+            <Link
+              to="/verify"
+              className="inline-flex items-center text-white font-medium hover:underline"
+            >
+              Open Scanner <ArrowRight size={16} className="ml-1" />
+            </Link>
+          </motion.div>
+        </div>
+      )}
 
       {/* Quick Actions for different roles */}
       {user?.role === 'manufacturer' && (
