@@ -1,15 +1,17 @@
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { Menu, X } from 'lucide-react'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useAuthStore } from '../../store/authStore'
 import ThemeToggle from '../common/ThemeToggle'
+import { SkipLink } from '../../utils/accessibility'
 
 export default function MainLayout() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const { isAuthenticated } = useAuthStore()
   const location = useLocation()
   const navigate = useNavigate()
+  const mobileMenuRef = useRef(null)
 
   // Handle hash navigation for smooth scrolling
   const handleHashNavigation = (e, hash) => {
@@ -42,13 +44,24 @@ export default function MainLayout() {
 
   return (
     <div className="min-h-screen flex flex-col bg-white dark:bg-gray-900 transition-colors duration-300">
+      {/* Skip Link for Keyboard Users */}
+      <SkipLink targetId="main-content" />
+      
       {/* Navigation */}
-      <nav className="bg-white dark:bg-gray-800 shadow-sm sticky top-0 z-50 transition-colors duration-300">
+      <nav 
+        className="bg-white dark:bg-gray-800 shadow-sm sticky top-0 z-50 transition-colors duration-300"
+        role="navigation"
+        aria-label="Main navigation"
+      >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16">
             {/* Logo */}
             <div className="flex items-center">
-              <Link to="/" className="flex items-center space-x-2">
+              <Link 
+                to="/" 
+                className="flex items-center space-x-2"
+                aria-label="ChainTrack - Go to homepage"
+              >
                 <div className="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center">
                   <span className="text-white font-bold text-lg">C</span>
                 </div>
@@ -104,9 +117,12 @@ export default function MainLayout() {
             <div className="md:hidden flex items-center">
               <button
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
-                className="text-gray-600 hover:text-gray-900"
+                className="text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                aria-expanded={isMenuOpen}
+                aria-controls="mobile-menu"
+                aria-label={isMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
               >
-                {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
+                {isMenuOpen ? <X size={24} aria-hidden="true" /> : <Menu size={24} aria-hidden="true" />}
               </button>
             </div>
           </div>
@@ -118,7 +134,11 @@ export default function MainLayout() {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
+            id="mobile-menu"
+            ref={mobileMenuRef}
             className="md:hidden bg-white dark:bg-gray-800 border-t dark:border-gray-700"
+            role="menu"
+            aria-label="Mobile navigation menu"
           >
             <div className="px-4 py-4 space-y-4">
               <a 
@@ -169,12 +189,12 @@ export default function MainLayout() {
       </nav>
 
       {/* Main Content */}
-      <main className="flex-grow">
+      <main id="main-content" className="flex-grow" role="main" tabIndex="-1">
         <Outlet />
       </main>
 
       {/* Footer */}
-      <footer className="bg-gray-900 text-gray-300">
+      <footer className="bg-gray-900 text-gray-300" role="contentinfo">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div className="col-span-1 md:col-span-2">

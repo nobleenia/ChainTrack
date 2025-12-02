@@ -58,6 +58,10 @@ def create_app(config_name='development'):
     app.register_blueprint(uploads_bp, url_prefix='/api/uploads')
     app.register_blueprint(notifications.bp, url_prefix='/api/notifications')
     
+    # Initialize Swagger UI for API documentation
+    from .swagger import init_swagger
+    init_swagger(app)
+    
     # Health check endpoint
     @app.route('/api/health')
     def health_check():

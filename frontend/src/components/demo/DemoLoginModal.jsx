@@ -1,12 +1,14 @@
 /**
  * Demo Login Modal Component
  * Allows users to quickly log in as different demo personas
+ * WCAG 2.1 AA Compliant - Focus trap, keyboard navigation, screen reader support
  */
 
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { X, Factory, Truck, Store, User, Sparkles, ChevronRight } from 'lucide-react'
 import { useAuthStore } from '../../store/authStore'
+import { FocusTrap, announceToScreenReader } from '../../utils/accessibility'
 
 const DEMO_ACCOUNTS = [
   {
@@ -65,17 +67,41 @@ export default function DemoLoginModal({ isOpen, onClose }) {
   const [loading, setLoading] = useState(null)
   const [error, setError] = useState(null)
   const [selectedAccount, setSelectedAccount] = useState(null)
+  const closeButtonRef = useRef(null)
+
+  // Focus the close button when modal opens
+  useEffect(() => {
+    if (isOpen && closeButtonRef.current) {
+      closeButtonRef.current.focus()
+      announceToScreenReader('Demo login dialog opened. Select a demo account to explore ChainTrack.')
+    }
+  }, [isOpen])
+
+  // Handle escape key to close modal
+  useEffect(() => {
+    const handleEscape = (e) => {
+      if (e.key === 'Escape' && isOpen) {
+        onClose()
+      }
+    }
+    document.addEventListener('keydown', handleEscape)
+    return () => document.removeEventListener('keydown', handleEscape)
+  }, [isOpen, onClose])
 
   const handleDemoLogin = async (account) => {
     setLoading(account.id)
     setError(null)
+    announceToScreenReader(`Logging in as ${account.role}. Please wait.`)
     
     try {
       await login(account.email, account.password)
+      announceToScreenReader(`Successfully logged in as ${account.role}. Redirecting to dashboard.`)
       onClose()
       navigate('/dashboard')
     } catch (err) {
-      setError(`Failed to login as ${account.role}. Please try again.`)
+      const errorMsg = `Failed to login as ${account.role}. Please try again.`
+      setError(errorMsg)
+      announceToScreenReader(errorMsg)
       console.error('Demo login error:', err)
     } finally {
       setLoading(null)
@@ -85,30 +111,40 @@ export default function DemoLoginModal({ isOpen, onClose }) {
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      {/* Backdrop */}
+    <FocusTrap active={isOpen}>
       <div 
-        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-        onClick={onClose}
-      />
-      
-      {/* Modal */}
-      <div className="relative w-full max-w-2xl bg-white dark:bg-gray-800 rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-300">
-        {/* Header */}
-        <div className="relative bg-gradient-to-r from-emerald-500 to-teal-500 px-6 py-6">
-          <button
-            onClick={onClose}
-            className="absolute top-4 right-4 p-2 rounded-full bg-white/20 hover:bg-white/30 transition-colors"
-          >
-            <X className="w-5 h-5 text-white" />
-          </button>
+        className="fixed inset-0 z-50 flex items-center justify-center p-4"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="demo-modal-title"
+        aria-describedby="demo-modal-description"
+      >
+        {/* Backdrop */}
+        <div 
+          className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+          onClick={onClose}
+          aria-hidden="true"
+        />
+        
+        {/* Modal */}
+        <div className="relative w-full max-w-2xl bg-white dark:bg-gray-800 rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-300">
+          {/* Header */}
+          <div className="relative bg-gradient-to-r from-emerald-500 to-teal-500 px-6 py-6">
+            <button
+              ref={closeButtonRef}
+              onClick={onClose}
+              className="absolute top-4 right-4 p-2 rounded-full bg-white/20 hover:bg-white/30 transition-colors focus:outline-none focus:ring-2 focus:ring-white"
+              aria-label="Close demo login dialog"
+            >
+              <X className="w-5 h-5 text-white" aria-hidden="true" />
+            </button>
           
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-white/20 rounded-xl">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-white/20 rounded-xl" aria-hidden="true">
               <Sparkles className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h2 className="text-2xl font-bold text-white">Try ChainTrack Demo</h2>
+              <h2 id="demo-modal-title" className="text-2xl font-bold text-white">Try ChainTrack Demo</h2>
               <p className="text-emerald-100 text-sm mt-1">
                 Experience the platform as different supply chain participants
               </p>
@@ -118,7 +154,11 @@ export default function DemoLoginModal({ isOpen, onClose }) {
         
         {/* Error message */}
         {error && (
-          <div className="mx-6 mt-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 rounded-lg text-red-600 dark:text-red-400 text-sm">
+          <div 
+            className="mx-6 mt-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 rounded-lg text-red-600 dark:text-red-400 text-sm"
+            role="alert"
+            aria-live="polite"
+          >
             {error}
           </div>
         )}
@@ -141,17 +181,22 @@ export default function DemoLoginModal({ isOpen, onClose }) {
                   onClick={() => handleDemoLogin(account)}
                   onMouseEnter={() => setSelectedAccount(account.id)}
                   onMouseLeave={() => setSelectedAccount(null)}
+                  onFocus={() => setSelectedAccount(account.id)}
+                  onBlur={() => setSelectedAccount(null)}
                   disabled={loading !== null}
+                  aria-label={`Login as ${account.role}. ${account.description}`}
+                  aria-busy={isLoading}
                   className={`
                     relative p-4 rounded-xl border-2 text-left transition-all duration-300
                     ${account.bgColor} ${account.borderColor}
                     hover:scale-[1.02] hover:shadow-lg
+                    focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 dark:focus:ring-offset-gray-800
                     disabled:opacity-50 disabled:cursor-not-allowed
                     ${isSelected ? 'ring-2 ring-offset-2 ring-emerald-500 dark:ring-offset-gray-800' : ''}
                   `}
                 >
                   <div className="flex items-start gap-3">
-                    <div className={`p-2 rounded-lg bg-gradient-to-br ${account.color} shadow-lg`}>
+                    <div className={`p-2 rounded-lg bg-gradient-to-br ${account.color} shadow-lg`} aria-hidden="true">
                       <Icon className="w-5 h-5 text-white" />
                     </div>
                     
@@ -161,9 +206,9 @@ export default function DemoLoginModal({ isOpen, onClose }) {
                           {account.role}
                         </h3>
                         {isLoading ? (
-                          <div className="w-5 h-5 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" />
+                          <div className="w-5 h-5 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" aria-label="Loading" />
                         ) : (
-                          <ChevronRight className={`w-5 h-5 text-gray-400 transition-transform ${isSelected ? 'translate-x-1' : ''}`} />
+                          <ChevronRight className={`w-5 h-5 text-gray-400 transition-transform ${isSelected ? 'translate-x-1' : ''}`} aria-hidden="true" />
                         )}
                       </div>
                       
@@ -171,7 +216,7 @@ export default function DemoLoginModal({ isOpen, onClose }) {
                         {account.description}
                       </p>
                       
-                      <div className="flex flex-wrap gap-1 mt-2">
+                      <div className="flex flex-wrap gap-1 mt-2" aria-label="Features">
                         {account.features.map((feature, idx) => (
                           <span 
                             key={idx}
@@ -191,12 +236,13 @@ export default function DemoLoginModal({ isOpen, onClose }) {
         
         {/* Footer */}
         <div className="px-6 py-4 bg-gray-50 dark:bg-gray-700/50 border-t border-gray-200 dark:border-gray-700">
-          <p className="text-xs text-gray-500 dark:text-gray-400 text-center">
+          <p className="text-xs text-gray-500 dark:text-gray-400 text-center" id="demo-modal-description">
             Demo accounts have pre-populated data to showcase platform features.
             No real transactions will be made.
           </p>
         </div>
       </div>
     </div>
+    </FocusTrap>
   )
 }

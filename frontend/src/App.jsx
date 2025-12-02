@@ -47,9 +47,18 @@ function PublicRoute({ children }) {
 
 function App() {
   return (
-    <Routes>
-      {/* Public Routes */}
-      <Route element={<MainLayout />}>
+    <>
+      {/* WCAG 2.1 AA - Live region for screen reader announcements */}
+      <div 
+        id="aria-live-region" 
+        aria-live="polite" 
+        aria-atomic="true"
+        className="sr-only"
+      />
+      
+      <Routes>
+        {/* Public Routes */}
+        <Route element={<MainLayout />}>
         <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={
           <PublicRoute>
@@ -87,6 +96,7 @@ function App() {
       {/* 404 */}
       <Route path="*" element={<NotFoundPage />} />
     </Routes>
+    </>
   )
 }
 

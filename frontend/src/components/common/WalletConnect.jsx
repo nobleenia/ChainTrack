@@ -149,19 +149,22 @@ export default function WalletConnect({ className = '' }) {
       <button
         onClick={connectWallet}
         disabled={isConnecting}
+        aria-label={!isMetaMaskInstalled ? 'Install MetaMask wallet extension' : isConnecting ? 'Connecting to wallet' : 'Connect MetaMask wallet'}
+        aria-busy={isConnecting}
         className={`
           flex items-center gap-2 px-3 py-2 rounded-lg font-medium text-sm
           bg-gradient-to-r from-orange-500 to-amber-500 text-white
           hover:from-orange-600 hover:to-amber-600
           disabled:opacity-50 disabled:cursor-not-allowed
           transition-all duration-200 shadow-sm
+          focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800
           ${className}
         `}
       >
         {isConnecting ? (
-          <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+          <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" aria-hidden="true" />
         ) : (
-          <Wallet size={16} />
+          <Wallet size={16} aria-hidden="true" />
         )}
         <span className="hidden sm:inline">
           {!isMetaMaskInstalled ? 'Install MetaMask' : isConnecting ? 'Connecting...' : 'Connect Wallet'}
@@ -175,19 +178,24 @@ export default function WalletConnect({ className = '' }) {
     <div className={`relative wallet-dropdown ${className}`}>
       <button
         onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+        aria-expanded={isDropdownOpen}
+        aria-haspopup="menu"
+        aria-label={`Wallet menu. Connected as ${formatAddress(account)} on ${networkNames[chainId] || 'Unknown Network'}`}
         className={`
           flex items-center gap-2 px-3 py-2 rounded-lg font-medium text-sm
           bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-400
           border border-green-200 dark:border-green-700
           hover:bg-green-100 dark:hover:bg-green-900/50
+          focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800
           transition-all duration-200
         `}
       >
-        <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+        <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" aria-hidden="true" />
         <span className="font-mono">{formatAddress(account)}</span>
         <ChevronDown 
           size={16} 
           className={`transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`}
+          aria-hidden="true"
         />
       </button>
 
@@ -197,12 +205,14 @@ export default function WalletConnect({ className = '' }) {
             initial={{ opacity: 0, y: -10, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -10, scale: 0.95 }}
+            role="menu"
+            aria-label="Wallet options"
             className="absolute right-0 mt-2 w-64 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-200 dark:border-gray-700 overflow-hidden z-50"
           >
             {/* Header */}
             <div className="p-4 bg-gray-50 dark:bg-gray-700/50 border-b border-gray-200 dark:border-gray-600">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-gradient-to-br from-orange-400 to-amber-500 rounded-full flex items-center justify-center">
+                <div className="w-10 h-10 bg-gradient-to-br from-orange-400 to-amber-500 rounded-full flex items-center justify-center" aria-hidden="true">
                   <Wallet size={20} className="text-white" />
                 </div>
                 <div>
@@ -217,34 +227,40 @@ export default function WalletConnect({ className = '' }) {
             </div>
 
             {/* Actions */}
-            <div className="p-2">
+            <div className="p-2" role="group" aria-label="Wallet actions">
               <button
                 onClick={copyAddress}
-                className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition"
+                role="menuitem"
+                aria-label={copied ? 'Address copied to clipboard' : 'Copy wallet address to clipboard'}
+                className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition focus:outline-none focus:ring-2 focus:ring-primary-500"
               >
                 {copied ? (
-                  <Check size={16} className="text-green-500" />
+                  <Check size={16} className="text-green-500" aria-hidden="true" />
                 ) : (
-                  <Copy size={16} />
+                  <Copy size={16} aria-hidden="true" />
                 )}
                 {copied ? 'Copied!' : 'Copy Address'}
               </button>
 
               <button
                 onClick={openExplorer}
-                className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition"
+                role="menuitem"
+                aria-label="View wallet address on blockchain explorer (opens in new tab)"
+                className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition focus:outline-none focus:ring-2 focus:ring-primary-500"
               >
-                <ExternalLink size={16} />
+                <ExternalLink size={16} aria-hidden="true" />
                 View on Explorer
               </button>
 
-              <hr className="my-2 dark:border-gray-700" />
+              <hr className="my-2 dark:border-gray-700" aria-hidden="true" />
 
               <button
                 onClick={disconnectWallet}
-                className="w-full flex items-center gap-3 px-3 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition"
+                role="menuitem"
+                aria-label="Disconnect wallet"
+                className="w-full flex items-center gap-3 px-3 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition focus:outline-none focus:ring-2 focus:ring-red-500"
               >
-                <LogOut size={16} />
+                <LogOut size={16} aria-hidden="true" />
                 Disconnect
               </button>
             </div>
@@ -259,6 +275,8 @@ export default function WalletConnect({ className = '' }) {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0 }}
+            role="alert"
+            aria-live="polite"
             className="absolute right-0 top-full mt-2 px-3 py-2 bg-red-100 dark:bg-red-900/50 text-red-600 dark:text-red-400 text-xs rounded-lg"
           >
             {error}
