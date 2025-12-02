@@ -41,6 +41,19 @@ class Config:
     PINATA_API_SECRET = os.environ.get('PINATA_API_SECRET', '')
     PINATA_JWT = os.environ.get('PINATA_JWT', '')
     PINATA_GATEWAY_URL = os.environ.get('PINATA_GATEWAY_URL', 'https://gateway.pinata.cloud/ipfs')
+    
+    # Notification Configuration
+    SENDGRID_API_KEY = os.environ.get('SENDGRID_API_KEY', '')
+    NOTIFICATION_FROM_EMAIL = os.environ.get('NOTIFICATION_FROM_EMAIL', 'noreply@chaintrack.io')
+    NOTIFICATION_FROM_NAME = os.environ.get('NOTIFICATION_FROM_NAME', 'ChainTrack')
+    
+    # Twilio SMS Configuration
+    TWILIO_ACCOUNT_SID = os.environ.get('TWILIO_ACCOUNT_SID', '')
+    TWILIO_AUTH_TOKEN = os.environ.get('TWILIO_AUTH_TOKEN', '')
+    TWILIO_FROM_NUMBER = os.environ.get('TWILIO_FROM_NUMBER', '')
+    
+    # Frontend URL for notification links
+    FRONTEND_URL = os.environ.get('FRONTEND_URL', 'http://localhost:5173')
 
 
 class DevelopmentConfig(Config):

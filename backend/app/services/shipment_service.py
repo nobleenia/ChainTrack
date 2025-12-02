@@ -3,6 +3,7 @@ Shipment Service
 Business logic for P2P delivery/courier system
 """
 
+import logging
 from datetime import datetime
 from typing import Optional, Tuple, List, Dict, Any
 import hashlib
@@ -13,6 +14,14 @@ from ..models import (
     Shipment, ShipmentCheckpoint, DeliveryProof,
     ShipmentStatus, CheckpointAction, User
 )
+
+logger = logging.getLogger(__name__)
+
+
+def get_notification_service():
+    """Lazy import to avoid circular dependencies"""
+    from .notification_service import notification_service
+    return notification_service
 
 
 class ShipmentService:
@@ -35,7 +44,8 @@ class ShipmentService:
         pickup_city: Optional[str] = None,
         delivery_city: Optional[str] = None,
         sender_photo_url: Optional[str] = None,
-        sender_photo_ipfs_hash: Optional[str] = None
+        sender_photo_ipfs_hash: Optional[str] = None,
+        send_notification: bool = True
     ) -> Shipment:
         """
         Create a new shipment
@@ -65,6 +75,16 @@ class ShipmentService:
         
         db.session.add(shipment)
         db.session.commit()
+        
+        # Send notification to receiver
+        if send_notification and (receiver_email or receiver_phone):
+            try:
+                sender = User.query.get(sender_id)
+                sender_name = sender.name if sender else 'Sender'
+                notification_svc = get_notification_service()
+                notification_svc.notify_shipment_created(shipment, sender_name)
+            except Exception as e:
+                logger.error(f"Failed to send shipment created notification: {e}")
         
         return shipment
 
@@ -142,7 +162,8 @@ class ShipmentService:
         location: Optional[str] = None,
         notes: Optional[str] = None,
         photo_url: Optional[str] = None,
-        photo_ipfs_hash: Optional[str] = None
+        photo_ipfs_hash: Optional[str] = None,
+        send_notification: bool = True
     ) -> ShipmentCheckpoint:
         """
         Record a checkpoint/scan event
@@ -185,6 +206,23 @@ class ShipmentService:
         db.session.add(checkpoint)
         db.session.commit()
         
+        # Send notifications based on action
+        if send_notification:
+            try:
+                notification_svc = get_notification_service()
+                effective_handler = handler_name or (User.query.get(handler_id).name if handler_id else 'Courier')
+                
+                if action == CheckpointAction.PICKED_UP:
+                    notification_svc.notify_shipment_picked_up(shipment, effective_handler, location)
+                elif action == CheckpointAction.OUT_FOR_DELIVERY:
+                    notification_svc.notify_out_for_delivery(shipment)
+                elif action == CheckpointAction.DELIVERED:
+                    notification_svc.notify_shipment_delivered(shipment, effective_handler, location)
+                elif action in [CheckpointAction.CHECKPOINT, CheckpointAction.HANDED_OFF]:
+                    notification_svc.notify_shipment_in_transit(shipment, location or 'In transit', notes)
+            except Exception as e:
+                logger.error(f"Failed to send checkpoint notification: {e}")
+        
         return checkpoint
 
     @staticmethod
@@ -195,7 +233,8 @@ class ShipmentService:
         receiver_relationship: Optional[str] = None,
         signature_data: Optional[str] = None,
         condition_notes: Optional[str] = None,
-        photo_ipfs_hash: Optional[str] = None
+        photo_ipfs_hash: Optional[str] = None,
+        send_notification: bool = True
     ) -> DeliveryProof:
         """
         Confirm delivery with proof (photo, optional signature)
@@ -223,6 +262,20 @@ class ShipmentService:
         
         db.session.add(proof)
         db.session.commit()
+        
+        # Send notification to sender
+        if send_notification:
+            try:
+                notification_svc = get_notification_service()
+                sender = User.query.get(shipment.sender_id)
+                if sender and sender.email:
+                    notification_svc.notify_delivery_confirmed(
+                        shipment,
+                        confirmed_by=receiver_name or shipment.receiver_name,
+                        sender_email=sender.email
+                    )
+            except Exception as e:
+                logger.error(f"Failed to send delivery confirmation notification: {e}")
         
         return proof
 
