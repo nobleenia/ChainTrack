@@ -12,6 +12,7 @@ from ..models import Shipment, ShipmentStatus, CheckpointAction
 from ..services.shipment_service import ShipmentService
 
 bp = Blueprint('shipments', __name__)
+bp.strict_slashes = False
 
 
 def get_optional_user_id():
