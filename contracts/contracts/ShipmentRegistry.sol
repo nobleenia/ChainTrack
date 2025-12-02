@@ -6,227 +6,144 @@ import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
 /**
  * @title ShipmentRegistry
- * @dev Smart contract for recording shipment checkpoints on the blockchain
- * @author ChainTrack Team
- * 
- * This contract provides immutable record-keeping for P2P deliveries,
- * creating a tamper-proof audit trail of shipment movements.
+ * @author ChainTrack
+ * @notice Blockchain-based shipment tracking for P2P deliveries
+ * @dev Simplified version optimized for gas efficiency
  */
 contract ShipmentRegistry is Ownable, ReentrancyGuard {
     
     // ============ Enums ============
     
-    enum ShipmentStatus {
-        Created,
-        PickedUp,
-        InTransit,
-        OutForDelivery,
-        Delivered,
-        Confirmed,
-        Cancelled
+    enum ShipmentStatus { 
+        Created,      // 0: Shipment registered
+        PickedUp,     // 1: Picked up by courier
+        InTransit,    // 2: In transit (at checkpoint)
+        OutForDelivery, // 3: Out for final delivery
+        Delivered,    // 4: Delivered to recipient
+        Confirmed     // 5: Delivery confirmed with proof
     }
-    
-    enum CheckpointAction {
-        Created,
-        PickedUp,
-        Checkpoint,
-        HandedOff,
-        OutForDelivery,
-        Delivered,
-        Confirmed
-    }
-    
+
     // ============ Structs ============
     
     struct Shipment {
-        bytes32 shipmentHash;       // Hash of shipment data (tracking_id + details)
-        address sender;             // Address that created the shipment
-        string trackingId;          // Off-chain tracking ID (e.g., SHP-ABC123)
-        ShipmentStatus status;      // Current status
-        uint256 createdAt;          // Creation timestamp
-        uint256 checkpointCount;    // Number of checkpoints
-        bool exists;                // Existence flag
+        bytes32 shipmentHash;    // Hash of shipment details
+        address sender;          // Address that registered
+        string origin;           // Origin location
+        string destination;      // Destination location
+        uint256 createdAt;       // Creation timestamp
+        ShipmentStatus status;   // Current status
+        uint256 checkpointCount; // Number of checkpoints
+        bool exists;             // Existence flag
     }
     
     struct Checkpoint {
-        bytes32 checkpointHash;     // Hash of checkpoint data
-        CheckpointAction action;    // Type of checkpoint
-        address handler;            // Address recording the checkpoint
-        string handlerName;         // Name of handler (for anonymous couriers)
-        string location;            // Location string
-        string ipfsHash;            // IPFS hash of photo proof (if any)
-        uint256 timestamp;          // Checkpoint timestamp
-        bytes32 previousHash;       // Hash of previous checkpoint (chain integrity)
+        address handler;         // Wallet that recorded
+        string handlerName;      // Name of handler
+        string action;           // Action type
+        string location;         // Location
+        string ipfsHash;         // IPFS hash of proof
+        uint256 timestamp;       // Timestamp
     }
     
     struct DeliveryProof {
-        bytes32 proofHash;          // Hash of delivery proof data
-        string receiverName;        // Name of person who received
-        string photoIpfsHash;       // IPFS hash of delivery photo
-        string signatureIpfsHash;   // IPFS hash of signature image
-        uint256 confirmedAt;        // Confirmation timestamp
-        bool exists;                // Existence flag
+        string receiverName;     // Name of receiver
+        string photoIpfsHash;    // IPFS hash of photo
+        string signatureIpfsHash; // IPFS hash of signature
+        uint256 confirmedAt;     // Confirmation timestamp
+        bool exists;             // Existence flag
     }
-    
+
     // ============ State Variables ============
     
-    // Mapping from tracking ID hash to Shipment
     mapping(bytes32 => Shipment) public shipments;
-    
-    // Mapping from tracking ID hash to array of checkpoints
-    mapping(bytes32 => Checkpoint[]) public shipmentCheckpoints;
-    
-    // Mapping from tracking ID hash to delivery proof
+    mapping(bytes32 => Checkpoint[]) public checkpoints;
     mapping(bytes32 => DeliveryProof) public deliveryProofs;
     
-    // Mapping of authorized senders
-    mapping(address => bool) public authorizedSenders;
-    
-    // Statistics
     uint256 public totalShipments;
-    uint256 public totalCheckpoints;
     uint256 public totalDeliveries;
-    
+
     // ============ Events ============
     
-    event ShipmentCreated(
-        bytes32 indexed trackingIdHash,
-        string trackingId,
-        bytes32 shipmentHash,
+    event ShipmentRegistered(
+        bytes32 indexed idHash,
         address indexed sender,
         uint256 timestamp
     );
     
     event CheckpointRecorded(
-        bytes32 indexed trackingIdHash,
-        string trackingId,
-        CheckpointAction action,
+        bytes32 indexed idHash,
         address indexed handler,
-        string location,
-        string ipfsHash,
         uint256 timestamp
     );
     
     event DeliveryConfirmed(
-        bytes32 indexed trackingIdHash,
-        string trackingId,
-        string receiverName,
-        string photoIpfsHash,
+        bytes32 indexed idHash,
         uint256 timestamp
     );
     
     event StatusUpdated(
-        bytes32 indexed trackingIdHash,
-        ShipmentStatus oldStatus,
+        bytes32 indexed idHash,
         ShipmentStatus newStatus,
         uint256 timestamp
     );
+
+    // ============ Constructor ============
     
-    event SenderAuthorized(address indexed sender);
-    event SenderRevoked(address indexed sender);
-    
+    constructor() Ownable(msg.sender) {}
+
     // ============ Modifiers ============
     
-    modifier onlyAuthorizedSender() {
-        require(
-            authorizedSenders[msg.sender] || msg.sender == owner(),
-            "Not an authorized sender"
-        );
-        _;
-    }
-    
-    modifier shipmentExists(string memory trackingId) {
+    modifier shipmentExists(string calldata trackingId) {
         bytes32 idHash = keccak256(abi.encodePacked(trackingId));
         require(shipments[idHash].exists, "Shipment not found");
         _;
     }
-    
-    modifier shipmentNotExists(string memory trackingId) {
-        bytes32 idHash = keccak256(abi.encodePacked(trackingId));
-        require(!shipments[idHash].exists, "Shipment already exists");
-        _;
-    }
-    
-    // ============ Constructor ============
-    
-    constructor() Ownable(msg.sender) {
-        authorizedSenders[msg.sender] = true;
-    }
-    
+
     // ============ External Functions ============
     
     /**
-     * @notice Authorize an address to create shipments
-     * @param sender Address to authorize
+     * @notice Register a new shipment on the blockchain
+     * @param trackingId Unique tracking ID (e.g., SHP-XXXXX)
+     * @param shipmentHash Hash of shipment details
+     * @param origin Origin location
+     * @param destination Destination location
      */
-    function authorizeSender(address sender) external onlyOwner {
-        authorizedSenders[sender] = true;
-        emit SenderAuthorized(sender);
-    }
-    
-    /**
-     * @notice Revoke sender authorization
-     * @param sender Address to revoke
-     */
-    function revokeSender(address sender) external onlyOwner {
-        authorizedSenders[sender] = false;
-        emit SenderRevoked(sender);
-    }
-    
-    /**
-     * @notice Create a new shipment record on-chain
-     * @param trackingId Off-chain tracking ID (e.g., SHP-ABC123)
-     * @param shipmentDataHash Hash of shipment details (description, addresses, etc.)
-     */
-    function createShipment(
+    function registerShipment(
         string calldata trackingId,
-        bytes32 shipmentDataHash
-    ) external onlyAuthorizedSender shipmentNotExists(trackingId) nonReentrant {
+        bytes32 shipmentHash,
+        string calldata origin,
+        string calldata destination
+    ) external nonReentrant {
         bytes32 idHash = keccak256(abi.encodePacked(trackingId));
+        require(!shipments[idHash].exists, "Shipment already registered");
         
         shipments[idHash] = Shipment({
-            shipmentHash: shipmentDataHash,
+            shipmentHash: shipmentHash,
             sender: msg.sender,
-            trackingId: trackingId,
-            status: ShipmentStatus.Created,
+            origin: origin,
+            destination: destination,
             createdAt: block.timestamp,
+            status: ShipmentStatus.Created,
             checkpointCount: 0,
             exists: true
         });
         
         totalShipments++;
         
-        // Record creation as first checkpoint
-        _recordCheckpoint(
-            idHash,
-            trackingId,
-            CheckpointAction.Created,
-            msg.sender,
-            "",
-            "Origin",
-            ""
-        );
-        
-        emit ShipmentCreated(
-            idHash,
-            trackingId,
-            shipmentDataHash,
-            msg.sender,
-            block.timestamp
-        );
+        emit ShipmentRegistered(idHash, msg.sender, block.timestamp);
     }
     
     /**
-     * @notice Record a checkpoint for a shipment
+     * @notice Record a checkpoint during shipment journey
      * @param trackingId Shipment tracking ID
-     * @param action Type of checkpoint action
-     * @param handlerName Name of the handler (for display)
-     * @param location Location description
-     * @param ipfsHash IPFS hash of checkpoint photo (optional)
+     * @param action Action type (picked_up, checkpoint, etc.)
+     * @param handlerName Name of handler
+     * @param location Current location
+     * @param ipfsHash IPFS hash of proof photo
      */
     function recordCheckpoint(
         string calldata trackingId,
-        CheckpointAction action,
+        string calldata action,
         string calldata handlerName,
         string calldata location,
         string calldata ipfsHash
@@ -234,36 +151,35 @@ contract ShipmentRegistry is Ownable, ReentrancyGuard {
         bytes32 idHash = keccak256(abi.encodePacked(trackingId));
         Shipment storage shipment = shipments[idHash];
         
-        // Validate action based on current status
-        require(_isValidTransition(shipment.status, action), "Invalid status transition");
+        checkpoints[idHash].push(Checkpoint({
+            handler: msg.sender,
+            handlerName: handlerName,
+            action: action,
+            location: location,
+            ipfsHash: ipfsHash,
+            timestamp: block.timestamp
+        }));
         
-        // Record checkpoint
-        _recordCheckpoint(
-            idHash,
-            trackingId,
-            action,
-            msg.sender,
-            handlerName,
-            location,
-            ipfsHash
-        );
+        shipment.checkpointCount++;
         
-        // Update shipment status
+        // Update status based on action
         ShipmentStatus oldStatus = shipment.status;
-        ShipmentStatus newStatus = _getNewStatus(action);
+        ShipmentStatus newStatus = _getStatusFromAction(action);
         
-        if (newStatus != oldStatus) {
+        if (newStatus != oldStatus && uint8(newStatus) > uint8(oldStatus)) {
             shipment.status = newStatus;
-            emit StatusUpdated(idHash, oldStatus, newStatus, block.timestamp);
+            emit StatusUpdated(idHash, newStatus, block.timestamp);
         }
+        
+        emit CheckpointRecorded(idHash, msg.sender, block.timestamp);
     }
     
     /**
      * @notice Confirm delivery with proof
      * @param trackingId Shipment tracking ID
-     * @param receiverName Name of person who received
+     * @param receiverName Name of receiver
      * @param photoIpfsHash IPFS hash of delivery photo
-     * @param signatureIpfsHash IPFS hash of signature image (optional)
+     * @param signatureIpfsHash IPFS hash of signature
      */
     function confirmDelivery(
         string calldata trackingId,
@@ -274,25 +190,15 @@ contract ShipmentRegistry is Ownable, ReentrancyGuard {
         bytes32 idHash = keccak256(abi.encodePacked(trackingId));
         Shipment storage shipment = shipments[idHash];
         
+        require(!deliveryProofs[idHash].exists, "Already confirmed");
         require(
             shipment.status == ShipmentStatus.Delivered || 
-            shipment.status == ShipmentStatus.OutForDelivery,
-            "Shipment not ready for confirmation"
+            shipment.status == ShipmentStatus.OutForDelivery ||
+            shipment.status == ShipmentStatus.InTransit,
+            "Invalid status for confirmation"
         );
-        require(!deliveryProofs[idHash].exists, "Already confirmed");
-        require(bytes(photoIpfsHash).length > 0, "Photo proof required");
-        
-        // Create proof hash
-        bytes32 proofHash = keccak256(abi.encodePacked(
-            trackingId,
-            receiverName,
-            photoIpfsHash,
-            signatureIpfsHash,
-            block.timestamp
-        ));
         
         deliveryProofs[idHash] = DeliveryProof({
-            proofHash: proofHash,
             receiverName: receiverName,
             photoIpfsHash: photoIpfsHash,
             signatureIpfsHash: signatureIpfsHash,
@@ -300,34 +206,14 @@ contract ShipmentRegistry is Ownable, ReentrancyGuard {
             exists: true
         });
         
-        // Update status
-        ShipmentStatus oldStatus = shipment.status;
         shipment.status = ShipmentStatus.Confirmed;
-        
-        // Record confirmation checkpoint
-        _recordCheckpoint(
-            idHash,
-            trackingId,
-            CheckpointAction.Confirmed,
-            msg.sender,
-            receiverName,
-            "Destination",
-            photoIpfsHash
-        );
         
         totalDeliveries++;
         
-        emit DeliveryConfirmed(
-            idHash,
-            trackingId,
-            receiverName,
-            photoIpfsHash,
-            block.timestamp
-        );
-        
-        emit StatusUpdated(idHash, oldStatus, ShipmentStatus.Confirmed, block.timestamp);
+        emit DeliveryConfirmed(idHash, block.timestamp);
+        emit StatusUpdated(idHash, ShipmentStatus.Confirmed, block.timestamp);
     }
-    
+
     // ============ View Functions ============
     
     /**
@@ -340,40 +226,30 @@ contract ShipmentRegistry is Ownable, ReentrancyGuard {
         returns (
             bytes32 shipmentHash,
             address sender,
-            ShipmentStatus status,
+            string memory origin,
+            string memory destination,
             uint256 createdAt,
-            uint256 checkpointCount,
-            bool exists
+            ShipmentStatus status,
+            uint256 checkpointCount
         ) 
     {
         bytes32 idHash = keccak256(abi.encodePacked(trackingId));
-        Shipment storage shipment = shipments[idHash];
+        Shipment storage s = shipments[idHash];
+        require(s.exists, "Shipment not found");
         
         return (
-            shipment.shipmentHash,
-            shipment.sender,
-            shipment.status,
-            shipment.createdAt,
-            shipment.checkpointCount,
-            shipment.exists
+            s.shipmentHash,
+            s.sender,
+            s.origin,
+            s.destination,
+            s.createdAt,
+            s.status,
+            s.checkpointCount
         );
     }
     
     /**
-     * @notice Get number of checkpoints for a shipment
-     * @param trackingId Shipment tracking ID
-     */
-    function getCheckpointCount(string calldata trackingId) 
-        external 
-        view 
-        returns (uint256) 
-    {
-        bytes32 idHash = keccak256(abi.encodePacked(trackingId));
-        return shipmentCheckpoints[idHash].length;
-    }
-    
-    /**
-     * @notice Get a specific checkpoint
+     * @notice Get checkpoint at index
      * @param trackingId Shipment tracking ID
      * @param index Checkpoint index
      */
@@ -381,28 +257,25 @@ contract ShipmentRegistry is Ownable, ReentrancyGuard {
         external
         view
         returns (
-            bytes32 checkpointHash,
-            CheckpointAction action,
             address handler,
             string memory handlerName,
+            string memory action,
             string memory location,
             string memory ipfsHash,
             uint256 timestamp
         )
     {
         bytes32 idHash = keccak256(abi.encodePacked(trackingId));
-        require(index < shipmentCheckpoints[idHash].length, "Index out of bounds");
+        require(index < checkpoints[idHash].length, "Index out of bounds");
         
-        Checkpoint storage cp = shipmentCheckpoints[idHash][index];
-        
+        Checkpoint storage c = checkpoints[idHash][index];
         return (
-            cp.checkpointHash,
-            cp.action,
-            cp.handler,
-            cp.handlerName,
-            cp.location,
-            cp.ipfsHash,
-            cp.timestamp
+            c.handler,
+            c.handlerName,
+            c.action,
+            c.location,
+            c.ipfsHash,
+            c.timestamp
         );
     }
     
@@ -414,162 +287,72 @@ contract ShipmentRegistry is Ownable, ReentrancyGuard {
         external
         view
         returns (
-            bytes32 proofHash,
             string memory receiverName,
             string memory photoIpfsHash,
             string memory signatureIpfsHash,
-            uint256 confirmedAt,
-            bool exists
+            uint256 confirmedAt
         )
     {
         bytes32 idHash = keccak256(abi.encodePacked(trackingId));
-        DeliveryProof storage proof = deliveryProofs[idHash];
+        DeliveryProof storage p = deliveryProofs[idHash];
+        require(p.exists, "No delivery proof");
         
         return (
-            proof.proofHash,
-            proof.receiverName,
-            proof.photoIpfsHash,
-            proof.signatureIpfsHash,
-            proof.confirmedAt,
-            proof.exists
+            p.receiverName,
+            p.photoIpfsHash,
+            p.signatureIpfsHash,
+            p.confirmedAt
         );
     }
     
     /**
-     * @notice Verify checkpoint chain integrity
+     * @notice Get checkpoint count for shipment
      * @param trackingId Shipment tracking ID
      */
-    function verifyCheckpointChain(string calldata trackingId)
+    function getCheckpointCount(string calldata trackingId)
         external
         view
-        returns (bool isValid, uint256 lastValidIndex)
+        returns (uint256)
     {
         bytes32 idHash = keccak256(abi.encodePacked(trackingId));
-        Checkpoint[] storage checkpoints = shipmentCheckpoints[idHash];
-        
-        if (checkpoints.length == 0) {
-            return (true, 0);
-        }
-        
-        // First checkpoint should have zero previous hash
-        if (checkpoints[0].previousHash != bytes32(0)) {
-            return (false, 0);
-        }
-        
-        // Verify chain
-        for (uint256 i = 1; i < checkpoints.length; i++) {
-            bytes32 expectedPrevHash = checkpoints[i - 1].checkpointHash;
-            if (checkpoints[i].previousHash != expectedPrevHash) {
-                return (false, i - 1);
-            }
-        }
-        
-        return (true, checkpoints.length - 1);
+        return checkpoints[idHash].length;
     }
     
+    /**
+     * @notice Check if shipment exists
+     * @param trackingId Shipment tracking ID
+     */
+    function shipmentExistsCheck(string calldata trackingId)
+        external
+        view
+        returns (bool)
+    {
+        bytes32 idHash = keccak256(abi.encodePacked(trackingId));
+        return shipments[idHash].exists;
+    }
+
     // ============ Internal Functions ============
     
-    function _recordCheckpoint(
-        bytes32 idHash,
-        string memory trackingId,
-        CheckpointAction action,
-        address handler,
-        string memory handlerName,
-        string memory location,
-        string memory ipfsHash
-    ) internal {
-        Checkpoint[] storage checkpoints = shipmentCheckpoints[idHash];
-        
-        // Get previous hash for chain integrity
-        bytes32 previousHash = bytes32(0);
-        if (checkpoints.length > 0) {
-            previousHash = checkpoints[checkpoints.length - 1].checkpointHash;
-        }
-        
-        // Create checkpoint hash
-        bytes32 checkpointHash = keccak256(abi.encodePacked(
-            trackingId,
-            action,
-            handler,
-            handlerName,
-            location,
-            ipfsHash,
-            block.timestamp,
-            previousHash
-        ));
-        
-        checkpoints.push(Checkpoint({
-            checkpointHash: checkpointHash,
-            action: action,
-            handler: handler,
-            handlerName: handlerName,
-            location: location,
-            ipfsHash: ipfsHash,
-            timestamp: block.timestamp,
-            previousHash: previousHash
-        }));
-        
-        shipments[idHash].checkpointCount++;
-        totalCheckpoints++;
-        
-        emit CheckpointRecorded(
-            idHash,
-            trackingId,
-            action,
-            handler,
-            location,
-            ipfsHash,
-            block.timestamp
-        );
-    }
-    
-    function _isValidTransition(ShipmentStatus currentStatus, CheckpointAction action) 
-        internal 
-        pure 
-        returns (bool) 
+    /**
+     * @notice Convert action string to status
+     */
+    function _getStatusFromAction(string calldata action)
+        internal
+        pure
+        returns (ShipmentStatus)
     {
-        // Created -> PickedUp
-        if (currentStatus == ShipmentStatus.Created && action == CheckpointAction.PickedUp) {
-            return true;
+        bytes32 actionHash = keccak256(abi.encodePacked(action));
+        
+        if (actionHash == keccak256("picked_up")) {
+            return ShipmentStatus.PickedUp;
+        } else if (actionHash == keccak256("checkpoint") || actionHash == keccak256("handed_off")) {
+            return ShipmentStatus.InTransit;
+        } else if (actionHash == keccak256("out_for_delivery")) {
+            return ShipmentStatus.OutForDelivery;
+        } else if (actionHash == keccak256("delivered")) {
+            return ShipmentStatus.Delivered;
         }
         
-        // PickedUp -> Checkpoint, HandedOff, OutForDelivery
-        if (currentStatus == ShipmentStatus.PickedUp) {
-            return action == CheckpointAction.Checkpoint || 
-                   action == CheckpointAction.HandedOff ||
-                   action == CheckpointAction.OutForDelivery ||
-                   action == CheckpointAction.Delivered;
-        }
-        
-        // InTransit -> Checkpoint, HandedOff, OutForDelivery, Delivered
-        if (currentStatus == ShipmentStatus.InTransit) {
-            return action == CheckpointAction.Checkpoint ||
-                   action == CheckpointAction.HandedOff ||
-                   action == CheckpointAction.OutForDelivery ||
-                   action == CheckpointAction.Delivered;
-        }
-        
-        // OutForDelivery -> Delivered
-        if (currentStatus == ShipmentStatus.OutForDelivery) {
-            return action == CheckpointAction.Delivered ||
-                   action == CheckpointAction.Checkpoint;
-        }
-        
-        // Delivered -> Confirmed (handled separately)
-        if (currentStatus == ShipmentStatus.Delivered) {
-            return action == CheckpointAction.Confirmed;
-        }
-        
-        return false;
-    }
-    
-    function _getNewStatus(CheckpointAction action) internal pure returns (ShipmentStatus) {
-        if (action == CheckpointAction.PickedUp) return ShipmentStatus.PickedUp;
-        if (action == CheckpointAction.Checkpoint) return ShipmentStatus.InTransit;
-        if (action == CheckpointAction.HandedOff) return ShipmentStatus.InTransit;
-        if (action == CheckpointAction.OutForDelivery) return ShipmentStatus.OutForDelivery;
-        if (action == CheckpointAction.Delivered) return ShipmentStatus.Delivered;
-        if (action == CheckpointAction.Confirmed) return ShipmentStatus.Confirmed;
         return ShipmentStatus.Created;
     }
 }
