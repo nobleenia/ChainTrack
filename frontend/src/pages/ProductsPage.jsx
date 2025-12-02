@@ -42,6 +42,8 @@ const categoryOptions = [
   { value: 'pharmaceutical', label: 'Pharmaceutical' },
   { value: 'clothing', label: 'Clothing & Apparel' },
   { value: 'automotive', label: 'Automotive' },
+  { value: 'cosmetics', label: 'Cosmetics' },
+  { value: 'luxury', label: 'Luxury Goods' },
   { value: 'other', label: 'Other' },
 ]
 

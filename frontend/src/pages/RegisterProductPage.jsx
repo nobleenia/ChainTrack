@@ -32,6 +32,7 @@ const categories = [
   { value: 'clothing', label: 'Clothing & Apparel', icon: '👕' },
   { value: 'automotive', label: 'Automotive', icon: '🚗' },
   { value: 'cosmetics', label: 'Cosmetics', icon: '💄' },
+  { value: 'luxury', label: 'Luxury Goods', icon: '💎' },
   { value: 'other', label: 'Other', icon: '📦' },
 ]
 

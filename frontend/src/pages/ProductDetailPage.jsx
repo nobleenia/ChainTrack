@@ -37,7 +37,7 @@ import { Button, LoadingSpinner, StatusBadge, Modal } from '../components/common
 import TransferCard from '../components/transfers/TransferCard'
 
 export default function ProductDetailPage() {
-  const { id } = useParams()
+  const { productId } = useParams()
   const navigate = useNavigate()
   const { user } = useAuthStore()
   
@@ -63,8 +63,8 @@ export default function ProductDetailPage() {
       
       try {
         const [productData, transfersData] = await Promise.all([
-          productService.getProduct(id),
-          transferService.getProductTransfers(id).catch(() => ({ transfers: [] }))
+          productService.getProduct(productId),
+          transferService.getProductTransfers(productId).catch(() => ({ transfers: [] }))
         ])
         
         setProduct(productData.product)
@@ -81,7 +81,7 @@ export default function ProductDetailPage() {
     }
 
     fetchData()
-  }, [id])
+  }, [productId])
 
   // Copy hash to clipboard
   const copyHash = () => {
@@ -119,7 +119,7 @@ export default function ProductDetailPage() {
       setShowTransferModal(false)
       setTransferData({ to_user_id: '', location: '', notes: '' })
       // Refresh transfers
-      const updatedTransfers = await transferService.getProductTransfers(id)
+      const updatedTransfers = await transferService.getProductTransfers(productId)
       setTransfers(updatedTransfers.transfers || [])
     } catch (err) {
       setError(err.response?.data?.error || 'Failed to create transfer')

@@ -56,14 +56,27 @@ export default function TransfersPage() {
     setError(null)
     
     try {
+      // Map frontend tab to backend direction param
+      const directionMap = {
+        'incoming': 'received',
+        'outgoing': 'sent',
+        'all': 'all'
+      }
+      
       const params = {
+        direction: directionMap[activeTab] || 'all',
         ...(statusFilter && { status: statusFilter }),
-        ...(activeTab === 'incoming' && { to_user: user?.id }),
-        ...(activeTab === 'outgoing' && { from_user: user?.id }),
       }
       
       const data = await transferService.getTransfers(params)
-      setTransfers(data.transfers || [])
+      
+      // Client-side status filtering since backend doesn't support it yet
+      let filteredTransfers = data.transfers || []
+      if (statusFilter) {
+        filteredTransfers = filteredTransfers.filter(t => t.status === statusFilter)
+      }
+      
+      setTransfers(filteredTransfers)
     } catch (err) {
       setError(err.response?.data?.error || 'Failed to load transfers')
       setTransfers([])
