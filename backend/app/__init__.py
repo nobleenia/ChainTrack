@@ -47,12 +47,13 @@ def create_app(config_name='development'):
     })
     
     # Register blueprints
-    from .routes import auth, products, transfers, verification, rewards
+    from .routes import auth, products, transfers, verification, rewards, shipments
     app.register_blueprint(auth.bp, url_prefix='/api/auth')
     app.register_blueprint(products.bp, url_prefix='/api/products')
     app.register_blueprint(transfers.bp, url_prefix='/api/transfers')
     app.register_blueprint(verification.bp, url_prefix='/api/verify')
     app.register_blueprint(rewards.bp, url_prefix='/api/rewards')
+    app.register_blueprint(shipments.bp, url_prefix='/api/shipments')
     
     # Health check endpoint
     @app.route('/api/health')
@@ -62,12 +63,15 @@ def create_app(config_name='development'):
     # Shell context for flask shell
     @app.shell_context_processor
     def make_shell_context():
-        from .models import User, Product, Transfer
+        from .models import User, Product, Transfer, Shipment, ShipmentCheckpoint, DeliveryProof
         return {
             'db': db,
             'User': User,
             'Product': Product,
-            'Transfer': Transfer
+            'Transfer': Transfer,
+            'Shipment': Shipment,
+            'ShipmentCheckpoint': ShipmentCheckpoint,
+            'DeliveryProof': DeliveryProof
         }
     
     return app

@@ -108,6 +108,13 @@ export default function LandingPage() {
                   <QrCode className="mr-2" size={20} />
                   Verify a Product
                 </Link>
+                <Link
+                  to="/track"
+                  className="inline-flex items-center px-6 py-3 border-2 border-primary-300 text-primary-100 font-semibold rounded-lg hover:bg-white/10 transition"
+                >
+                  <Truck className="mr-2" size={20} />
+                  Track Shipment
+                </Link>
               </div>
             </motion.div>
 

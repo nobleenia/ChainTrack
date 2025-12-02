@@ -17,6 +17,13 @@ from .rewards import (
     TIER_BENEFITS,
     POINTS_PER_TOKEN
 )
+from .shipment import (
+    Shipment,
+    ShipmentCheckpoint,
+    DeliveryProof,
+    ShipmentStatus,
+    CheckpointAction
+)
 
 __all__ = [
     'User',
@@ -33,5 +40,10 @@ __all__ = [
     'POINT_VALUES',
     'TIER_THRESHOLDS',
     'TIER_BENEFITS',
-    'POINTS_PER_TOKEN'
+    'POINTS_PER_TOKEN',
+    'Shipment',
+    'ShipmentCheckpoint',
+    'DeliveryProof',
+    'ShipmentStatus',
+    'CheckpointAction'
 ]

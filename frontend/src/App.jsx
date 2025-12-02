@@ -18,6 +18,10 @@ import VerifyPage from './pages/VerifyPage'
 import RewardsPage from './pages/RewardsPage'
 import SettingsPage from './pages/SettingsPage'
 import NotFoundPage from './pages/NotFoundPage'
+import TrackPage from './pages/TrackPage'
+import ShipmentsPage from './pages/dashboard/ShipmentsPage'
+import CreateShipmentPage from './pages/dashboard/CreateShipmentPage'
+import ShipmentDetailPage from './pages/dashboard/ShipmentDetailPage'
 
 // Protected Route Component
 function ProtectedRoute({ children }) {
@@ -59,6 +63,9 @@ function App() {
         } />
         <Route path="/verify/:productId?" element={<VerifyPage />} />
       </Route>
+      
+      {/* Public Track Page (no header) */}
+      <Route path="/track" element={<TrackPage />} />
 
       {/* Protected Dashboard Routes */}
       <Route element={
@@ -71,6 +78,9 @@ function App() {
         <Route path="/products/new" element={<RegisterProductPage />} />
         <Route path="/products/:productId" element={<ProductDetailPage />} />
         <Route path="/transfers" element={<TransfersPage />} />
+        <Route path="/dashboard/shipments" element={<ShipmentsPage />} />
+        <Route path="/dashboard/shipments/create" element={<CreateShipmentPage />} />
+        <Route path="/dashboard/shipments/:id" element={<ShipmentDetailPage />} />
         <Route path="/verify" element={<VerifyPage />} />
         <Route path="/rewards" element={<RewardsPage />} />
         <Route path="/settings" element={<SettingsPage />} />

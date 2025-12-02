@@ -18,26 +18,29 @@ import {
   AlertTriangle,
   Info,
   Trash2,
-  Gift
+  Gift,
+  Truck
 } from 'lucide-react'
 import { useAuthStore } from '../../store/authStore'
 import { useTour } from '../../hooks/useTour'
 
-// Navigation items - all roles get Verify Product, consumers don't see Products/Transfers
+// Navigation items - all roles get Verify Product and Shipments, consumers don't see Products/Transfers
 const getNavigation = (userRole) => {
   if (userRole === 'consumer') {
     return [
       { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
+      { name: 'Shipments', href: '/dashboard/shipments', icon: Truck },
       { name: 'Verify Product', href: '/verify', icon: ShieldCheck },
       { name: 'Rewards', href: '/rewards', icon: Gift },
       { name: 'Settings', href: '/settings', icon: Settings },
     ]
   }
-  // Manufacturers, Distributors, Retailers get full navigation including Verify
+  // Manufacturers, Distributors, Retailers get full navigation including Verify and Shipments
   return [
     { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
     { name: 'Products', href: '/products', icon: Package },
     { name: 'Transfers', href: '/transfers', icon: ArrowRightLeft },
+    { name: 'Shipments', href: '/dashboard/shipments', icon: Truck },
     { name: 'Verify Product', href: '/verify', icon: ShieldCheck },
     { name: 'Rewards', href: '/rewards', icon: Gift },
     { name: 'Settings', href: '/settings', icon: Settings },
