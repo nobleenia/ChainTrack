@@ -65,15 +65,24 @@ export default function TransfersPage() {
       
       const params = {
         direction: directionMap[activeTab] || 'all',
-        ...(statusFilter && { status: statusFilter }),
       }
       
       const data = await transferService.getTransfers(params)
       
-      // Client-side status filtering since backend doesn't support it yet
+      // Client-side status filtering
+      // Backend uses is_confirmed boolean, not status string
       let filteredTransfers = data.transfers || []
       if (statusFilter) {
-        filteredTransfers = filteredTransfers.filter(t => t.status === statusFilter)
+        filteredTransfers = filteredTransfers.filter(t => {
+          if (statusFilter === 'confirmed') {
+            return t.is_confirmed === true
+          } else if (statusFilter === 'pending') {
+            return t.is_confirmed === false
+          } else if (statusFilter === 'rejected') {
+            return t.status === 'rejected' // if rejection is ever implemented
+          }
+          return true
+        })
       }
       
       setTransfers(filteredTransfers)
