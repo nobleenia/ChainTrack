@@ -1,12 +1,43 @@
-import { Outlet, Link } from 'react-router-dom'
+import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { Menu, X } from 'lucide-react'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useAuthStore } from '../../store/authStore'
 
 export default function MainLayout() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const { isAuthenticated } = useAuthStore()
+  const location = useLocation()
+  const navigate = useNavigate()
+
+  // Handle hash navigation for smooth scrolling
+  const handleHashNavigation = (e, hash) => {
+    e.preventDefault()
+    setIsMenuOpen(false)
+    
+    // If we're not on the landing page, navigate there first
+    if (location.pathname !== '/') {
+      navigate('/' + hash)
+    } else {
+      // We're on landing page, scroll to section
+      const element = document.querySelector(hash)
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      }
+    }
+  }
+
+  // Handle scroll on page load if there's a hash
+  useEffect(() => {
+    if (location.hash && location.pathname === '/') {
+      setTimeout(() => {
+        const element = document.querySelector(location.hash)
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'start' })
+        }
+      }, 100)
+    }
+  }, [location])
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -26,12 +57,20 @@ export default function MainLayout() {
 
             {/* Desktop Navigation */}
             <div className="hidden md:flex items-center space-x-8">
-              <Link to="/#features" className="text-gray-600 hover:text-primary-600 transition">
+              <a 
+                href="#features" 
+                onClick={(e) => handleHashNavigation(e, '#features')}
+                className="text-gray-600 hover:text-primary-600 transition cursor-pointer"
+              >
                 Features
-              </Link>
-              <Link to="/#how-it-works" className="text-gray-600 hover:text-primary-600 transition">
+              </a>
+              <a 
+                href="#how-it-works" 
+                onClick={(e) => handleHashNavigation(e, '#how-it-works')}
+                className="text-gray-600 hover:text-primary-600 transition cursor-pointer"
+              >
                 How It Works
-              </Link>
+              </a>
               <Link to="/verify" className="text-gray-600 hover:text-primary-600 transition">
                 Verify Product
               </Link>
@@ -79,12 +118,20 @@ export default function MainLayout() {
             className="md:hidden bg-white border-t"
           >
             <div className="px-4 py-4 space-y-4">
-              <Link to="/#features" className="block text-gray-600 hover:text-primary-600">
+              <a 
+                href="#features" 
+                onClick={(e) => handleHashNavigation(e, '#features')}
+                className="block text-gray-600 hover:text-primary-600 cursor-pointer"
+              >
                 Features
-              </Link>
-              <Link to="/#how-it-works" className="block text-gray-600 hover:text-primary-600">
+              </a>
+              <a 
+                href="#how-it-works" 
+                onClick={(e) => handleHashNavigation(e, '#how-it-works')}
+                className="block text-gray-600 hover:text-primary-600 cursor-pointer"
+              >
                 How It Works
-              </Link>
+              </a>
               <Link to="/verify" className="block text-gray-600 hover:text-primary-600">
                 Verify Product
               </Link>

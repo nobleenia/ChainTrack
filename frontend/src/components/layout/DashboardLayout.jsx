@@ -23,7 +23,7 @@ import {
 import { useAuthStore } from '../../store/authStore'
 import { useTour } from '../../hooks/useTour'
 
-// Navigation items - consumers get Verify instead of Products
+// Navigation items - all roles get Verify Product, consumers don't see Products/Transfers
 const getNavigation = (userRole) => {
   if (userRole === 'consumer') {
     return [
@@ -33,10 +33,12 @@ const getNavigation = (userRole) => {
       { name: 'Settings', href: '/settings', icon: Settings },
     ]
   }
+  // Manufacturers, Distributors, Retailers get full navigation including Verify
   return [
     { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
     { name: 'Products', href: '/products', icon: Package },
     { name: 'Transfers', href: '/transfers', icon: ArrowRightLeft },
+    { name: 'Verify Product', href: '/verify', icon: ShieldCheck },
     { name: 'Rewards', href: '/rewards', icon: Gift },
     { name: 'Settings', href: '/settings', icon: Settings },
   ]
