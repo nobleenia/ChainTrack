@@ -62,10 +62,8 @@ function App() {
           </PublicRoute>
         } />
         <Route path="/verify/:productId?" element={<VerifyPage />} />
+        <Route path="/track" element={<TrackPage />} />
       </Route>
-      
-      {/* Public Track Page (no header) */}
-      <Route path="/track" element={<TrackPage />} />
 
       {/* Protected Dashboard Routes */}
       <Route element={
