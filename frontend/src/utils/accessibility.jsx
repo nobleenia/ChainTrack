@@ -182,7 +182,7 @@ export function useModalA11y(isOpen, onClose) {
   }, [isOpen, onClose])
 }
 
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 
 /**
  * Hook to announce messages to screen readers
@@ -202,6 +202,32 @@ export function useAnnounce() {
   }
   
   return announce
+}
+
+/**
+ * Standalone function to announce messages to screen readers
+ * Use when you need to announce outside of a React component
+ */
+export function announceToScreenReader(message, priority = 'polite') {
+  const liveRegion = document.getElementById('aria-live-region')
+  if (liveRegion) {
+    liveRegion.textContent = message
+    // Clear after announcement
+    setTimeout(() => {
+      liveRegion.textContent = ''
+    }, 1000)
+  } else {
+    // Fallback: create temporary announcer
+    const announcer = document.createElement('div')
+    announcer.setAttribute('aria-live', priority)
+    announcer.setAttribute('aria-atomic', 'true')
+    announcer.setAttribute('class', 'sr-only')
+    announcer.textContent = message
+    document.body.appendChild(announcer)
+    setTimeout(() => {
+      document.body.removeChild(announcer)
+    }, 1000)
+  }
 }
 
 /**
@@ -241,4 +267,48 @@ export function useFocusTrap(ref, isActive) {
     element.addEventListener('keydown', handleKeyDown)
     return () => element.removeEventListener('keydown', handleKeyDown)
   }, [ref, isActive])
+}
+
+/**
+ * FocusTrap component wrapper for modals and dialogs
+ * Traps focus within the component when active
+ */
+export function FocusTrap({ children, active = true }) {
+  const containerRef = useRef(null)
+  
+  useEffect(() => {
+    if (!active || !containerRef.current) return
+    
+    const element = containerRef.current
+    const focusableSelector = 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+    const focusableElements = element.querySelectorAll(focusableSelector)
+    
+    const firstElement = focusableElements[0]
+    const lastElement = focusableElements[focusableElements.length - 1]
+    
+    const handleKeyDown = (e) => {
+      if (e.key !== 'Tab') return
+      
+      if (e.shiftKey) {
+        if (document.activeElement === firstElement) {
+          e.preventDefault()
+          lastElement?.focus()
+        }
+      } else {
+        if (document.activeElement === lastElement) {
+          e.preventDefault()
+          firstElement?.focus()
+        }
+      }
+    }
+    
+    element.addEventListener('keydown', handleKeyDown)
+    return () => element.removeEventListener('keydown', handleKeyDown)
+  }, [active])
+  
+  return (
+    <div ref={containerRef}>
+      {children}
+    </div>
+  )
 }
