@@ -23,7 +23,11 @@ class ShipmentBlockchainService:
         """Initialize blockchain connection"""
         self.rpc_url = os.environ.get('ETHEREUM_RPC_URL', '')
         self.contract_address = os.environ.get('SHIPMENT_REGISTRY_ADDRESS', '')
-        self.private_key = os.environ.get('DEPLOYER_PRIVATE_KEY', '')
+        self.private_key = os.environ.get('DEPLOYER_PRIVATE_KEY', '') or os.environ.get('PRIVATE_KEY', '')
+        
+        # Ensure private key has 0x prefix
+        if self.private_key and not self.private_key.startswith('0x'):
+            self.private_key = '0x' + self.private_key
         
         self.w3 = None
         self.contract = None
@@ -39,10 +43,13 @@ class ShipmentBlockchainService:
             if not self.w3.is_connected():
                 raise ConnectionError("Failed to connect to Ethereum network")
             
+            print(f"Connected to Ethereum network. Chain ID: {self.w3.eth.chain_id}")
+            
             if self.contract_address:
                 self._load_contract()
                 
         except Exception as e:
+            print(f"Blockchain connection failed: {e}")
             if current_app:
                 current_app.logger.error(f"Blockchain connection failed: {e}")
             self.w3 = None
@@ -50,20 +57,37 @@ class ShipmentBlockchainService:
     def _load_contract(self):
         """Load the ShipmentRegistry contract"""
         try:
-            abi_path = os.path.join(
-                os.path.dirname(__file__), 
-                '..', '..', '..', 'contracts', 'artifacts', 
-                'contracts', 'ShipmentRegistry.sol', 'ShipmentRegistry.json'
-            )
+            # Try multiple possible paths for ABI files
+            possible_paths = [
+                os.path.join(
+                    os.path.dirname(__file__), 
+                    '..', '..', '..', 'contracts', 'artifacts', 
+                    'contracts', 'ShipmentRegistry.sol', 'ShipmentRegistry.json'
+                ),
+                os.path.join(
+                    '/home/noble/projects/ChainTrack', 'contracts', 'artifacts',
+                    'contracts', 'ShipmentRegistry.sol', 'ShipmentRegistry.json'
+                ),
+            ]
             
-            if os.path.exists(abi_path):
+            abi_path = None
+            for path in possible_paths:
+                if os.path.exists(path):
+                    abi_path = path
+                    break
+            
+            if abi_path:
                 with open(abi_path, 'r') as f:
                     contract_json = json.load(f)
                     self.contract = self.w3.eth.contract(
                         address=Web3.to_checksum_address(self.contract_address),
                         abi=contract_json['abi']
                     )
+                    print(f"ShipmentRegistry contract loaded at {self.contract_address}")
+            else:
+                print("ShipmentRegistry ABI not found")
         except Exception as e:
+            print(f"Failed to load contract: {e}")
             if current_app:
                 current_app.logger.error(f"Failed to load contract: {e}")
     
@@ -92,7 +116,12 @@ class ShipmentBlockchainService:
         
         receipt = self.w3.eth.wait_for_transaction_receipt(tx_hash)
         
-        return (receipt.transactionHash.hex(), receipt.blockNumber)
+        # Ensure tx hash has 0x prefix
+        tx_hash_hex = receipt.transactionHash.hex()
+        if not tx_hash_hex.startswith('0x'):
+            tx_hash_hex = '0x' + tx_hash_hex
+        
+        return (tx_hash_hex, receipt.blockNumber)
     
     def register_shipment(
         self, 
