@@ -143,8 +143,8 @@ export default function RewardsPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Rewards</h1>
-          <p className="text-gray-600">Earn points, climb tiers, convert to CTK tokens</p>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Rewards</h1>
+          <p className="text-gray-600 dark:text-gray-400">Earn points, climb tiers, convert to CTK tokens</p>
         </div>
         <Button
           onClick={handleClaimDailyBonus}
@@ -180,15 +180,15 @@ export default function RewardsPage() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-white rounded-xl p-6 shadow-sm border border-gray-100"
+          className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700"
         >
           <div className="flex items-center justify-between mb-4">
-            <div className="p-3 bg-yellow-100 rounded-lg">
+            <div className="p-3 bg-yellow-100 dark:bg-yellow-900/30 rounded-lg">
               <Coins size={24} className="text-yellow-600" />
             </div>
             <span className="text-xs font-medium text-gray-400 uppercase">Points</span>
           </div>
-          <p className="text-3xl font-bold text-gray-900">
+          <p className="text-3xl font-bold text-gray-900 dark:text-gray-100">
             {rewards?.current_points?.toLocaleString() || 0}
           </p>
           <p className="text-sm text-gray-500 mt-1">
@@ -201,15 +201,15 @@ export default function RewardsPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="bg-white rounded-xl p-6 shadow-sm border border-gray-100"
+          className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700"
         >
           <div className="flex items-center justify-between mb-4">
-            <div className="p-3 bg-purple-100 rounded-lg">
+            <div className="p-3 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
               <Zap size={24} className="text-purple-600" />
             </div>
             <span className="text-xs font-medium text-gray-400 uppercase">CTK Tokens</span>
           </div>
-          <p className="text-3xl font-bold text-gray-900">
+          <p className="text-3xl font-bold text-gray-900 dark:text-gray-100">
             {rewards?.ctk_tokens?.toFixed(2) || '0.00'}
           </p>
           <button
@@ -242,15 +242,15 @@ export default function RewardsPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
-          className="bg-white rounded-xl p-6 shadow-sm border border-gray-100"
+          className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700"
         >
           <div className="flex items-center justify-between mb-4">
-            <div className="p-3 bg-green-100 rounded-lg">
+            <div className="p-3 bg-green-100 dark:bg-green-900/30 rounded-lg">
               <Shield size={24} className="text-green-600" />
             </div>
             <span className="text-xs font-medium text-gray-400 uppercase">Verifications</span>
           </div>
-          <p className="text-3xl font-bold text-gray-900">
+          <p className="text-3xl font-bold text-gray-900 dark:text-gray-100">
             {rewards?.stats?.total_verifications || 0}
           </p>
           <p className="text-sm text-gray-500 mt-1">
@@ -265,21 +265,21 @@ export default function RewardsPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
-          className="bg-white rounded-xl p-6 shadow-sm border border-gray-100"
+          className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700"
         >
           <div className="flex items-center justify-between mb-4">
-            <h3 className="font-semibold text-gray-900">Progress to {rewards.next_tier_progress.next_tier}</h3>
+            <h3 className="font-semibold text-gray-900 dark:text-gray-100">Progress to {rewards.next_tier_progress.next_tier}</h3>
             <span className="text-sm text-gray-500">
               {rewards.next_tier_progress.points_needed.toLocaleString()} points needed
             </span>
           </div>
-          <div className="w-full bg-gray-200 rounded-full h-3">
+          <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3">
             <div
               className={`bg-gradient-to-r ${tierConfig.color} h-3 rounded-full transition-all duration-500`}
               style={{ width: `${rewards.next_tier_progress.progress}%` }}
             />
           </div>
-          <p className="text-sm text-gray-500 mt-2">
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
             {rewards.next_tier_progress.progress.toFixed(1)}% complete
           </p>
         </motion.div>
@@ -291,15 +291,15 @@ export default function RewardsPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5 }}
-          className="bg-white rounded-xl shadow-sm border border-gray-100"
+          className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700"
         >
-          <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
-            <h3 className="font-semibold text-gray-900 flex items-center gap-2">
+          <div className="px-6 py-4 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between">
+            <h3 className="font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
               <Clock size={20} className="text-gray-400" />
               Recent Activity
             </h3>
           </div>
-          <div className="divide-y divide-gray-50 max-h-80 overflow-y-auto">
+          <div className="divide-y divide-gray-50 dark:divide-gray-700 max-h-80 overflow-y-auto">
             {history.length === 0 ? (
               <div className="p-8 text-center text-gray-500">
                 <Trophy size={48} className="mx-auto mb-4 text-gray-300" />
@@ -317,10 +317,10 @@ export default function RewardsPage() {
                       )}
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-gray-900 capitalize">
+                      <p className="text-sm font-medium text-gray-900 dark:text-gray-100 capitalize">
                         {tx.action_type.replace(/_/g, ' ')}
                       </p>
-                      <p className="text-xs text-gray-500">
+                      <p className="text-xs text-gray-500 dark:text-gray-400">
                         {new Date(tx.created_at).toLocaleDateString()}
                       </p>
                     </div>
@@ -339,23 +339,23 @@ export default function RewardsPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.6 }}
-          className="bg-white rounded-xl shadow-sm border border-gray-100"
+          className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700"
         >
-          <div className="px-6 py-4 border-b border-gray-100">
-            <h3 className="font-semibold text-gray-900 flex items-center gap-2">
+          <div className="px-6 py-4 border-b border-gray-100 dark:border-gray-700">
+            <h3 className="font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
               <Users size={20} className="text-gray-400" />
               Refer Friends
             </h3>
           </div>
           <div className="p-6">
-            <p className="text-gray-600 mb-4">
+            <p className="text-gray-600 dark:text-gray-400 mb-4">
               Share your referral link and earn <span className="font-semibold text-primary-600">200 points</span> when your friends verify their first product!
             </p>
             
-            <div className="bg-gray-50 rounded-lg p-4 mb-4">
-              <p className="text-xs text-gray-500 mb-2">Your referral code</p>
+            <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 mb-4">
+              <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">Your referral code</p>
               <div className="flex items-center gap-2">
-                <code className="flex-1 bg-white px-3 py-2 rounded border text-sm font-mono">
+                <code className="flex-1 bg-white dark:bg-gray-800 px-3 py-2 rounded border dark:border-gray-600 text-sm font-mono dark:text-gray-100">
                   {referralCode?.referral_code || 'Loading...'}
                 </code>
                 <button
@@ -380,15 +380,15 @@ export default function RewardsPage() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.7 }}
-        className="bg-white rounded-xl shadow-sm border border-gray-100"
+        className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700"
       >
-        <div className="px-6 py-4 border-b border-gray-100">
-          <h3 className="font-semibold text-gray-900 flex items-center gap-2">
+        <div className="px-6 py-4 border-b border-gray-100 dark:border-gray-700">
+          <h3 className="font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
             <Trophy size={20} className="text-yellow-500" />
             Top Verifiers
           </h3>
         </div>
-        <div className="divide-y divide-gray-50">
+        <div className="divide-y divide-gray-50 dark:divide-gray-700">
           {leaderboard.map((user, index) => (
             <div key={index} className="px-6 py-4 flex items-center justify-between">
               <div className="flex items-center gap-4">
@@ -401,11 +401,11 @@ export default function RewardsPage() {
                   {index + 1}
                 </span>
                 <div>
-                  <p className="font-medium text-gray-900">{user.user_name}</p>
-                  <p className="text-xs text-gray-500 capitalize">{user.tier} • {user.verifications} verifications</p>
+                  <p className="font-medium text-gray-900 dark:text-gray-100">{user.user_name}</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 capitalize">{user.tier} • {user.verifications} verifications</p>
                 </div>
               </div>
-              <span className="font-semibold text-gray-900">{user.total_points.toLocaleString()} pts</span>
+              <span className="font-semibold text-gray-900 dark:text-gray-100">{user.total_points.toLocaleString()} pts</span>
             </div>
           ))}
         </div>
@@ -419,17 +419,17 @@ export default function RewardsPage() {
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="bg-white rounded-xl p-6 max-w-md w-full"
+              className="bg-white dark:bg-gray-800 rounded-xl p-6 max-w-md w-full"
             >
-              <h3 className="text-lg font-semibold mb-4">Convert Points to CTK Tokens</h3>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Convert Points to CTK Tokens</h3>
               
-              <div className="bg-gray-50 rounded-lg p-4 mb-4">
-                <p className="text-sm text-gray-600">Conversion Rate</p>
-                <p className="text-2xl font-bold text-gray-900">1,000 points = 1 CTK</p>
+              <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 mb-4">
+                <p className="text-sm text-gray-600 dark:text-gray-400">Conversion Rate</p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">1,000 points = 1 CTK</p>
               </div>
 
               <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Points to convert
                 </label>
                 <input
@@ -437,11 +437,11 @@ export default function RewardsPage() {
                   value={convertAmount}
                   onChange={(e) => setConvertAmount(e.target.value)}
                   placeholder={`Max: ${rewards?.current_points || 0}`}
-                  className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500"
+                  className="w-full px-4 py-2 border dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                   min="100"
                   max={rewards?.current_points}
                 />
-                <p className="text-xs text-gray-500 mt-1">
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                   Leave empty to convert all points
                 </p>
               </div>
