@@ -23,6 +23,7 @@ import ShipmentsPage from './pages/dashboard/ShipmentsPage'
 import CreateShipmentPage from './pages/dashboard/CreateShipmentPage'
 import ShipmentDetailPage from './pages/dashboard/ShipmentDetailPage'
 import ConfirmDeliveryPage from './pages/dashboard/ConfirmDeliveryPage'
+import ShipmentAnalyticsPage from './pages/dashboard/ShipmentAnalyticsPage'
 import CourierCheckpointPage from './pages/CourierCheckpointPage'
 import ReceiverTrackingPage from './pages/ReceiverTrackingPage'
 
@@ -107,6 +108,7 @@ function App() {
         <Route path="/dashboard/shipments" element={<ShipmentsPage />} />
         <Route path="/dashboard/shipments/create" element={<CreateShipmentPage />} />
         <Route path="/dashboard/shipments/:id" element={<ShipmentDetailPage />} />
+        <Route path="/dashboard/shipments/analytics" element={<ShipmentAnalyticsPage />} />
         <Route path="/dashboard/confirm-delivery" element={<ConfirmDeliveryPage />} />
         <Route path="/dashboard/confirm-delivery/:shipmentId" element={<ConfirmDeliveryPage />} />
         <Route path="/verify" element={<VerifyPage />} />

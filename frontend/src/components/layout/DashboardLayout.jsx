@@ -19,7 +19,8 @@ import {
   Info,
   Trash2,
   Gift,
-  Truck
+  Truck,
+  BarChart3
 } from 'lucide-react'
 import { useAuthStore } from '../../store/authStore'
 import { useTour } from '../../hooks/useTour'
@@ -32,6 +33,7 @@ const getNavigation = (userRole) => {
     return [
       { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
       { name: 'Shipments', href: '/dashboard/shipments', icon: Truck },
+      { name: 'Analytics', href: '/dashboard/shipments/analytics', icon: BarChart3 },
       { name: 'Verify Product', href: '/verify', icon: ShieldCheck },
       { name: 'Rewards', href: '/rewards', icon: Gift },
       { name: 'Settings', href: '/settings', icon: Settings },
@@ -43,6 +45,7 @@ const getNavigation = (userRole) => {
     { name: 'Products', href: '/products', icon: Package },
     { name: 'Transfers', href: '/transfers', icon: ArrowRightLeft },
     { name: 'Shipments', href: '/dashboard/shipments', icon: Truck },
+    { name: 'Analytics', href: '/dashboard/shipments/analytics', icon: BarChart3 },
     { name: 'Verify Product', href: '/verify', icon: ShieldCheck },
     { name: 'Rewards', href: '/rewards', icon: Gift },
     { name: 'Settings', href: '/settings', icon: Settings },
