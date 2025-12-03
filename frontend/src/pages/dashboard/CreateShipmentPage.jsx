@@ -5,7 +5,7 @@
 
 import { useState, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import {
   Package,
   MapPin,
@@ -20,10 +20,16 @@ import {
   CheckCircle,
   AlertCircle,
   Loader2,
-  Copy
+  Copy,
+  ChevronDown,
+  ChevronUp,
+  BookMarked,
+  FileStack
 } from 'lucide-react'
 import useShipmentStore from '../../store/shipmentStore'
 import { useAuthStore } from '../../store/authStore'
+import AddressBook from '../../components/shipment/AddressBook'
+import ShipmentTemplates from '../../components/shipment/ShipmentTemplates'
 
 export default function CreateShipmentPage() {
   const navigate = useNavigate()
@@ -60,6 +66,10 @@ export default function CreateShipmentPage() {
   const [photoPreviews, setPhotoPreviews] = useState([])
   const [success, setSuccess] = useState(null)
   const [validationErrors, setValidationErrors] = useState({})
+  const [showAddressBook, setShowAddressBook] = useState(false)
+  const [showTemplates, setShowTemplates] = useState(false)
+  const [selectedAddress, setSelectedAddress] = useState(null)
+  const [selectedTemplate, setSelectedTemplate] = useState(null)
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target
@@ -71,6 +81,33 @@ export default function CreateShipmentPage() {
     if (validationErrors[name]) {
       setValidationErrors((prev) => ({ ...prev, [name]: null }))
     }
+  }
+
+  const handleSelectAddress = (address) => {
+    setSelectedAddress(address)
+    setFormData((prev) => ({
+      ...prev,
+      receiver_name: address.name,
+      receiver_email: address.email || '',
+      receiver_phone: address.phone || '',
+      delivery_address: address.address,
+      delivery_city: address.city || ''
+    }))
+    setShowAddressBook(false)
+  }
+
+  const handleSelectTemplate = (template) => {
+    setSelectedTemplate(template)
+    setFormData((prev) => ({
+      ...prev,
+      description: template.description || prev.description,
+      package_weight: template.weight || prev.package_weight,
+      package_dimensions: template.dimensions || prev.package_dimensions,
+      package_value: template.declared_value || prev.package_value,
+      special_instructions: template.special_instructions || prev.special_instructions,
+      fragile: template.is_fragile || false
+    }))
+    setShowTemplates(false)
   }
 
   const handlePhotoChange = (e) => {
@@ -320,6 +357,96 @@ export default function CreateShipmentPage() {
       )}
 
       <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Quick Select Section */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Address Book Quick Select */}
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+            <button
+              type="button"
+              onClick={() => setShowAddressBook(!showAddressBook)}
+              className="w-full p-4 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
+            >
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+                  <BookMarked className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                </div>
+                <div className="text-left">
+                  <h3 className="font-medium text-gray-900 dark:text-white">Address Book</h3>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                    {selectedAddress ? `Selected: ${selectedAddress.name}` : 'Quick fill receiver details'}
+                  </p>
+                </div>
+              </div>
+              {showAddressBook ? (
+                <ChevronUp className="w-5 h-5 text-gray-400" />
+              ) : (
+                <ChevronDown className="w-5 h-5 text-gray-400" />
+              )}
+            </button>
+            <AnimatePresence>
+              {showAddressBook && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: 'auto', opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  className="border-t border-gray-200 dark:border-gray-700"
+                >
+                  <div className="p-4">
+                    <AddressBook
+                      onSelect={handleSelectAddress}
+                      selectedId={selectedAddress?.id}
+                      mode="select"
+                    />
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+
+          {/* Shipment Templates Quick Select */}
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+            <button
+              type="button"
+              onClick={() => setShowTemplates(!showTemplates)}
+              className="w-full p-4 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
+            >
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
+                  <FileStack className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+                </div>
+                <div className="text-left">
+                  <h3 className="font-medium text-gray-900 dark:text-white">Templates</h3>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                    {selectedTemplate ? `Using: ${selectedTemplate.name}` : 'Use saved package templates'}
+                  </p>
+                </div>
+              </div>
+              {showTemplates ? (
+                <ChevronUp className="w-5 h-5 text-gray-400" />
+              ) : (
+                <ChevronDown className="w-5 h-5 text-gray-400" />
+              )}
+            </button>
+            <AnimatePresence>
+              {showTemplates && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: 'auto', opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  className="border-t border-gray-200 dark:border-gray-700"
+                >
+                  <div className="p-4">
+                    <ShipmentTemplates
+                      onSelect={handleSelectTemplate}
+                      selectedId={selectedTemplate?.id}
+                    />
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        </div>
+
         {/* Package Description */}
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
           <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4 flex items-center gap-2">
