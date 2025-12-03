@@ -28,6 +28,11 @@ from .courier import (
     CourierAuthorization,
     CheckpointChain
 )
+from .courier_profile import (
+    CourierProfile,
+    CourierSession,
+    CourierActivity
+)
 
 __all__ = [
     'User',
@@ -51,5 +56,8 @@ __all__ = [
     'ShipmentStatus',
     'CheckpointAction',
     'CourierAuthorization',
-    'CheckpointChain'
+    'CheckpointChain',
+    'CourierProfile',
+    'CourierSession',
+    'CourierActivity'
 ]

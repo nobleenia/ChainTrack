@@ -25,6 +25,12 @@ import ShipmentDetailPage from './pages/dashboard/ShipmentDetailPage'
 import ConfirmDeliveryPage from './pages/dashboard/ConfirmDeliveryPage'
 import CourierCheckpointPage from './pages/CourierCheckpointPage'
 
+// Courier Portal Pages
+import CourierLandingPage from './pages/courier/CourierLandingPage'
+import CourierDashboard from './pages/courier/CourierDashboard'
+import CourierShipmentsPage from './pages/courier/CourierShipmentsPage'
+import CourierShipmentDetailsPage from './pages/courier/CourierShipmentDetailsPage'
+
 // Protected Route Component
 function ProtectedRoute({ children }) {
   const { isAuthenticated } = useAuthStore()
@@ -75,6 +81,12 @@ function App() {
         <Route path="/verify/:productId?" element={<VerifyPage />} />
         <Route path="/track" element={<TrackPage />} />
         <Route path="/courier/checkpoint" element={<CourierCheckpointPage />} />
+        
+        {/* Courier Portal Routes */}
+        <Route path="/courier" element={<CourierLandingPage />} />
+        <Route path="/courier/dashboard" element={<CourierDashboard />} />
+        <Route path="/courier/shipments" element={<CourierShipmentsPage />} />
+        <Route path="/courier/shipments/:shipmentId" element={<CourierShipmentDetailsPage />} />
       </Route>
 
       {/* Protected Dashboard Routes */}

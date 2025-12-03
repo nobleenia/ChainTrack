@@ -40,15 +40,16 @@ def create_app(config_name='development'):
     # Enable CORS for frontend communication
     CORS(app, resources={
         r"/api/*": {
-            "origins": app.config.get('CORS_ORIGINS', ['http://localhost:5173']),
+            "origins": app.config.get('CORS_ORIGINS', ['http://localhost:5173', 'http://localhost:5174']),
             "methods": ["GET", "POST", "PUT", "DELETE", "PATCH"],
-            "allow_headers": ["Content-Type", "Authorization"]
+            "allow_headers": ["Content-Type", "Authorization", "X-Courier-Token"]
         }
     })
     
     # Register blueprints
     from .routes import auth, products, transfers, verification, rewards, shipments, notifications, couriers
     from .routes.uploads import uploads_bp
+    from .routes.courier_portal import bp as courier_portal_bp
     app.register_blueprint(auth.bp, url_prefix='/api/auth')
     app.register_blueprint(products.bp, url_prefix='/api/products')
     app.register_blueprint(transfers.bp, url_prefix='/api/transfers')
@@ -58,6 +59,7 @@ def create_app(config_name='development'):
     app.register_blueprint(uploads_bp, url_prefix='/api/uploads')
     app.register_blueprint(notifications.bp, url_prefix='/api/notifications')
     app.register_blueprint(couriers.bp, url_prefix='/api/couriers')
+    app.register_blueprint(courier_portal_bp, url_prefix='/api/courier-portal')
     
     # Initialize Swagger UI for API documentation
     from .swagger import init_swagger
