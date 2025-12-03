@@ -24,6 +24,7 @@ import CreateShipmentPage from './pages/dashboard/CreateShipmentPage'
 import ShipmentDetailPage from './pages/dashboard/ShipmentDetailPage'
 import ConfirmDeliveryPage from './pages/dashboard/ConfirmDeliveryPage'
 import CourierCheckpointPage from './pages/CourierCheckpointPage'
+import ReceiverTrackingPage from './pages/ReceiverTrackingPage'
 
 // Courier Portal Pages
 import CourierLandingPage from './pages/courier/CourierLandingPage'
@@ -81,6 +82,7 @@ function App() {
         } />
         <Route path="/verify/:productId?" element={<VerifyPage />} />
         <Route path="/track" element={<TrackPage />} />
+        <Route path="/track/:trackingCode" element={<ReceiverTrackingPage />} />
         <Route path="/courier/checkpoint" element={<CourierCheckpointPage />} />
         
         {/* Courier Portal Routes */}
