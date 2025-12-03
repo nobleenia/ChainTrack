@@ -23,6 +23,7 @@ import ShipmentsPage from './pages/dashboard/ShipmentsPage'
 import CreateShipmentPage from './pages/dashboard/CreateShipmentPage'
 import ShipmentDetailPage from './pages/dashboard/ShipmentDetailPage'
 import ConfirmDeliveryPage from './pages/dashboard/ConfirmDeliveryPage'
+import CourierCheckpointPage from './pages/CourierCheckpointPage'
 
 // Protected Route Component
 function ProtectedRoute({ children }) {
@@ -73,6 +74,7 @@ function App() {
         } />
         <Route path="/verify/:productId?" element={<VerifyPage />} />
         <Route path="/track" element={<TrackPage />} />
+        <Route path="/courier/checkpoint" element={<CourierCheckpointPage />} />
       </Route>
 
       {/* Protected Dashboard Routes */}

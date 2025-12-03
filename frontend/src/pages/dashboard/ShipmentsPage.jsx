@@ -67,17 +67,24 @@ function ShipmentCard({ shipment }) {
   const StatusIcon = statusConfig[shipment.status]?.icon || Package
   const statusStyle = statusConfig[shipment.status] || statusConfig.created
 
+  // Handle both nested and flat data structures
+  const description = shipment.package?.description || shipment.description || 'No description'
+  const pickupCity = shipment.pickup?.city || shipment.pickup_city || 'N/A'
+  const deliveryCity = shipment.delivery?.city || shipment.delivery_city || 'N/A'
+  const createdAt = shipment.timestamps?.created_at || shipment.created_at
+  const checkpointCount = shipment.checkpoints?.length || shipment.checkpoint_count || 0
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       className="bg-white rounded-xl shadow-sm border border-gray-200 p-5 hover:shadow-md transition-shadow cursor-pointer"
-      onClick={() => navigate(`/dashboard/shipments/${shipment.id}`)}
+      onClick={() => navigate(`/dashboard/shipments/${shipment.shipment_id}`)}
     >
       <div className="flex justify-between items-start mb-4">
         <div>
           <h3 className="font-semibold text-gray-900">{shipment.shipment_id}</h3>
-          <p className="text-sm text-gray-500">{shipment.description || 'No description'}</p>
+          <p className="text-sm text-gray-500">{description}</p>
         </div>
         <span
           className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium ${statusStyle.color}`}
@@ -91,12 +98,12 @@ function ShipmentCard({ shipment }) {
         <div className="flex items-center gap-2 text-gray-600">
           <MapPin className="h-4 w-4 text-gray-400" />
           <span className="truncate">
-            {shipment.pickup_city || 'N/A'} → {shipment.delivery_city || 'N/A'}
+            {pickupCity} → {deliveryCity}
           </span>
         </div>
         <div className="flex items-center gap-2 text-gray-600">
           <Calendar className="h-4 w-4 text-gray-400" />
-          <span>Created {new Date(shipment.created_at).toLocaleDateString()}</span>
+          <span>Created {createdAt ? new Date(createdAt).toLocaleDateString() : 'N/A'}</span>
         </div>
       </div>
 
@@ -104,7 +111,7 @@ function ShipmentCard({ shipment }) {
         <div className="text-sm">
           <span className="text-gray-500">Checkpoints: </span>
           <span className="font-medium text-gray-900">
-            {shipment.checkpoint_count || 0}
+            {checkpointCount}
           </span>
         </div>
         <button className="text-emerald-600 hover:text-emerald-700 text-sm font-medium flex items-center gap-1">
@@ -155,10 +162,12 @@ export default function ShipmentsPage() {
   const filteredShipments = shipments.filter((shipment) => {
     if (!searchQuery) return true
     const query = searchQuery.toLowerCase()
+    const description = shipment.package?.description || shipment.description || ''
+    const receiverName = shipment.receiver?.name || shipment.receiver_name || ''
     return (
       shipment.shipment_id?.toLowerCase().includes(query) ||
-      shipment.description?.toLowerCase().includes(query) ||
-      shipment.receiver_name?.toLowerCase().includes(query)
+      description.toLowerCase().includes(query) ||
+      receiverName.toLowerCase().includes(query)
     )
   })
 
@@ -200,7 +209,7 @@ export default function ShipmentsPage() {
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="border border-gray-300 rounded-lg px-3 py-2.5 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+              className="border border-gray-300 rounded-lg px-3 py-2.5 text-gray-900 bg-white focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
             >
               <option value="">All Statuses</option>
               <option value="created">Created</option>
@@ -217,11 +226,11 @@ export default function ShipmentsPage() {
           <select
             value={roleFilter}
             onChange={(e) => setRoleFilter(e.target.value)}
-            className="border border-gray-300 rounded-lg px-3 py-2.5 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+            className="border border-gray-300 rounded-lg px-3 py-2.5 text-gray-900 bg-white focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
           >
-            <option value="">All Roles</option>
-            <option value="sender">As Sender</option>
-            <option value="receiver">As Receiver</option>
+            <option value="">All Shipments</option>
+            <option value="sent">Sent by Me</option>
+            <option value="handling">I'm Handling</option>
           </select>
         </div>
       </div>

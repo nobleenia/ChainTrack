@@ -25,29 +25,29 @@ const statCards = [
     key: 'total_products', 
     label: 'Total Products', 
     icon: Package, 
-    color: 'bg-blue-500',
-    bgColor: 'bg-blue-50'
+    color: 'text-blue-600',
+    bgColor: 'bg-blue-100'
   },
   { 
     key: 'in_transit', 
     label: 'In Transit', 
     icon: ArrowRightLeft, 
-    color: 'bg-amber-500',
-    bgColor: 'bg-amber-50'
+    color: 'text-orange-600',
+    bgColor: 'bg-orange-100'
   },
   { 
     key: 'delivered', 
     label: 'Delivered', 
     icon: CheckCircle, 
-    color: 'bg-green-500',
-    bgColor: 'bg-green-50'
+    color: 'text-green-600',
+    bgColor: 'bg-green-100'
   },
   { 
     key: 'total_verifications', 
     label: 'Verifications', 
     icon: TrendingUp, 
-    color: 'bg-purple-500',
-    bgColor: 'bg-purple-50'
+    color: 'text-purple-600',
+    bgColor: 'bg-purple-100'
   },
 ]
 
@@ -57,32 +57,32 @@ const consumerStatCards = [
     key: 'products_verified', 
     label: 'Products Verified', 
     icon: ShieldCheck, 
-    color: 'bg-green-500',
-    bgColor: 'bg-green-50',
+    color: 'text-green-600',
+    bgColor: 'bg-green-100',
     value: 0
   },
   { 
     key: 'scans_today', 
     label: 'Scans Today', 
     icon: Scan, 
-    color: 'bg-blue-500',
-    bgColor: 'bg-blue-50',
+    color: 'text-blue-600',
+    bgColor: 'bg-blue-100',
     value: 0
   },
   { 
     key: 'recent_checks', 
     label: 'Recent Checks', 
     icon: History, 
-    color: 'bg-amber-500',
-    bgColor: 'bg-amber-50',
+    color: 'text-orange-600',
+    bgColor: 'bg-orange-100',
     value: 0
   },
   { 
     key: 'authentic_found', 
     label: 'Authentic Found', 
     icon: CheckCircle, 
-    color: 'bg-purple-500',
-    bgColor: 'bg-purple-50',
+    color: 'text-purple-600',
+    bgColor: 'bg-purple-100',
     value: 0
   },
 ]
@@ -146,10 +146,10 @@ export default function DashboardPage() {
       {/* Welcome Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">
-            Welcome back, {user?.name?.split(' ')[0]}! 👋
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-emerald-400 via-cyan-400 to-blue-500 bg-clip-text text-transparent">
+            Welcome back, {user?.name?.split(' ')[0]}! <span className="inline-block animate-bounce">👋</span>
           </h1>
-          <p className="text-gray-600 mt-1">
+          <p className="text-gray-400 mt-2 text-base">
             {user?.role === 'consumer' 
               ? 'Verify product authenticity and track supply chain journeys.'
               : "Here's what's happening with your supply chain today."
@@ -200,7 +200,7 @@ export default function DashboardPage() {
                 </p>
               </div>
               <div className={`w-12 h-12 ${stat.bgColor} rounded-lg flex items-center justify-center`}>
-                <stat.icon size={24} className={stat.color.replace('bg-', 'text-')} />
+                <stat.icon size={24} className={stat.color} />
               </div>
             </div>
           </motion.div>

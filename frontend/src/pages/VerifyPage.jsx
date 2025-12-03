@@ -152,7 +152,7 @@ export default function VerifyPage() {
                   value={productId}
                   onChange={(e) => setProductId(e.target.value)}
                   placeholder="Enter Product ID (e.g., PRD-XXXXX)"
-                  className="w-full pl-12 pr-4 py-3 text-lg border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 font-mono"
+                  className="w-full pl-12 pr-4 py-3 text-lg border border-gray-300 rounded-lg text-gray-900 bg-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500 font-mono placeholder-gray-400"
                 />
               </div>
               <Button

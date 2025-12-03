@@ -183,18 +183,21 @@ def record_checkpoint(shipment_id):
     Record a checkpoint/scan event
     
     Can be called by:
-    - Registered user (with JWT)
-    - Anyone with PIN (for flexibility with courier riders)
+    - Sender (always authorized)
+    - Registered courier with JWT (if authorized)
+    - Anyone with authorization code (auth_code)
     
     Request Body:
         - action: string (required) - picked_up, checkpoint, handed_off, out_for_delivery, delivered
-        - pin: string (required if not authenticated)
+        - auth_code: string (required if not sender or not JWT authenticated)
         - location: string (optional)
         - notes: string (optional)
         - handler_name: string (optional, for non-registered handlers)
         - photo_url: string (optional)
         - photo_ipfs_hash: string (optional)
     """
+    from ..services.courier_service import CourierAuthorizationService, TamperProofChainService
+    
     user_id = get_optional_user_id()
     data = request.get_json()
     
@@ -202,11 +205,6 @@ def record_checkpoint(shipment_id):
     
     if not shipment:
         return jsonify({'error': 'Shipment not found'}), 404
-    
-    # Verify access - need either auth or PIN
-    tracking_pin = data.get('pin')
-    if not ShipmentService.verify_access(shipment, user_id, tracking_pin):
-        return jsonify({'error': 'Access denied. Provide PIN or login'}), 403
     
     # Validate action
     action_str = data.get('action')
@@ -223,6 +221,21 @@ def record_checkpoint(shipment_id):
     if action in [CheckpointAction.CREATED, CheckpointAction.CONFIRMED]:
         return jsonify({'error': f'Action {action.value} not allowed via checkpoint endpoint'}), 400
     
+    # Verify courier authorization
+    is_authorized, auth, auth_message = CourierAuthorizationService.verify_authorization(
+        shipment=shipment,
+        action=action_str,
+        auth_code=data.get('auth_code'),
+        user_id=user_id
+    )
+    
+    if not is_authorized:
+        return jsonify({
+            'error': 'Not authorized to record checkpoint',
+            'details': auth_message,
+            'hint': 'Provide a valid auth_code or ensure you are authorized for this shipment'
+        }), 403
+    
     # Check shipment status allows this action
     if shipment.status == ShipmentStatus.CONFIRMED:
         return jsonify({'error': 'Shipment already confirmed, no more checkpoints allowed'}), 400
@@ -231,20 +244,37 @@ def record_checkpoint(shipment_id):
         return jsonify({'error': 'Shipment is cancelled'}), 400
     
     try:
+        # Get handler name from auth or request
+        handler_name = data.get('handler_name')
+        if not handler_name and auth:
+            handler_name = auth.courier_name or (auth.courier_user.name if auth.courier_user else None)
+        
         checkpoint = ShipmentService.record_checkpoint(
             shipment=shipment,
             action=action,
             handler_id=user_id,
-            handler_name=data.get('handler_name'),
+            handler_name=handler_name,
             location=data.get('location'),
             notes=data.get('notes'),
             photo_url=data.get('photo_url'),
             photo_ipfs_hash=data.get('photo_ipfs_hash')
         )
         
+        # Add to tamper-proof chain
+        chain_entry = TamperProofChainService.add_to_chain(checkpoint)
+        
+        # Record authorization usage
+        if auth:
+            auth.record_usage()
+        
         return jsonify({
             'message': f'Checkpoint recorded: {action.value}',
             'checkpoint': checkpoint.to_dict(),
+            'chain_entry': {
+                'sequence': chain_entry.sequence_number,
+                'hash': chain_entry.current_hash,
+                'blockchain_pending': chain_entry.blockchain_hash is None
+            },
             'shipment_status': shipment.status.value
         }), 201
         

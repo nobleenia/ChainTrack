@@ -47,7 +47,7 @@ def create_app(config_name='development'):
     })
     
     # Register blueprints
-    from .routes import auth, products, transfers, verification, rewards, shipments, notifications
+    from .routes import auth, products, transfers, verification, rewards, shipments, notifications, couriers
     from .routes.uploads import uploads_bp
     app.register_blueprint(auth.bp, url_prefix='/api/auth')
     app.register_blueprint(products.bp, url_prefix='/api/products')
@@ -57,6 +57,7 @@ def create_app(config_name='development'):
     app.register_blueprint(shipments.bp, url_prefix='/api/shipments')
     app.register_blueprint(uploads_bp, url_prefix='/api/uploads')
     app.register_blueprint(notifications.bp, url_prefix='/api/notifications')
+    app.register_blueprint(couriers.bp, url_prefix='/api/couriers')
     
     # Initialize Swagger UI for API documentation
     from .swagger import init_swagger

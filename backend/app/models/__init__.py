@@ -24,6 +24,10 @@ from .shipment import (
     ShipmentStatus,
     CheckpointAction
 )
+from .courier import (
+    CourierAuthorization,
+    CheckpointChain
+)
 
 __all__ = [
     'User',
@@ -45,5 +49,7 @@ __all__ = [
     'ShipmentCheckpoint',
     'DeliveryProof',
     'ShipmentStatus',
-    'CheckpointAction'
+    'CheckpointAction',
+    'CourierAuthorization',
+    'CheckpointChain'
 ]
