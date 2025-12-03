@@ -17,9 +17,12 @@ import {
   Shield,
   Clock,
   Package,
-  MapPin
+  MapPin,
+  Share2,
+  Link2
 } from 'lucide-react'
 import { courierApi } from '../../services/courierApi'
+import ShareCourierLinkModal from './ShareCourierLinkModal'
 
 export default function AuthorizeCourierModal({ shipmentId, onClose, onSuccess }) {
   const [step, setStep] = useState('form') // 'form' | 'success'
@@ -27,6 +30,7 @@ export default function AuthorizeCourierModal({ shipmentId, onClose, onSuccess }
   const [error, setError] = useState(null)
   const [authResult, setAuthResult] = useState(null)
   const [copied, setCopied] = useState(false)
+  const [showShareModal, setShowShareModal] = useState(false)
 
   const [formData, setFormData] = useState({
     courier_name: '',

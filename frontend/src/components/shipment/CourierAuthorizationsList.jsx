@@ -17,9 +17,12 @@ import {
   Copy,
   Trash2,
   ChevronDown,
-  ChevronUp
+  ChevronUp,
+  Share2,
+  Link2
 } from 'lucide-react'
 import { courierApi } from '../../services/courierApi'
+import ShareCourierLinkModal from './ShareCourierLinkModal'
 
 export default function CourierAuthorizationsList({ shipmentId, onAuthorizeCourier }) {
   const [authorizations, setAuthorizations] = useState([])
@@ -27,6 +30,7 @@ export default function CourierAuthorizationsList({ shipmentId, onAuthorizeCouri
   const [error, setError] = useState(null)
   const [expanded, setExpanded] = useState(true)
   const [revoking, setRevoking] = useState(null)
+  const [shareModal, setShareModal] = useState(null) // { authCode, courierName, expiresAt }
 
   const fetchAuthorizations = async () => {
     try {
@@ -163,15 +167,26 @@ export default function CourierAuthorizationsList({ shipmentId, onAuthorizeCouri
                             {/* Auth Code */}
                             {auth.status.is_valid && (
                               <div className="flex items-center gap-2 mt-2">
-                                <span className="font-mono text-sm bg-gray-100 px-2 py-1 rounded">
+                                <span className="font-mono text-sm bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded text-gray-700 dark:text-gray-300">
                                   {auth.auth_code}
                                 </span>
                                 <button
                                   onClick={() => copyToClipboard(auth.auth_code)}
-                                  className="p-1 hover:bg-gray-100 rounded"
+                                  className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded"
                                   title="Copy code"
                                 >
-                                  <Copy className="h-3 w-3 text-gray-500" />
+                                  <Copy className="h-3 w-3 text-gray-500 dark:text-gray-400" />
+                                </button>
+                                <button
+                                  onClick={() => setShareModal({
+                                    authCode: auth.auth_code,
+                                    courierName: auth.courier?.name,
+                                    expiresAt: auth.status.expires_at
+                                  })}
+                                  className="p-1 hover:bg-emerald-100 dark:hover:bg-emerald-900/30 rounded text-emerald-600 dark:text-emerald-400"
+                                  title="Share link"
+                                >
+                                  <Share2 className="h-3 w-3" />
                                 </button>
                               </div>
                             )}
@@ -240,10 +255,10 @@ export default function CourierAuthorizationsList({ shipmentId, onAuthorizeCouri
 
               {/* Add New Button */}
               {authorizations.length > 0 && (
-                <div className="p-4 border-t border-gray-100">
+                <div className="p-4 border-t border-gray-100 dark:border-gray-700">
                   <button
                     onClick={onAuthorizeCourier}
-                    className="w-full py-2 border-2 border-dashed border-gray-300 text-gray-600 hover:border-emerald-400 hover:text-emerald-600 rounded-lg transition-colors text-sm font-medium"
+                    className="w-full py-2 border-2 border-dashed border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400 hover:border-emerald-400 dark:hover:border-emerald-500 hover:text-emerald-600 dark:hover:text-emerald-400 rounded-lg transition-colors text-sm font-medium"
                   >
                     + Authorize Another Courier
                   </button>
@@ -253,6 +268,17 @@ export default function CourierAuthorizationsList({ shipmentId, onAuthorizeCouri
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Share Link Modal */}
+      {shareModal && (
+        <ShareCourierLinkModal
+          shipmentId={shipmentId}
+          authCode={shareModal.authCode}
+          courierName={shareModal.courierName}
+          expiresAt={shareModal.expiresAt}
+          onClose={() => setShareModal(null)}
+        />
+      )}
     </div>
   )
 }
