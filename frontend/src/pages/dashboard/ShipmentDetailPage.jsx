@@ -675,7 +675,7 @@ export default function ShipmentDetailPage() {
       <div>
         <button
           onClick={() => navigate('/dashboard/shipments')}
-          className="flex items-center gap-2 text-gray-300 hover:text-white mb-4 transition-colors"
+          className="flex items-center gap-2 text-gray-500 dark:text-gray-300 hover:text-gray-700 dark:hover:text-white mb-4 transition-colors"
         >
           <ArrowLeft className="h-5 w-5" />
           Back to Shipments
@@ -684,22 +684,22 @@ export default function ShipmentDetailPage() {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <div className="flex items-center gap-3">
-              <h1 className="text-2xl font-bold text-white">{shipment.shipment_id}</h1>
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{shipment.shipment_id}</h1>
               <button
                 onClick={() => copyToClipboard(shipment.shipment_id)}
-                className="p-1.5 hover:bg-gray-700 rounded transition-colors"
+                className="p-1.5 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors"
                 title="Copy ID"
               >
-                <Copy className="h-4 w-4 text-gray-400" />
+                <Copy className="h-4 w-4 text-gray-500 dark:text-gray-400" />
               </button>
             </div>
-            <p className="text-gray-300">{shipment.package?.description || shipment.description || 'Shipment'}</p>
+            <p className="text-gray-600 dark:text-gray-300">{shipment.package?.description || shipment.description || 'Shipment'}</p>
           </div>
 
           <div className="flex items-center gap-3">
             <button
               onClick={() => setShowQR(true)}
-              className="flex items-center gap-2 px-4 py-2 border border-gray-600 text-gray-300 rounded-lg hover:bg-gray-700 hover:text-white transition-colors"
+              className="flex items-center gap-2 px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white transition-colors"
             >
               <QrCode className="h-5 w-5" />
               QR Code
