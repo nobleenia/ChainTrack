@@ -64,8 +64,8 @@ export default function RegisterPage() {
         className="max-w-lg w-full space-y-8"
       >
         <div className="text-center">
-          <h2 className="text-3xl font-bold text-gray-900">Create your account</h2>
-          <p className="mt-2 text-gray-600">
+          <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Create your account</h2>
+          <p className="mt-2 text-gray-600 dark:text-gray-400">
             Join ChainTrack and start securing your supply chain
           </p>
         </div>
@@ -75,7 +75,7 @@ export default function RegisterPage() {
             <motion.div
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg flex items-center space-x-2"
+              className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 px-4 py-3 rounded-lg flex items-center space-x-2"
             >
               <AlertCircle size={20} />
               <span>{error || passwordError}</span>
@@ -84,7 +84,7 @@ export default function RegisterPage() {
 
           {/* Role Selection */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-3">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
               I am a...
             </label>
             <div className="grid grid-cols-2 gap-3">
@@ -95,12 +95,12 @@ export default function RegisterPage() {
                   onClick={() => setFormData(prev => ({ ...prev, role: role.value }))}
                   className={`p-4 rounded-lg border-2 text-left transition ${
                     formData.role === role.value
-                      ? 'border-primary-500 bg-primary-50'
-                      : 'border-gray-200 hover:border-gray-300'
+                      ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
+                      : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
                   }`}
                 >
-                  <div className="font-medium text-gray-900">{role.label}</div>
-                  <div className="text-xs text-gray-500 mt-1">{role.description}</div>
+                  <div className="font-medium text-gray-900 dark:text-white">{role.label}</div>
+                  <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">{role.description}</div>
                 </button>
               ))}
             </div>
@@ -108,7 +108,7 @@ export default function RegisterPage() {
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Full Name
               </label>
               <div className="relative">
@@ -120,14 +120,14 @@ export default function RegisterPage() {
                   required
                   value={formData.name}
                   onChange={handleChange}
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition"
+                  className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition"
                   placeholder="John Doe"
                 />
               </div>
             </div>
 
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Email
               </label>
               <div className="relative">
@@ -139,7 +139,7 @@ export default function RegisterPage() {
                   required
                   value={formData.email}
                   onChange={handleChange}
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition"
+                  className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition"
                   placeholder="you@example.com"
                 />
               </div>
@@ -149,7 +149,7 @@ export default function RegisterPage() {
           {formData.role !== 'consumer' && (
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label htmlFor="company_name" className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="company_name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                   Company Name
                 </label>
                 <div className="relative">
@@ -160,14 +160,14 @@ export default function RegisterPage() {
                     type="text"
                     value={formData.company_name}
                     onChange={handleChange}
-                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition"
+                    className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition"
                     placeholder="Acme Inc."
                   />
                 </div>
               </div>
 
               <div>
-                <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="phone" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                   Phone (Optional)
                 </label>
                 <div className="relative">
@@ -178,7 +178,7 @@ export default function RegisterPage() {
                     type="tel"
                     value={formData.phone}
                     onChange={handleChange}
-                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition"
+                    className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition"
                     placeholder="+1 (555) 000-0000"
                   />
                 </div>
@@ -188,7 +188,7 @@ export default function RegisterPage() {
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Password
               </label>
               <div className="relative">
@@ -200,14 +200,14 @@ export default function RegisterPage() {
                   required
                   value={formData.password}
                   onChange={handleChange}
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition"
+                  className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition"
                   placeholder="••••••••"
                 />
               </div>
             </div>
 
             <div>
-              <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Confirm Password
               </label>
               <div className="relative">
@@ -219,7 +219,7 @@ export default function RegisterPage() {
                   required
                   value={formData.confirmPassword}
                   onChange={handleChange}
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition"
+                  className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition"
                   placeholder="••••••••"
                 />
               </div>
@@ -231,20 +231,20 @@ export default function RegisterPage() {
               id="terms"
               type="checkbox"
               required
-              className="h-4 w-4 text-primary-600 rounded border-gray-300 mt-1"
+              className="h-4 w-4 text-primary-600 rounded border-gray-300 dark:border-gray-600 mt-1"
             />
-            <label htmlFor="terms" className="ml-2 text-sm text-gray-600">
+            <label htmlFor="terms" className="ml-2 text-sm text-gray-600 dark:text-gray-400">
               I agree to the{' '}
-              <a href="#" className="text-primary-600 hover:text-primary-700">Terms of Service</a>
+              <a href="#" className="text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300">Terms of Service</a>
               {' '}and{' '}
-              <a href="#" className="text-primary-600 hover:text-primary-700">Privacy Policy</a>
+              <a href="#" className="text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300">Privacy Policy</a>
             </label>
           </div>
 
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full flex items-center justify-center px-4 py-3 bg-primary-600 text-white font-semibold rounded-lg hover:bg-primary-700 focus:ring-4 focus:ring-primary-300 transition disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full flex items-center justify-center px-4 py-3 bg-primary-600 text-white font-semibold rounded-lg hover:bg-primary-700 focus:ring-4 focus:ring-primary-300 dark:focus:ring-primary-800 transition disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isLoading ? (
               <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -257,9 +257,9 @@ export default function RegisterPage() {
           </button>
         </form>
 
-        <p className="text-center text-gray-600">
+        <p className="text-center text-gray-600 dark:text-gray-400">
           Already have an account?{' '}
-          <Link to="/login" className="text-primary-600 hover:text-primary-700 font-medium">
+          <Link to="/login" className="text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 font-medium">
             Sign in
           </Link>
         </p>
