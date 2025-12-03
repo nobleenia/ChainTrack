@@ -1133,15 +1133,15 @@ export default function ShipmentDetailPage() {
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
-            className="bg-white rounded-xl shadow-xl max-w-2xl w-full my-8"
+            className="bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-2xl w-full my-8"
           >
-            <div className="p-6 border-b border-gray-200 flex items-center justify-between">
-              <h3 className="text-lg font-semibold">Authorized Couriers</h3>
+            <div className="p-6 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Authorized Couriers</h3>
               <button
                 onClick={() => setShowCourierAuthorizations(false)}
-                className="p-2 hover:bg-gray-100 rounded-lg"
+                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
               >
-                <X className="h-5 w-5" />
+                <X className="h-5 w-5 text-gray-500 dark:text-gray-400" />
               </button>
             </div>
             <div className="p-6">
@@ -1157,15 +1157,15 @@ export default function ShipmentDetailPage() {
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
-            className="bg-white rounded-xl shadow-xl max-w-3xl w-full my-8"
+            className="bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-3xl w-full my-8"
           >
-            <div className="p-6 border-b border-gray-200 flex items-center justify-between">
-              <h3 className="text-lg font-semibold">Chain Integrity Verification</h3>
+            <div className="p-6 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Chain Integrity Verification</h3>
               <button
                 onClick={() => setShowChainVerification(false)}
-                className="p-2 hover:bg-gray-100 rounded-lg"
+                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
               >
-                <X className="h-5 w-5" />
+                <X className="h-5 w-5 text-gray-500 dark:text-gray-400" />
               </button>
             </div>
             <div className="p-6">
