@@ -298,13 +298,13 @@ export default function CreateShipmentPage() {
       <div className="mb-6">
         <button
           onClick={() => navigate('/dashboard/shipments')}
-          className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-4"
+          className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 mb-4"
         >
           <ArrowLeft className="h-5 w-5" />
           Back to Shipments
         </button>
-        <h1 className="text-2xl font-bold text-gray-900">Create New Shipment</h1>
-        <p className="text-gray-500">Send a package with secure P2P tracking</p>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Create New Shipment</h1>
+        <p className="text-gray-500 dark:text-gray-400">Send a package with secure P2P tracking</p>
       </div>
 
       {/* Error Alert */}
@@ -321,15 +321,15 @@ export default function CreateShipmentPage() {
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Package Description */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4 flex items-center gap-2">
             <Package className="h-5 w-5 text-emerald-600" />
             Package Details
           </h2>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Description *
               </label>
               <input
@@ -338,8 +338,8 @@ export default function CreateShipmentPage() {
                 value={formData.description}
                 onChange={handleChange}
                 placeholder="e.g., Electronics, Documents, Food items"
-                className={`w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 ${
-                  validationErrors.description ? 'border-red-300' : 'border-gray-300'
+                className={`w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 ${
+                  validationErrors.description ? 'border-red-300' : 'border-gray-300 dark:border-gray-600'
                 }`}
               />
               {validationErrors.description && (
@@ -348,7 +348,7 @@ export default function CreateShipmentPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Weight (kg)
               </label>
               <input
@@ -359,12 +359,12 @@ export default function CreateShipmentPage() {
                 placeholder="0.5"
                 step="0.1"
                 min="0"
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Dimensions (LxWxH cm)
               </label>
               <input
@@ -373,12 +373,12 @@ export default function CreateShipmentPage() {
                 value={formData.package_dimensions}
                 onChange={handleChange}
                 placeholder="30x20x15"
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Declared Value (₦)
               </label>
               <input
@@ -388,7 +388,7 @@ export default function CreateShipmentPage() {
                 onChange={handleChange}
                 placeholder="10000"
                 min="0"
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
               />
             </div>
 
@@ -401,22 +401,22 @@ export default function CreateShipmentPage() {
                   onChange={handleChange}
                   className="w-4 h-4 text-emerald-600 focus:ring-emerald-500 border-gray-300 rounded"
                 />
-                <span className="text-sm font-medium text-gray-700">Fragile - Handle with care</span>
+                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Fragile - Handle with care</span>
               </label>
             </div>
           </div>
         </div>
 
         {/* Receiver Information */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4 flex items-center gap-2">
             <User className="h-5 w-5 text-emerald-600" />
             Receiver Information
           </h2>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Full Name *
               </label>
               <input
@@ -425,8 +425,8 @@ export default function CreateShipmentPage() {
                 value={formData.receiver_name}
                 onChange={handleChange}
                 placeholder="John Doe"
-                className={`w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 ${
-                  validationErrors.receiver_name ? 'border-red-300' : 'border-gray-300'
+                className={`w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 ${
+                  validationErrors.receiver_name ? 'border-red-300' : 'border-gray-300 dark:border-gray-600'
                 }`}
               />
               {validationErrors.receiver_name && (
@@ -435,7 +435,7 @@ export default function CreateShipmentPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Phone Number *
               </label>
               <input
@@ -444,8 +444,8 @@ export default function CreateShipmentPage() {
                 value={formData.receiver_phone}
                 onChange={handleChange}
                 placeholder="+234 xxx xxx xxxx"
-                className={`w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 ${
-                  validationErrors.receiver_phone ? 'border-red-300' : 'border-gray-300'
+                className={`w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 ${
+                  validationErrors.receiver_phone ? 'border-red-300' : 'border-gray-300 dark:border-gray-600'
                 }`}
               />
               {validationErrors.receiver_phone && (
@@ -454,7 +454,7 @@ export default function CreateShipmentPage() {
             </div>
 
             <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Email (optional)
               </label>
               <input
@@ -463,22 +463,22 @@ export default function CreateShipmentPage() {
                 value={formData.receiver_email}
                 onChange={handleChange}
                 placeholder="john@example.com"
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
               />
             </div>
           </div>
         </div>
 
         {/* Pickup Address */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4 flex items-center gap-2">
             <MapPin className="h-5 w-5 text-blue-600" />
             Pickup Address
           </h2>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Street Address *
               </label>
               <input
@@ -487,8 +487,8 @@ export default function CreateShipmentPage() {
                 value={formData.pickup_address}
                 onChange={handleChange}
                 placeholder="123 Main Street, Lekki"
-                className={`w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 ${
-                  validationErrors.pickup_address ? 'border-red-300' : 'border-gray-300'
+                className={`w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 ${
+                  validationErrors.pickup_address ? 'border-red-300' : 'border-gray-300 dark:border-gray-600'
                 }`}
               />
               {validationErrors.pickup_address && (
@@ -497,7 +497,7 @@ export default function CreateShipmentPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 City *
               </label>
               <input
@@ -506,8 +506,8 @@ export default function CreateShipmentPage() {
                 value={formData.pickup_city}
                 onChange={handleChange}
                 placeholder="Lagos"
-                className={`w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 ${
-                  validationErrors.pickup_city ? 'border-red-300' : 'border-gray-300'
+                className={`w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 ${
+                  validationErrors.pickup_city ? 'border-red-300' : 'border-gray-300 dark:border-gray-600'
                 }`}
               />
               {validationErrors.pickup_city && (
@@ -516,7 +516,7 @@ export default function CreateShipmentPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 State
               </label>
               <input
@@ -525,22 +525,22 @@ export default function CreateShipmentPage() {
                 value={formData.pickup_state}
                 onChange={handleChange}
                 placeholder="Lagos State"
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
               />
             </div>
           </div>
         </div>
 
         {/* Delivery Address */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4 flex items-center gap-2">
             <MapPin className="h-5 w-5 text-emerald-600" />
             Delivery Address
           </h2>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Street Address *
               </label>
               <input
@@ -549,8 +549,8 @@ export default function CreateShipmentPage() {
                 value={formData.delivery_address}
                 onChange={handleChange}
                 placeholder="456 Victoria Island"
-                className={`w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 ${
-                  validationErrors.delivery_address ? 'border-red-300' : 'border-gray-300'
+                className={`w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 ${
+                  validationErrors.delivery_address ? 'border-red-300' : 'border-gray-300 dark:border-gray-600'
                 }`}
               />
               {validationErrors.delivery_address && (
@@ -559,7 +559,7 @@ export default function CreateShipmentPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 City *
               </label>
               <input
@@ -568,8 +568,8 @@ export default function CreateShipmentPage() {
                 value={formData.delivery_city}
                 onChange={handleChange}
                 placeholder="Abuja"
-                className={`w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 ${
-                  validationErrors.delivery_city ? 'border-red-300' : 'border-gray-300'
+                className={`w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 ${
+                  validationErrors.delivery_city ? 'border-red-300' : 'border-gray-300 dark:border-gray-600'
                 }`}
               />
               {validationErrors.delivery_city && (
@@ -578,7 +578,7 @@ export default function CreateShipmentPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 State
               </label>
               <input
@@ -587,19 +587,19 @@ export default function CreateShipmentPage() {
                 value={formData.delivery_state}
                 onChange={handleChange}
                 placeholder="FCT"
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
               />
             </div>
           </div>
         </div>
 
         {/* Photo Upload - Multiple */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4 flex items-center gap-2">
             <Camera className="h-5 w-5 text-emerald-600" />
-            Package Photos * <span className="text-sm font-normal text-gray-500">({photoPreviews.length}/5)</span>
+            Package Photos * <span className="text-sm font-normal text-gray-500 dark:text-gray-400">({photoPreviews.length}/5)</span>
           </h2>
-          <p className="text-sm text-gray-500 mb-4">
+          <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
             Take clear photos of the package before shipping. These serve as proof of condition at pickup. You can upload up to 5 photos.
           </p>
 
@@ -637,11 +637,11 @@ export default function CreateShipmentPage() {
               className={`border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition-colors ${
                 validationErrors.pickup_photos
                   ? 'border-red-300 bg-red-50'
-                  : 'border-gray-300 hover:border-emerald-400 hover:bg-emerald-50'
+                  : 'border-gray-300 dark:border-gray-600 hover:border-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/20'
               }`}
             >
               <Upload className="h-8 w-8 mx-auto text-gray-400 mb-2" />
-              <p className="text-gray-600 font-medium">
+              <p className="text-gray-600 dark:text-gray-300 font-medium">
                 {photoPreviews.length === 0 ? 'Click to upload photos' : 'Add more photos'}
               </p>
               <p className="text-sm text-gray-400 mt-1">JPG, PNG up to 5MB each</p>
@@ -663,8 +663,8 @@ export default function CreateShipmentPage() {
         </div>
 
         {/* Special Instructions */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4 flex items-center gap-2">
             <FileText className="h-5 w-5 text-emerald-600" />
             Special Instructions (Optional)
           </h2>
@@ -675,7 +675,7 @@ export default function CreateShipmentPage() {
             onChange={handleChange}
             placeholder="Any special handling instructions for the courier..."
             rows={3}
-            className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 resize-none"
+            className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 resize-none bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
           />
         </div>
 
@@ -684,7 +684,7 @@ export default function CreateShipmentPage() {
           <button
             type="button"
             onClick={() => navigate('/dashboard/shipments')}
-            className="flex-1 px-4 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-medium"
+            className="flex-1 px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors font-medium text-gray-900 dark:text-gray-100"
           >
             Cancel
           </button>

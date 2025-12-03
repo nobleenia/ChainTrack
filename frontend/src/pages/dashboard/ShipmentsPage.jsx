@@ -78,13 +78,13 @@ function ShipmentCard({ shipment }) {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-white rounded-xl shadow-sm border border-gray-200 p-5 hover:shadow-md transition-shadow cursor-pointer"
+      className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-5 hover:shadow-md transition-shadow cursor-pointer"
       onClick={() => navigate(`/dashboard/shipments/${shipment.shipment_id}`)}
     >
       <div className="flex justify-between items-start mb-4">
         <div>
-          <h3 className="font-semibold text-gray-900">{shipment.shipment_id}</h3>
-          <p className="text-sm text-gray-500">{description}</p>
+          <h3 className="font-semibold text-gray-900 dark:text-gray-100">{shipment.shipment_id}</h3>
+          <p className="text-sm text-gray-500 dark:text-gray-400">{description}</p>
         </div>
         <span
           className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium ${statusStyle.color}`}
@@ -95,22 +95,22 @@ function ShipmentCard({ shipment }) {
       </div>
 
       <div className="space-y-2 text-sm">
-        <div className="flex items-center gap-2 text-gray-600">
+        <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
           <MapPin className="h-4 w-4 text-gray-400" />
           <span className="truncate">
             {pickupCity} → {deliveryCity}
           </span>
         </div>
-        <div className="flex items-center gap-2 text-gray-600">
+        <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
           <Calendar className="h-4 w-4 text-gray-400" />
           <span>Created {createdAt ? new Date(createdAt).toLocaleDateString() : 'N/A'}</span>
         </div>
       </div>
 
-      <div className="mt-4 pt-4 border-t border-gray-100 flex justify-between items-center">
+      <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700 flex justify-between items-center">
         <div className="text-sm">
-          <span className="text-gray-500">Checkpoints: </span>
-          <span className="font-medium text-gray-900">
+          <span className="text-gray-500 dark:text-gray-400">Checkpoints: </span>
+          <span className="font-medium text-gray-900 dark:text-gray-100">
             {checkpointCount}
           </span>
         </div>
@@ -176,8 +176,8 @@ export default function ShipmentsPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Shipments</h1>
-          <p className="text-gray-500">Track and manage your P2P deliveries</p>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Shipments</h1>
+          <p className="text-gray-500 dark:text-gray-400">Track and manage your P2P deliveries</p>
         </div>
         <Link
           to="/dashboard/shipments/create"
@@ -189,7 +189,7 @@ export default function ShipmentsPage() {
       </div>
 
       {/* Filters */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
         <div className="flex flex-col md:flex-row gap-4">
           {/* Search */}
           <div className="flex-1 relative">
@@ -199,7 +199,7 @@ export default function ShipmentsPage() {
               placeholder="Search by ID, description, or receiver..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+              className="w-full pl-10 pr-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
             />
           </div>
 
@@ -209,7 +209,7 @@ export default function ShipmentsPage() {
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="border border-gray-300 rounded-lg px-3 py-2.5 text-gray-900 bg-white focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+              className="border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2.5 text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-700 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
             >
               <option value="">All Statuses</option>
               <option value="created">Created</option>
@@ -226,7 +226,7 @@ export default function ShipmentsPage() {
           <select
             value={roleFilter}
             onChange={(e) => setRoleFilter(e.target.value)}
-            className="border border-gray-300 rounded-lg px-3 py-2.5 text-gray-900 bg-white focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+            className="border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2.5 text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-700 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
           >
             <option value="">All Shipments</option>
             <option value="sent">Sent by Me</option>

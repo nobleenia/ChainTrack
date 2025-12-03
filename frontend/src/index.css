@@ -71,6 +71,57 @@ body {
   @apply bg-gray-900 text-gray-100;
 }
 
+/* ============================================
+   Form Input Dark Mode Fixes
+   ============================================ */
+
+/* All text inputs, textareas, and selects */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+input[type="tel"],
+input[type="url"],
+input[type="search"],
+input[type="date"],
+input[type="time"],
+input[type="datetime-local"],
+textarea,
+select {
+  @apply text-gray-900 bg-white;
+}
+
+.dark input[type="text"],
+.dark input[type="email"],
+.dark input[type="password"],
+.dark input[type="number"],
+.dark input[type="tel"],
+.dark input[type="url"],
+.dark input[type="search"],
+.dark input[type="date"],
+.dark input[type="time"],
+.dark input[type="datetime-local"],
+.dark textarea,
+.dark select {
+  @apply text-gray-100 bg-gray-700 border-gray-600;
+}
+
+/* Placeholder text in dark mode */
+.dark input::placeholder,
+.dark textarea::placeholder {
+  @apply text-gray-400;
+}
+
+/* Select option text in dark mode */
+.dark select option {
+  @apply bg-gray-700 text-gray-100;
+}
+
+/* Form labels in dark mode */
+.dark label {
+  @apply text-gray-200;
+}
+
 /* Custom scrollbar */
 ::-webkit-scrollbar {
   width: 8px;
