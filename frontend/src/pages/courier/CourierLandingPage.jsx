@@ -214,6 +214,21 @@ function LandingView({ onSelectAuthCode, onSelectPhoneLogin }) {
           />
         </div>
       </div>
+
+      {/* Register CTA */}
+      <div className="bg-gradient-to-r from-emerald-500 to-teal-600 rounded-2xl p-6 text-white text-center">
+        <h3 className="text-xl font-bold mb-2">New to ChainTrack?</h3>
+        <p className="text-emerald-100 mb-4">
+          Register as a courier to build your reputation, track deliveries, and access exclusive benefits.
+        </p>
+        <a 
+          href="/courier/register"
+          className="inline-flex items-center gap-2 bg-white text-emerald-600 px-6 py-2.5 rounded-xl font-semibold hover:bg-emerald-50 transition"
+        >
+          <User className="h-5 w-5" />
+          Register as Courier
+        </a>
+      </div>
     </motion.div>
   )
 }

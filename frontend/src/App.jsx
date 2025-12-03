@@ -30,6 +30,7 @@ import CourierLandingPage from './pages/courier/CourierLandingPage'
 import CourierDashboard from './pages/courier/CourierDashboard'
 import CourierShipmentsPage from './pages/courier/CourierShipmentsPage'
 import CourierShipmentDetailsPage from './pages/courier/CourierShipmentDetailsPage'
+import CourierRegistrationPage from './pages/courier/CourierRegistrationPage'
 
 // Protected Route Component
 function ProtectedRoute({ children }) {
@@ -84,6 +85,7 @@ function App() {
         
         {/* Courier Portal Routes */}
         <Route path="/courier" element={<CourierLandingPage />} />
+        <Route path="/courier/register" element={<CourierRegistrationPage />} />
         <Route path="/courier/dashboard" element={<CourierDashboard />} />
         <Route path="/courier/shipments" element={<CourierShipmentsPage />} />
         <Route path="/courier/shipments/:shipmentId" element={<CourierShipmentDetailsPage />} />

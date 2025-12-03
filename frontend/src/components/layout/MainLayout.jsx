@@ -88,6 +88,9 @@ export default function MainLayout() {
               <Link to="/verify" className="text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition">
                 Verify Product
               </Link>
+              <Link to="/courier" className="text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition">
+                Courier Portal
+              </Link>
               
               <ThemeToggle />
               
@@ -158,6 +161,9 @@ export default function MainLayout() {
               <Link to="/verify" className="block text-gray-600 dark:text-gray-300 hover:text-primary-600">
                 Verify Product
               </Link>
+              <Link to="/courier" className="block text-gray-600 dark:text-gray-300 hover:text-primary-600">
+                Courier Portal
+              </Link>
               <div className="flex items-center justify-between">
                 <span className="text-gray-600 dark:text-gray-300">Theme</span>
                 <ThemeToggle />
@@ -215,6 +221,7 @@ export default function MainLayout() {
                 <li><Link to="/#features" className="hover:text-white transition">Features</Link></li>
                 <li><Link to="/#how-it-works" className="hover:text-white transition">How It Works</Link></li>
                 <li><Link to="/verify" className="hover:text-white transition">Verify Product</Link></li>
+                <li><Link to="/courier" className="hover:text-white transition">Courier Portal</Link></li>
               </ul>
             </div>
             

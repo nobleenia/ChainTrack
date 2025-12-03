@@ -83,6 +83,30 @@ export const courierPortalApi = {
   },
 
   /**
+   * Verify OTP and register new courier
+   * @param {Object} data - Registration data
+   * @param {string} data.phone - Phone number
+   * @param {string} data.otp - 6-digit OTP
+   * @param {string} data.display_name - Full name
+   * @param {string} [data.company_name] - Company name (optional)
+   * @param {string} [data.email] - Email (optional)
+   * @param {string} [data.vehicle_type] - Vehicle type (optional)
+   * @param {string} [data.vehicle_plate] - Vehicle plate (optional)
+   * @returns {Promise} Session data with token and profile
+   */
+  verifyOtpAndRegister: async (data) => {
+    const response = await courierAxios.post('/auth/register', data)
+    
+    // Store token and profile
+    if (response.data.token) {
+      localStorage.setItem(COURIER_TOKEN_KEY, response.data.token)
+      localStorage.setItem(COURIER_PROFILE_KEY, JSON.stringify(response.data.profile))
+    }
+    
+    return response.data
+  },
+
+  /**
    * Logout and invalidate session
    */
   logout: async () => {

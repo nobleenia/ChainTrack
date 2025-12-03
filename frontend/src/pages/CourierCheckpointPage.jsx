@@ -38,7 +38,7 @@ import { courierApi } from '../services/courierApi'
 const actionOptions = [
   { value: 'picked_up', label: 'Picked Up', icon: Package, color: 'blue', description: 'Mark as collected from sender' },
   { value: 'checkpoint', label: 'Checkpoint', icon: MapPin, color: 'purple', description: 'Record current location' },
-  { value: 'in_transit', label: 'In Transit', icon: Truck, color: 'yellow', description: 'Package is being transported' },
+  { value: 'handed_off', label: 'Handed Off', icon: Truck, color: 'yellow', description: 'Transferred to another courier' },
   { value: 'out_for_delivery', label: 'Out for Delivery', icon: Navigation, color: 'orange', description: 'Final delivery in progress' },
   { value: 'delivered', label: 'Delivered', icon: CheckCircle, color: 'green', description: 'Successfully delivered' }
 ]
@@ -240,29 +240,43 @@ export default function CourierCheckpointPage() {
     }
   }
 
-  // Get current location
+  // Get current location with better error handling
   const getCurrentLocation = () => {
     if (!navigator.geolocation) {
-      setError('Geolocation is not supported by your browser')
+      setError('Geolocation is not supported by your browser. Please enter location manually.')
       return
     }
 
     setGettingLocation(true)
+    setError(null)
+    
+    const timeoutId = setTimeout(() => {
+      setGettingLocation(false)
+      setError('Location detection timed out. Please enter location manually or try again.')
+    }, 30000) // 30 second timeout
+    
     navigator.geolocation.getCurrentPosition(
       async (position) => {
+        clearTimeout(timeoutId)
         const { latitude, longitude } = position.coords
         setLocation({ lat: latitude, lng: longitude })
         
-        // Try to get a readable address (simplified)
+        // Try to get a readable address
         try {
           const response = await fetch(
-            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`
+            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`,
+            { 
+              headers: { 'Accept-Language': 'en' },
+              signal: AbortSignal.timeout(10000) 
+            }
           )
           const data = await response.json()
           const address = data.display_name?.split(',').slice(0, 3).join(', ') || 
                          `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`
           setFormData(prev => ({ ...prev, location: address }))
+          setError(null)
         } catch {
+          // Fallback to coordinates
           setFormData(prev => ({
             ...prev,
             location: `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`
@@ -271,10 +285,29 @@ export default function CourierCheckpointPage() {
         setGettingLocation(false)
       },
       (err) => {
-        setError('Failed to get location: ' + err.message)
+        clearTimeout(timeoutId)
         setGettingLocation(false)
+        let errorMsg = 'Failed to get location. '
+        switch (err.code) {
+          case err.PERMISSION_DENIED:
+            errorMsg += 'Location permission denied. Please enable location access or enter manually.'
+            break
+          case err.POSITION_UNAVAILABLE:
+            errorMsg += 'Location information unavailable. Please enter manually.'
+            break
+          case err.TIMEOUT:
+            errorMsg += 'Location request timed out. Please try again or enter manually.'
+            break
+          default:
+            errorMsg += 'Please enter location manually.'
+        }
+        setError(errorMsg)
       },
-      { enableHighAccuracy: true, timeout: 10000 }
+      { 
+        enableHighAccuracy: true, 
+        timeout: 25000,
+        maximumAge: 60000 // Accept cached position up to 1 minute old
+      }
     )
   }
 

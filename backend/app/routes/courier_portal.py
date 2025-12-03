@@ -139,6 +139,100 @@ def verify_otp():
     return jsonify(session_data), 200
 
 
+@bp.route('/auth/register', methods=['POST'])
+def register_courier():
+    """
+    Register a new courier with OTP verification
+    
+    Request Body:
+        - phone: string (required)
+        - otp: string (required) - 6-digit OTP
+        - display_name: string (required)
+        - company_name: string (optional)
+        - email: string (optional)
+        - vehicle_type: string (optional)
+        - vehicle_plate: string (optional)
+    
+    Returns:
+        Session token and profile data
+    """
+    data = request.get_json()
+    
+    # Validate required fields
+    if not data.get('phone') or not data.get('otp'):
+        return jsonify({'error': 'Phone and OTP are required'}), 400
+    
+    if not data.get('display_name'):
+        return jsonify({'error': 'Display name is required'}), 400
+    
+    phone = data['phone'].strip()
+    otp = data['otp'].strip()
+    
+    # First check if profile exists
+    profile = CourierProfile.query.filter_by(phone=phone).first()
+    
+    if profile and profile.phone_verified:
+        # Profile already exists and is verified - just login
+        success, message, session_data = CourierProfileService.verify_otp_and_login(
+            phone=phone,
+            otp=otp,
+            device_info=request.headers.get('User-Agent'),
+            ip_address=request.remote_addr
+        )
+        
+        if not success:
+            return jsonify({'error': message}), 401
+        
+        return jsonify({
+            **session_data,
+            'already_registered': True
+        }), 200
+    
+    # Verify OTP for new/unverified profile
+    if profile:
+        if not profile.verify_otp(otp):
+            return jsonify({'error': 'Invalid or expired OTP'}), 401
+        
+        # Update profile with registration data
+        profile.display_name = data['display_name'].strip()
+        profile.company_name = data.get('company_name', '').strip() or None
+        profile.email = data.get('email', '').strip() or None
+        profile.vehicle_type = data.get('vehicle_type', '').strip() or None
+        profile.vehicle_plate = data.get('vehicle_plate', '').strip() or None
+        profile.phone_verified = True
+        profile.verified_since = datetime.utcnow()
+        profile.current_otp = None
+        profile.otp_created_at = None
+        
+        db.session.commit()
+    else:
+        # This shouldn't happen if OTP was requested first
+        return jsonify({'error': 'Please request OTP first'}), 400
+    
+    # Create session
+    session = CourierProfileService.create_session(
+        profile=profile,
+        device_info=request.headers.get('User-Agent'),
+        ip_address=request.remote_addr
+    )
+    
+    # Record activity
+    CourierActivityService.log_activity(
+        courier_id=profile.id,
+        activity_type='registration',
+        description='Completed courier registration',
+        ip_address=request.remote_addr
+    )
+    
+    return jsonify({
+        'message': 'Registration successful',
+        'token': session.token,
+        'expires_at': session.expires_at.isoformat(),
+        'profile': profile.to_dict(include_stats=True),
+        'registered': True
+    }), 201
+
+
 @bp.route('/auth/logout', methods=['POST'])
 @courier_auth_required
 def logout():
