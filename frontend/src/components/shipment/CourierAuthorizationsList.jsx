@@ -68,8 +68,8 @@ export default function CourierAuthorizationsList({ shipmentId, onAuthorizeCouri
 
   if (loading) {
     return (
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-        <div className="flex items-center justify-center gap-2 text-gray-500">
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+        <div className="flex items-center justify-center gap-2 text-gray-500 dark:text-gray-400">
           <Loader2 className="h-5 w-5 animate-spin" />
           Loading authorizations...
         </div>
@@ -78,16 +78,16 @@ export default function CourierAuthorizationsList({ shipmentId, onAuthorizeCouri
   }
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-200">
+    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
       {/* Header */}
       <button
         onClick={() => setExpanded(!expanded)}
-        className="w-full p-4 flex items-center justify-between hover:bg-gray-50 transition-colors"
+        className="w-full p-4 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
       >
         <div className="flex items-center gap-3">
-          <Shield className="h-5 w-5 text-emerald-600" />
-          <span className="font-semibold text-gray-900">Authorized Couriers</span>
-          <span className="px-2 py-0.5 bg-gray-100 text-gray-600 text-sm rounded-full">
+          <Shield className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+          <span className="font-semibold text-gray-900 dark:text-white">Authorized Couriers</span>
+          <span className="px-2 py-0.5 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 text-sm rounded-full">
             {authorizations.length}
           </span>
         </div>
@@ -106,9 +106,9 @@ export default function CourierAuthorizationsList({ shipmentId, onAuthorizeCouri
             exit={{ height: 0, opacity: 0 }}
             className="overflow-hidden"
           >
-            <div className="border-t border-gray-100">
+            <div className="border-t border-gray-100 dark:border-gray-700">
               {error && (
-                <div className="p-4 bg-red-50 text-red-700 text-sm flex items-center gap-2">
+                <div className="p-4 bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-400 text-sm flex items-center gap-2">
                   <AlertCircle className="h-4 w-4" />
                   {error}
                 </div>
@@ -116,49 +116,49 @@ export default function CourierAuthorizationsList({ shipmentId, onAuthorizeCouri
 
               {authorizations.length === 0 ? (
                 <div className="p-6 text-center">
-                  <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                  <div className="w-12 h-12 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-3">
                     <User className="h-6 w-6 text-gray-400" />
                   </div>
-                  <p className="text-gray-500 mb-4">No couriers authorized yet</p>
+                  <p className="text-gray-500 dark:text-gray-400 mb-4">No couriers authorized yet</p>
                   <button
                     onClick={onAuthorizeCourier}
-                    className="text-emerald-600 hover:text-emerald-700 font-medium text-sm"
+                    className="text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 font-medium text-sm"
                   >
                     + Authorize a courier
                   </button>
                 </div>
               ) : (
-                <div className="divide-y divide-gray-100">
+                <div className="divide-y divide-gray-100 dark:divide-gray-700">
                   {authorizations.map((auth) => (
                     <div key={auth.id} className="p-4">
                       <div className="flex items-start justify-between">
                         <div className="flex items-start gap-3">
                           <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                            auth.status.is_valid ? 'bg-emerald-100' : 'bg-gray-100'
+                            auth.status.is_valid ? 'bg-emerald-100 dark:bg-emerald-900/30' : 'bg-gray-100 dark:bg-gray-700'
                           }`}>
                             <User className={`h-5 w-5 ${
-                              auth.status.is_valid ? 'text-emerald-600' : 'text-gray-400'
+                              auth.status.is_valid ? 'text-emerald-600 dark:text-emerald-400' : 'text-gray-400'
                             }`} />
                           </div>
                           <div>
                             <div className="flex items-center gap-2">
-                              <span className="font-medium text-gray-900">
+                              <span className="font-medium text-gray-900 dark:text-white">
                                 {auth.courier?.name || 'Unknown'}
                               </span>
                               {auth.status.is_valid ? (
-                                <span className="px-2 py-0.5 bg-emerald-100 text-emerald-700 text-xs rounded-full flex items-center gap-1">
+                                <span className="px-2 py-0.5 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 text-xs rounded-full flex items-center gap-1">
                                   <CheckCircle className="h-3 w-3" />
                                   Active
                                 </span>
                               ) : (
-                                <span className="px-2 py-0.5 bg-red-100 text-red-700 text-xs rounded-full flex items-center gap-1">
+                                <span className="px-2 py-0.5 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 text-xs rounded-full flex items-center gap-1">
                                   <XCircle className="h-3 w-3" />
                                   Expired/Revoked
                                 </span>
                               )}
                             </div>
                             {auth.courier?.phone && (
-                              <div className="flex items-center gap-1 text-sm text-gray-500 mt-1">
+                              <div className="flex items-center gap-1 text-sm text-gray-500 dark:text-gray-400 mt-1">
                                 <Phone className="h-3 w-3" />
                                 {auth.courier.phone}
                               </div>
@@ -194,29 +194,29 @@ export default function CourierAuthorizationsList({ shipmentId, onAuthorizeCouri
                             {/* Permissions */}
                             <div className="flex flex-wrap gap-1 mt-2">
                               {auth.permissions?.can_pickup && (
-                                <span className="px-1.5 py-0.5 bg-blue-50 text-blue-600 text-xs rounded">
+                                <span className="px-1.5 py-0.5 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-xs rounded">
                                   Pickup
                                 </span>
                               )}
                               {auth.permissions?.can_checkpoint && (
-                                <span className="px-1.5 py-0.5 bg-purple-50 text-purple-600 text-xs rounded">
+                                <span className="px-1.5 py-0.5 bg-purple-50 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 text-xs rounded">
                                   Checkpoints
                                 </span>
                               )}
                               {auth.permissions?.can_deliver && (
-                                <span className="px-1.5 py-0.5 bg-green-50 text-green-600 text-xs rounded">
+                                <span className="px-1.5 py-0.5 bg-green-50 dark:bg-green-900/30 text-green-600 dark:text-green-400 text-xs rounded">
                                   Deliver
                                 </span>
                               )}
                               {auth.permissions?.can_handoff && (
-                                <span className="px-1.5 py-0.5 bg-orange-50 text-orange-600 text-xs rounded">
+                                <span className="px-1.5 py-0.5 bg-orange-50 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 text-xs rounded">
                                   Handoff
                                 </span>
                               )}
                             </div>
 
                             {/* Usage Stats */}
-                            <div className="text-xs text-gray-400 mt-2 space-y-0.5">
+                            <div className="text-xs text-gray-400 dark:text-gray-500 mt-2 space-y-0.5">
                               <div className="flex items-center gap-1">
                                 <Clock className="h-3 w-3" />
                                 Expires: {auth.status.expires_at 
@@ -237,7 +237,7 @@ export default function CourierAuthorizationsList({ shipmentId, onAuthorizeCouri
                           <button
                             onClick={() => handleRevoke(auth.id)}
                             disabled={revoking === auth.id}
-                            className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
+                            className="p-2 text-red-500 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors disabled:opacity-50"
                             title="Revoke authorization"
                           >
                             {revoking === auth.id ? (
