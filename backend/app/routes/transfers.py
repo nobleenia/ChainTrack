@@ -61,9 +61,17 @@ def create_transfer():
     
     Request Body:
         - product_id: string (required) - The product's unique ID
-        - to_user_id: integer (required) - Recipient user ID
         - transfer_type: string (required) - Type of transfer
-        - location: string (required) - Current location
+        - location: string (required) - Current location/destination
+        
+        For registered user recipient:
+        - to_user_id: integer (optional) - Recipient user ID
+        
+        For external recipient (store, warehouse, etc.):
+        - recipient_name: string (optional) - Name of store/company/person
+        - recipient_address: string (optional) - Physical address
+        - recipient_type: string (optional) - Type: 'store', 'warehouse', 'distributor', 'retailer', 'consumer'
+        
         - notes: string (optional) - Additional notes
     """
     current_user_id = get_jwt_identity()
@@ -78,24 +86,36 @@ def create_transfer():
     data = request.get_json()
     
     # Validate required fields
-    required_fields = ['product_id', 'to_user_id', 'transfer_type', 'location']
+    required_fields = ['product_id', 'transfer_type', 'location']
     for field in required_fields:
         if not data.get(field):
             return jsonify({'error': f'{field} is required'}), 400
+    
+    # Must have either to_user_id OR recipient_name
+    if not data.get('to_user_id') and not data.get('recipient_name'):
+        return jsonify({'error': 'Either to_user_id or recipient_name is required'}), 400
     
     # Get product
     product = Product.query.filter_by(product_id=data['product_id']).first()
     if not product:
         return jsonify({'error': 'Product not found'}), 404
     
-    # Verify sender is current holder
-    if product.current_holder_id != user.id:
-        return jsonify({'error': 'You are not the current holder of this product'}), 403
+    # Verify sender is current holder or manufacturer
+    if product.current_holder_id != user.id and product.manufacturer_id != user.id:
+        return jsonify({'error': 'You are not authorized to transfer this product'}), 403
     
-    # Verify recipient exists
-    recipient = User.query.get(data['to_user_id'])
-    if not recipient:
-        return jsonify({'error': 'Recipient not found'}), 404
+    # Handle recipient - either registered user or external
+    recipient = None
+    recipient_name = data.get('recipient_name')
+    recipient_address = data.get('recipient_address')
+    recipient_type = data.get('recipient_type', 'store')
+    recipient_wallet = '0x0000000000000000000000000000000000000000'
+    
+    if data.get('to_user_id'):
+        recipient = User.query.get(data['to_user_id'])
+        if recipient:
+            recipient_name = recipient.name
+            recipient_wallet = recipient.wallet_address or recipient_wallet
     
     # Validate transfer type
     try:
@@ -113,7 +133,10 @@ def create_transfer():
     transfer = Transfer(
         product_id=product.id,
         from_user_id=user.id,
-        to_user_id=recipient.id,
+        to_user_id=recipient.id if recipient else None,
+        recipient_name=recipient_name,
+        recipient_address=recipient_address,
+        recipient_type=recipient_type,
         transfer_type=transfer_type,
         location=data['location'],
         notes=data.get('notes'),
@@ -121,7 +144,8 @@ def create_transfer():
     )
     
     # Update product
-    product.current_holder_id = recipient.id
+    if recipient:
+        product.current_holder_id = recipient.id
     product.current_location = data['location']
     
     # Update product status based on transfer type
@@ -133,14 +157,21 @@ def create_transfer():
     db.session.add(transfer)
     db.session.flush()
     
-    # Record on blockchain
+    # Record on blockchain - include recipient name and address for verification
     try:
+        # Build location string with recipient info for on-chain storage
+        chain_location = f"{data['location']}"
+        if recipient_name:
+            chain_location = f"{recipient_name} | {data['location']}"
+        if recipient_address:
+            chain_location = f"{recipient_name} | {recipient_address}"
+        
         tx_hash, block_number = blockchain_service.record_transfer(
             product.product_id,
             user.wallet_address or '0x0000000000000000000000000000000000000000',
-            recipient.wallet_address or '0x0000000000000000000000000000000000000000',
+            recipient_wallet,
             transfer_type.value,
-            data['location']
+            chain_location  # This goes on-chain for verification
         )
         transfer.blockchain_hash = tx_hash
         transfer.blockchain_block = block_number
@@ -148,7 +179,7 @@ def create_transfer():
         current_app.logger.error(f"Blockchain transfer recording failed: {e}")
         # Generate a mock hash for development
         import hashlib
-        mock_data = f"{product.product_id}|{user.id}|{recipient.id}|{transfer_type.value}"
+        mock_data = f"{product.product_id}|{user.id}|{recipient_name}|{transfer_type.value}|{data['location']}"
         transfer.blockchain_hash = f"0x{hashlib.sha256(mock_data.encode()).hexdigest()[:64]}"
     
     db.session.commit()

@@ -49,7 +49,9 @@ export default function ProductDetailPage() {
   const [copiedHash, setCopiedHash] = useState(false)
   const [showTransferModal, setShowTransferModal] = useState(false)
   const [transferData, setTransferData] = useState({
-    to_user_id: '',
+    recipient_name: '',
+    recipient_address: '',
+    recipient_type: 'store',
     transfer_type: 'shipped',
     location: '',
     notes: ''
@@ -118,7 +120,14 @@ export default function ProductDetailPage() {
         ...transferData
       })
       setShowTransferModal(false)
-      setTransferData({ to_user_id: '', transfer_type: 'shipped', location: '', notes: '' })
+      setTransferData({ 
+        recipient_name: '', 
+        recipient_address: '', 
+        recipient_type: 'store',
+        transfer_type: 'shipped', 
+        location: '', 
+        notes: '' 
+      })
       // Refresh transfers
       const updatedTransfers = await transferService.getProductTransfers(productId)
       setTransfers(updatedTransfers.transfers || [])
@@ -388,54 +397,101 @@ export default function ProductDetailPage() {
         isOpen={showTransferModal}
         onClose={() => setShowTransferModal(false)}
         title="Transfer Product"
-        size="md"
+        size="lg"
       >
         <form onSubmit={handleTransfer} className="space-y-4">
+          {/* Info Banner */}
+          <div className="bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-lg p-3">
+            <p className="text-sm text-blue-700 dark:text-blue-300">
+              Transfer this product to a store, warehouse, or distributor. The transfer will be recorded on the blockchain for verification.
+            </p>
+          </div>
+
+          {/* Recipient Type */}
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Recipient User ID *
+              Recipient Type *
+            </label>
+            <select
+              required
+              value={transferData.recipient_type}
+              onChange={(e) => setTransferData(prev => ({ ...prev, recipient_type: e.target.value }))}
+              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+            >
+              <option value="store">Store / Retail Shop</option>
+              <option value="warehouse">Warehouse</option>
+              <option value="distributor">Distributor</option>
+              <option value="retailer">Retailer</option>
+              <option value="consumer">End Consumer</option>
+            </select>
+          </div>
+
+          {/* Recipient Name */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              Recipient Name *
             </label>
             <input
               type="text"
               required
-              value={transferData.to_user_id}
-              onChange={(e) => setTransferData(prev => ({ ...prev, to_user_id: e.target.value }))}
-              placeholder="Enter recipient's user ID"
+              value={transferData.recipient_name}
+              onChange={(e) => setTransferData(prev => ({ ...prev, recipient_name: e.target.value }))}
+              placeholder="e.g., SuperMart Lagos, ABC Distributors"
               className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
             />
           </div>
 
+          {/* Recipient Address */}
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Transfer Type *
-            </label>
-            <select
-              required
-              value={transferData.transfer_type}
-              onChange={(e) => setTransferData(prev => ({ ...prev, transfer_type: e.target.value }))}
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-            >
-              <option value="shipped">Shipped</option>
-              <option value="received">Received</option>
-              <option value="delivered">Delivered</option>
-              <option value="returned">Returned</option>
-            </select>
-          </div>
-          
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Current Location *
+              Recipient Address *
             </label>
             <input
               type="text"
               required
-              value={transferData.location}
-              onChange={(e) => setTransferData(prev => ({ ...prev, location: e.target.value }))}
-              placeholder="e.g., Warehouse A, New York"
+              value={transferData.recipient_address}
+              onChange={(e) => setTransferData(prev => ({ ...prev, recipient_address: e.target.value }))}
+              placeholder="e.g., 123 Main Street, Lagos, Nigeria"
               className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
             />
           </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            {/* Transfer Type */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Transfer Type *
+              </label>
+              <select
+                required
+                value={transferData.transfer_type}
+                onChange={(e) => setTransferData(prev => ({ ...prev, transfer_type: e.target.value }))}
+                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+              >
+                <option value="shipped">Shipped</option>
+                <option value="delivered">Delivered</option>
+                <option value="received">Received</option>
+                <option value="returned">Returned</option>
+              </select>
+            </div>
+            
+            {/* Current Location */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Current Location *
+              </label>
+              <input
+                type="text"
+                required
+                value={transferData.location}
+                onChange={(e) => setTransferData(prev => ({ ...prev, location: e.target.value }))}
+                placeholder="e.g., Lagos, Nigeria"
+                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+              />
+            </div>
+          </div>
           
+          {/* Notes */}
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Notes (Optional)
@@ -444,9 +500,17 @@ export default function ProductDetailPage() {
               value={transferData.notes}
               onChange={(e) => setTransferData(prev => ({ ...prev, notes: e.target.value }))}
               placeholder="Add any notes about this transfer..."
-              rows={3}
+              rows={2}
               className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
             />
+          </div>
+
+          {/* Blockchain Notice */}
+          <div className="bg-emerald-50 dark:bg-emerald-900/30 border border-emerald-200 dark:border-emerald-800 rounded-lg p-3">
+            <p className="text-sm text-emerald-700 dark:text-emerald-300 flex items-center gap-2">
+              <Shield size={16} />
+              This transfer will be permanently recorded on the Ethereum blockchain for authenticity verification.
+            </p>
           </div>
 
           <div className="flex justify-end gap-3 pt-4">

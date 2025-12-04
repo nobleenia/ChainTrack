@@ -29,9 +29,16 @@ class Transfer(db.Model):
     # Product being transferred
     product_id = db.Column(db.Integer, db.ForeignKey('products.id'), nullable=False, index=True)
     
-    # Transfer participants
+    # Transfer participants (from is always a registered user)
     from_user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    to_user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    
+    # To can be either a registered user OR an external destination
+    to_user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)  # Changed to nullable
+    
+    # External recipient details (when transferring to unregistered entity)
+    recipient_name = db.Column(db.String(255), nullable=True)  # Store name, company, person
+    recipient_address = db.Column(db.String(500), nullable=True)  # Physical address
+    recipient_type = db.Column(db.String(50), nullable=True)  # 'store', 'warehouse', 'distributor', 'retailer', 'consumer'
     
     # Transfer details
     transfer_type = db.Column(db.Enum(TransferType), nullable=False)
@@ -57,11 +64,32 @@ class Transfer(db.Model):
     
     def to_dict(self):
         """Serialize transfer to dictionary"""
+        # Determine recipient info (registered user or external)
+        if self.to_user_id and self.receiver:
+            recipient_info = {
+                'type': 'registered',
+                'user': self.receiver.to_dict(),
+                'name': self.receiver.name,
+                'address': None
+            }
+        else:
+            recipient_info = {
+                'type': 'external',
+                'user': None,
+                'name': self.recipient_name,
+                'address': self.recipient_address,
+                'recipient_type': self.recipient_type
+            }
+        
         return {
             'id': self.id,
             'product_id': self.product.product_id if self.product else None,
             'from_user': self.sender.to_dict() if self.sender else None,
             'to_user': self.receiver.to_dict() if self.receiver else None,
+            'recipient': recipient_info,
+            'recipient_name': self.recipient_name,
+            'recipient_address': self.recipient_address,
+            'recipient_type': self.recipient_type,
             'transfer_type': self.transfer_type.value,
             'location': self.location,
             'notes': self.notes,
