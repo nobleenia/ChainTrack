@@ -50,6 +50,7 @@ export default function ProductDetailPage() {
   const [showTransferModal, setShowTransferModal] = useState(false)
   const [transferData, setTransferData] = useState({
     to_user_id: '',
+    transfer_type: 'shipped',
     location: '',
     notes: ''
   })
@@ -113,11 +114,11 @@ export default function ProductDetailPage() {
     
     try {
       await transferService.createTransfer({
-        product_id: product.id,
+        product_id: product.product_id,
         ...transferData
       })
       setShowTransferModal(false)
-      setTransferData({ to_user_id: '', location: '', notes: '' })
+      setTransferData({ to_user_id: '', transfer_type: 'shipped', location: '', notes: '' })
       // Refresh transfers
       const updatedTransfers = await transferService.getProductTransfers(productId)
       setTransfers(updatedTransfers.transfers || [])
@@ -391,7 +392,7 @@ export default function ProductDetailPage() {
       >
         <form onSubmit={handleTransfer} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Recipient User ID *
             </label>
             <input
@@ -400,25 +401,43 @@ export default function ProductDetailPage() {
               value={transferData.to_user_id}
               onChange={(e) => setTransferData(prev => ({ ...prev, to_user_id: e.target.value }))}
               placeholder="Enter recipient's user ID"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
             />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              Transfer Type *
+            </label>
+            <select
+              required
+              value={transferData.transfer_type}
+              onChange={(e) => setTransferData(prev => ({ ...prev, transfer_type: e.target.value }))}
+              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+            >
+              <option value="shipped">Shipped</option>
+              <option value="received">Received</option>
+              <option value="delivered">Delivered</option>
+              <option value="returned">Returned</option>
+            </select>
           </div>
           
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Current Location
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              Current Location *
             </label>
             <input
               type="text"
+              required
               value={transferData.location}
               onChange={(e) => setTransferData(prev => ({ ...prev, location: e.target.value }))}
               placeholder="e.g., Warehouse A, New York"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
             />
           </div>
           
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Notes (Optional)
             </label>
             <textarea
@@ -426,7 +445,7 @@ export default function ProductDetailPage() {
               onChange={(e) => setTransferData(prev => ({ ...prev, notes: e.target.value }))}
               placeholder="Add any notes about this transfer..."
               rows={3}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
             />
           </div>
 

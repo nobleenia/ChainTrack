@@ -46,6 +46,10 @@ def create_app(config_name='development'):
         }
     })
     
+    # Initialize blockchain service
+    from .services.blockchain_service import blockchain_service
+    blockchain_service.init_app(app)
+    
     # Register blueprints
     from .routes import auth, products, transfers, verification, rewards, shipments, notifications, couriers
     from .routes.uploads import uploads_bp
