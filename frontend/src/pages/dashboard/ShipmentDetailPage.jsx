@@ -33,8 +33,10 @@ import {
   Link2,
   X,
   ExternalLink,
-  Hash
+  Hash,
+  Printer
 } from 'lucide-react'
+import { generateShipmentLabel } from '../../utils/shipmentLabelPDF'
 import useShipmentStore from '../../store/shipmentStore'
 import { useAuthStore } from '../../store/authStore'
 import AuthorizeCourierModal from '../../components/shipment/AuthorizeCourierModal'
@@ -926,6 +928,15 @@ export default function ShipmentDetailPage() {
                   Verify Chain Integrity
                 </button>
               )}
+
+              {/* Print Shipping Label - Always available */}
+              <button
+                onClick={() => generateShipmentLabel(shipment)}
+                className="w-full flex items-center justify-center gap-2 border border-gray-300 text-gray-700 px-4 py-2.5 rounded-lg hover:bg-gray-50"
+              >
+                <Printer className="h-5 w-5" />
+                Print Shipping Label
+              </button>
             </div>
           </div>
 
