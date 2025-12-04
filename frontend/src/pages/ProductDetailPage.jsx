@@ -29,7 +29,8 @@ import {
   Copy,
   Check,
   AlertCircle,
-  ExternalLink
+  ExternalLink,
+  Truck
 } from 'lucide-react'
 import { productService, transferService } from '../services/productService'
 import { useAuthStore } from '../store/authStore'
@@ -46,6 +47,7 @@ export default function ProductDetailPage() {
   const [transfers, setTransfers] = useState([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState(null)
+  const [transferError, setTransferError] = useState(null)  // Separate error for transfer operations
   const [copiedHash, setCopiedHash] = useState(false)
   const [showTransferModal, setShowTransferModal] = useState(false)
   const [transferData, setTransferData] = useState({
@@ -113,12 +115,15 @@ export default function ProductDetailPage() {
   const handleTransfer = async (e) => {
     e.preventDefault()
     setIsTransferring(true)
+    setTransferError(null)
     
     try {
       await transferService.createTransfer({
         product_id: product.product_id,
         ...transferData
       })
+      
+      // Success! Close modal and reset form
       setShowTransferModal(false)
       setTransferData({ 
         recipient_name: '', 
@@ -128,11 +133,21 @@ export default function ProductDetailPage() {
         location: '', 
         notes: '' 
       })
-      // Refresh transfers
-      const updatedTransfers = await transferService.getProductTransfers(productId)
-      setTransfers(updatedTransfers.transfers || [])
+      
+      // Refresh transfers and product (don't let refresh errors affect the success)
+      try {
+        const [updatedTransfers, updatedProduct] = await Promise.all([
+          transferService.getProductTransfers(productId),
+          productService.getProduct(productId)
+        ])
+        setTransfers(updatedTransfers.transfers || [])
+        setProduct(updatedProduct.product)
+      } catch (refreshErr) {
+        console.log('Transfer successful but failed to refresh data:', refreshErr)
+        // Don't show error - transfer was successful
+      }
     } catch (err) {
-      setError(err.response?.data?.error || 'Failed to create transfer')
+      setTransferError(err.response?.data?.error || 'Failed to create transfer')
     } finally {
       setIsTransferring(false)
     }
@@ -147,14 +162,16 @@ export default function ProductDetailPage() {
     )
   }
 
-  // Error state
+  // Error state (only for product not found)
   if (error) {
     return (
       <div className="max-w-2xl mx-auto text-center py-16">
         <AlertCircle size={48} className="mx-auto text-red-400 mb-4" />
-        <h2 className="text-xl font-bold text-gray-900 mb-2">{error}</h2>
-        <p className="text-gray-500 mb-6">
-          The product you're looking for might have been removed or doesn't exist.
+        <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
+          {error === 'Product not found' ? 'Product Not Found' : 'Error Loading Product'}
+        </h2>
+        <p className="text-gray-500 dark:text-gray-400 mb-6">
+          {error}
         </p>
         <Link to="/products">
           <Button variant="secondary" leftIcon={<ArrowLeft size={18} />}>
@@ -170,7 +187,7 @@ export default function ProductDetailPage() {
       {/* Back Button */}
       <Link 
         to="/products" 
-        className="inline-flex items-center gap-2 text-gray-500 hover:text-gray-700"
+        className="inline-flex items-center gap-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
       >
         <ArrowLeft size={20} />
         Back to Products
@@ -236,19 +253,28 @@ export default function ProductDetailPage() {
             )}
 
             {/* Action Buttons */}
-            <div className="flex gap-3">
+            <div className="flex flex-wrap gap-3">
               <Link to={`/verify?id=${product?.product_id}`}>
                 <Button variant="outline" leftIcon={<Shield size={18} />}>
                   Verify Product
                 </Button>
               </Link>
               {isOwner && (
-                <Button 
-                  onClick={() => setShowTransferModal(true)}
-                  leftIcon={<Send size={18} />}
-                >
-                  Transfer Product
-                </Button>
+                <>
+                  <Button 
+                    onClick={() => setShowTransferModal(true)}
+                    leftIcon={<Send size={18} />}
+                  >
+                    Transfer Product
+                  </Button>
+                  <Button 
+                    variant="secondary"
+                    onClick={() => navigate(`/dashboard/shipments/create?productId=${product?.product_id}&productName=${encodeURIComponent(product?.name || '')}`)}
+                    leftIcon={<Truck size={18} />}
+                  >
+                    Ship Product
+                  </Button>
+                </>
               )}
             </div>
           </div>
@@ -400,9 +426,19 @@ export default function ProductDetailPage() {
         size="lg"
       >
         <form onSubmit={handleTransfer} className="space-y-4">
+          {/* Transfer Error */}
+          {transferError && (
+            <div className="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-700 rounded-lg p-3">
+              <p className="text-sm text-red-700 dark:text-red-300 flex items-center gap-2">
+                <AlertCircle size={16} />
+                {transferError}
+              </p>
+            </div>
+          )}
+
           {/* Info Banner */}
-          <div className="bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-lg p-3">
-            <p className="text-sm text-blue-700 dark:text-blue-300">
+          <div className="bg-sky-50 dark:bg-sky-900/20 border border-sky-200 dark:border-sky-700 rounded-lg p-3">
+            <p className="text-sm text-sky-800 dark:text-sky-200">
               Transfer this product to a store, warehouse, or distributor. The transfer will be recorded on the blockchain for verification.
             </p>
           </div>
@@ -506,8 +542,8 @@ export default function ProductDetailPage() {
           </div>
 
           {/* Blockchain Notice */}
-          <div className="bg-emerald-50 dark:bg-emerald-900/30 border border-emerald-200 dark:border-emerald-800 rounded-lg p-3">
-            <p className="text-sm text-emerald-700 dark:text-emerald-300 flex items-center gap-2">
+          <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 rounded-lg p-3">
+            <p className="text-sm text-green-800 dark:text-green-200 flex items-center gap-2">
               <Shield size={16} />
               This transfer will be permanently recorded on the Ethereum blockchain for authenticity verification.
             </p>

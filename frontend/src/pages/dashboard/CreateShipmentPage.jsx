@@ -3,8 +3,8 @@
  * Form for creating new P2P deliveries
  */
 
-import { useState, useRef } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useState, useRef, useEffect } from 'react'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   Package,
@@ -33,12 +33,17 @@ import ShipmentTemplates from '../../components/shipment/ShipmentTemplates'
 
 export default function CreateShipmentPage() {
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
   const { user } = useAuthStore()
   const { createShipment, loading, error, clearError } = useShipmentStore()
   const fileInputRef = useRef(null)
 
+  // Get product info from URL params (when coming from product detail page)
+  const productIdFromUrl = searchParams.get('productId')
+  const productNameFromUrl = searchParams.get('productName')
+
   const [formData, setFormData] = useState({
-    description: '',
+    description: productNameFromUrl ? `Product: ${productNameFromUrl} (${productIdFromUrl})` : '',
     // Receiver info
     receiver_name: '',
     receiver_email: '',
@@ -58,9 +63,11 @@ export default function CreateShipmentPage() {
     package_dimensions: '',
     package_value: '',
     fragile: false,
-    special_instructions: '',
+    special_instructions: productIdFromUrl ? `Product ID: ${productIdFromUrl}` : '',
     // Photos (multiple)
-    pickup_photos: []
+    pickup_photos: [],
+    // Link to product
+    product_id: productIdFromUrl || ''
   })
 
   const [photoPreviews, setPhotoPreviews] = useState([])
@@ -344,15 +351,36 @@ export default function CreateShipmentPage() {
         <p className="text-gray-500 dark:text-gray-400">Send a package with secure P2P tracking</p>
       </div>
 
+      {/* Product Info Banner (when coming from product page) */}
+      {productIdFromUrl && (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-primary-50 dark:bg-primary-900/30 border border-primary-200 dark:border-primary-700 rounded-lg p-4 mb-6"
+        >
+          <div className="flex items-center gap-3">
+            <Package className="h-6 w-6 text-primary-600 dark:text-primary-400" />
+            <div>
+              <p className="font-medium text-primary-900 dark:text-primary-100">
+                Shipping Product: {productNameFromUrl || productIdFromUrl}
+              </p>
+              <p className="text-sm text-primary-700 dark:text-primary-300">
+                Product ID: {productIdFromUrl}
+              </p>
+            </div>
+          </div>
+        </motion.div>
+      )}
+
       {/* Error Alert */}
       {error && (
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6 flex items-center gap-3"
+          className="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-700 rounded-lg p-4 mb-6 flex items-center gap-3"
         >
-          <AlertCircle className="h-5 w-5 text-red-600 flex-shrink-0" />
-          <p className="text-red-700">{error}</p>
+          <AlertCircle className="h-5 w-5 text-red-600 dark:text-red-400 flex-shrink-0" />
+          <p className="text-red-700 dark:text-red-300">{error}</p>
         </motion.div>
       )}
 
