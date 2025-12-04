@@ -158,7 +158,7 @@ export default function RegisterProductPage() {
       {/* Back Button */}
       <Link 
         to="/products" 
-        className="inline-flex items-center gap-2 text-gray-500 hover:text-gray-700 mb-6"
+        className="inline-flex items-center gap-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 mb-6"
       >
         <ArrowLeft size={20} />
         Back to Products
@@ -166,8 +166,8 @@ export default function RegisterProductPage() {
 
       {/* Page Header */}
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-gray-900">Register New Product</h1>
-        <p className="text-gray-500 mt-1">
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Register New Product</h1>
+        <p className="text-gray-500 dark:text-gray-400 mt-1">
           Add a product to the blockchain for secure tracking
         </p>
       </div>
@@ -182,18 +182,18 @@ export default function RegisterProductPage() {
                   flex items-center justify-center w-10 h-10 rounded-full font-medium
                   ${step >= s.num 
                     ? 'bg-primary-600 text-white' 
-                    : 'bg-gray-200 text-gray-500'}
+                    : 'bg-gray-200 text-gray-500 dark:bg-gray-700 dark:text-gray-400'}
                 `}>
                   {step > s.num ? <CheckCircle size={20} /> : s.num}
                 </div>
                 <span className={`ml-3 font-medium ${
-                  step >= s.num ? 'text-gray-900' : 'text-gray-500'
+                  step >= s.num ? 'text-gray-900 dark:text-white' : 'text-gray-500 dark:text-gray-400'
                 }`}>
                   {s.label}
                 </span>
                 {index < steps.length - 1 && (
                   <div className={`w-16 lg:w-32 h-1 mx-4 rounded ${
-                    step > s.num ? 'bg-primary-600' : 'bg-gray-200'
+                    step > s.num ? 'bg-primary-600' : 'bg-gray-200 dark:bg-gray-700'
                   }`} />
                 )}
               </div>
@@ -207,7 +207,7 @@ export default function RegisterProductPage() {
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="mb-6 bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg flex items-center gap-2"
+          className="mb-6 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 px-4 py-3 rounded-lg flex items-center gap-2"
         >
           <AlertCircle size={20} />
           {error}
@@ -215,7 +215,7 @@ export default function RegisterProductPage() {
       )}
 
       {/* Form Card */}
-      <div className="bg-white rounded-xl border border-gray-200 shadow-sm">
+      <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm">
         <form onSubmit={handleSubmit}>
           {/* Step 1: Basic Info */}
           {step === 1 && (
@@ -224,14 +224,14 @@ export default function RegisterProductPage() {
               animate={{ opacity: 1, x: 0 }}
               className="p-6 space-y-6"
             >
-              <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
                 <Package className="text-primary-600" size={24} />
                 Basic Information
               </h2>
 
               {/* Product Name */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Product Name *
                 </label>
                 <input
@@ -240,14 +240,14 @@ export default function RegisterProductPage() {
                   value={formData.name}
                   onChange={handleChange}
                   placeholder="e.g., Organic Coffee Beans - Premium Arabica"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
                   required
                 />
               </div>
 
               {/* Category Selection */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Category *
                 </label>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -258,12 +258,12 @@ export default function RegisterProductPage() {
                       onClick={() => setFormData(prev => ({ ...prev, category: cat.value }))}
                       className={`p-3 rounded-lg border-2 text-center transition ${
                         formData.category === cat.value
-                          ? 'border-primary-500 bg-primary-50'
-                          : 'border-gray-200 hover:border-gray-300'
+                          ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/30'
+                          : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500'
                       }`}
                     >
                       <span className="text-2xl block mb-1">{cat.icon}</span>
-                      <span className="text-xs font-medium text-gray-700">{cat.label}</span>
+                      <span className="text-xs font-medium text-gray-700 dark:text-gray-300">{cat.label}</span>
                     </button>
                   ))}
                 </div>
@@ -271,7 +271,7 @@ export default function RegisterProductPage() {
 
               {/* Description */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Description
                 </label>
                 <textarea
@@ -280,7 +280,7 @@ export default function RegisterProductPage() {
                   onChange={handleChange}
                   placeholder="Describe your product..."
                   rows={3}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
                 />
               </div>
             </motion.div>
@@ -293,7 +293,7 @@ export default function RegisterProductPage() {
               animate={{ opacity: 1, x: 0 }}
               className="p-6 space-y-6"
             >
-              <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
                 <FileText className="text-primary-600" size={24} />
                 Product Details
               </h2>
@@ -301,7 +301,7 @@ export default function RegisterProductPage() {
               <div className="grid sm:grid-cols-2 gap-4">
                 {/* Origin */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     <MapPin size={16} className="inline mr-1" />
                     Origin / Manufacturing Location *
                   </label>
@@ -311,14 +311,14 @@ export default function RegisterProductPage() {
                     value={formData.origin}
                     onChange={handleChange}
                     placeholder="e.g., Bogotá, Colombia"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                    className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
                     required
                   />
                 </div>
 
                 {/* Batch Number */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     <Tag size={16} className="inline mr-1" />
                     Batch Number
                   </label>
@@ -328,13 +328,13 @@ export default function RegisterProductPage() {
                     value={formData.batch_number}
                     onChange={handleChange}
                     placeholder="e.g., BATCH-2024-001"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                    className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
                   />
                 </div>
 
                 {/* Manufacturing Date */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     <Calendar size={16} className="inline mr-1" />
                     Manufacturing Date
                   </label>
@@ -343,13 +343,13 @@ export default function RegisterProductPage() {
                     name="manufacturing_date"
                     value={formData.manufacturing_date}
                     onChange={handleChange}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                    className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                   />
                 </div>
 
                 {/* Expiry Date */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     <Calendar size={16} className="inline mr-1" />
                     Expiry Date
                   </label>
@@ -358,14 +358,14 @@ export default function RegisterProductPage() {
                     name="expiry_date"
                     value={formData.expiry_date}
                     onChange={handleChange}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                    className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                   />
                 </div>
               </div>
 
               {/* Additional Metadata */}
               <div>
-                <h3 className="text-sm font-medium text-gray-700 mb-3">
+                <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
                   Additional Information (Optional)
                 </h3>
                 <div className="grid sm:grid-cols-3 gap-4">
@@ -375,7 +375,7 @@ export default function RegisterProductPage() {
                     value={formData.metadata.weight}
                     onChange={handleChange}
                     placeholder="Weight (e.g., 1kg)"
-                    className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                    className="px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
                   />
                   <input
                     type="text"
@@ -383,7 +383,7 @@ export default function RegisterProductPage() {
                     value={formData.metadata.dimensions}
                     onChange={handleChange}
                     placeholder="Dimensions"
-                    className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                    className="px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
                   />
                   <input
                     type="text"
@@ -391,7 +391,7 @@ export default function RegisterProductPage() {
                     value={formData.metadata.certification}
                     onChange={handleChange}
                     placeholder="Certification"
-                    className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                    className="px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
                   />
                 </div>
               </div>
@@ -405,58 +405,58 @@ export default function RegisterProductPage() {
               animate={{ opacity: 1, x: 0 }}
               className="p-6 space-y-6"
             >
-              <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
                 <CheckCircle className="text-primary-600" size={24} />
                 Review & Submit
               </h2>
 
-              <div className="bg-gray-50 rounded-lg p-4 space-y-4">
+              <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4 space-y-4">
                 <div className="grid sm:grid-cols-2 gap-4">
                   <div>
-                    <span className="text-sm text-gray-500">Product Name</span>
-                    <p className="font-medium text-gray-900">{formData.name}</p>
+                    <span className="text-sm text-gray-500 dark:text-gray-400">Product Name</span>
+                    <p className="font-medium text-gray-900 dark:text-white">{formData.name}</p>
                   </div>
                   <div>
-                    <span className="text-sm text-gray-500">Category</span>
-                    <p className="font-medium text-gray-900 capitalize">{formData.category}</p>
+                    <span className="text-sm text-gray-500 dark:text-gray-400">Category</span>
+                    <p className="font-medium text-gray-900 dark:text-white capitalize">{formData.category}</p>
                   </div>
                   <div>
-                    <span className="text-sm text-gray-500">Origin</span>
-                    <p className="font-medium text-gray-900">{formData.origin}</p>
+                    <span className="text-sm text-gray-500 dark:text-gray-400">Origin</span>
+                    <p className="font-medium text-gray-900 dark:text-white">{formData.origin}</p>
                   </div>
                   {formData.batch_number && (
                     <div>
-                      <span className="text-sm text-gray-500">Batch Number</span>
-                      <p className="font-medium text-gray-900">{formData.batch_number}</p>
+                      <span className="text-sm text-gray-500 dark:text-gray-400">Batch Number</span>
+                      <p className="font-medium text-gray-900 dark:text-white">{formData.batch_number}</p>
                     </div>
                   )}
                   {formData.manufacturing_date && (
                     <div>
-                      <span className="text-sm text-gray-500">Manufacturing Date</span>
-                      <p className="font-medium text-gray-900">{formData.manufacturing_date}</p>
+                      <span className="text-sm text-gray-500 dark:text-gray-400">Manufacturing Date</span>
+                      <p className="font-medium text-gray-900 dark:text-white">{formData.manufacturing_date}</p>
                     </div>
                   )}
                   {formData.expiry_date && (
                     <div>
-                      <span className="text-sm text-gray-500">Expiry Date</span>
-                      <p className="font-medium text-gray-900">{formData.expiry_date}</p>
+                      <span className="text-sm text-gray-500 dark:text-gray-400">Expiry Date</span>
+                      <p className="font-medium text-gray-900 dark:text-white">{formData.expiry_date}</p>
                     </div>
                   )}
                 </div>
                 {formData.description && (
                   <div>
-                    <span className="text-sm text-gray-500">Description</span>
-                    <p className="text-gray-900">{formData.description}</p>
+                    <span className="text-sm text-gray-500 dark:text-gray-400">Description</span>
+                    <p className="text-gray-900 dark:text-gray-100">{formData.description}</p>
                   </div>
                 )}
               </div>
 
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <div className="bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
                 <div className="flex items-start gap-3">
-                  <Shield className="text-blue-600 flex-shrink-0 mt-0.5" size={20} />
+                  <Shield className="text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" size={20} />
                   <div>
-                    <p className="font-medium text-blue-900">Blockchain Registration</p>
-                    <p className="text-sm text-blue-700 mt-1">
+                    <p className="font-medium text-blue-900 dark:text-blue-200">Blockchain Registration</p>
+                    <p className="text-sm text-blue-700 dark:text-blue-300 mt-1">
                       This product will be permanently recorded on the Ethereum blockchain.
                       A unique product ID and QR code will be generated for tracking.
                     </p>
@@ -473,28 +473,28 @@ export default function RegisterProductPage() {
               animate={{ opacity: 1, scale: 1 }}
               className="p-8 text-center"
             >
-              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <CheckCircle className="text-green-600" size={32} />
+              <div className="w-16 h-16 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+                <CheckCircle className="text-green-600 dark:text-green-400" size={32} />
               </div>
-              <h2 className="text-xl font-bold text-gray-900 mb-2">
+              <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
                 Product Registered Successfully!
               </h2>
-              <p className="text-gray-500 mb-6">
+              <p className="text-gray-500 dark:text-gray-400 mb-6">
                 Your product has been added to the blockchain.
               </p>
 
-              <div className="bg-gray-50 rounded-lg p-4 mb-6 text-left">
+              <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4 mb-6 text-left">
                 <div className="grid sm:grid-cols-2 gap-4">
                   <div>
-                    <span className="text-sm text-gray-500">Product ID</span>
-                    <p className="font-mono font-medium text-gray-900">
+                    <span className="text-sm text-gray-500 dark:text-gray-400">Product ID</span>
+                    <p className="font-mono font-medium text-gray-900 dark:text-white">
                       {success.product?.product_id}
                     </p>
                   </div>
                   {success.product?.blockchain_hash && (
                     <div>
-                      <span className="text-sm text-gray-500">Blockchain Hash</span>
-                      <p className="font-mono text-sm text-gray-900 truncate">
+                      <span className="text-sm text-gray-500 dark:text-gray-400">Blockchain Hash</span>
+                      <p className="font-mono text-sm text-gray-900 dark:text-gray-100 truncate">
                         {success.product.blockchain_hash}
                       </p>
                     </div>
@@ -503,9 +503,9 @@ export default function RegisterProductPage() {
               </div>
 
               {/* QR Code Preview Placeholder */}
-              <div className="bg-white border-2 border-dashed border-gray-300 rounded-lg p-8 mb-6">
-                <QrCode size={80} className="mx-auto text-gray-400 mb-2" />
-                <p className="text-sm text-gray-500">QR Code Generated</p>
+              <div className="bg-white dark:bg-gray-700 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-8 mb-6">
+                <QrCode size={80} className="mx-auto text-gray-400 dark:text-gray-500 mb-2" />
+                <p className="text-sm text-gray-500 dark:text-gray-400">QR Code Generated</p>
               </div>
 
               <div className="flex justify-center gap-4">
@@ -514,7 +514,7 @@ export default function RegisterProductPage() {
                     View All Products
                   </Button>
                 </Link>
-                <Link to={`/products/${success.product?.id}`}>
+                <Link to={`/products/${success.product?.product_id}`}>
                   <Button rightIcon={<ArrowRight size={20} />}>
                     View Product
                   </Button>
@@ -525,7 +525,7 @@ export default function RegisterProductPage() {
 
           {/* Form Actions */}
           {step < 4 && (
-            <div className="px-6 py-4 bg-gray-50 border-t border-gray-200 rounded-b-xl flex justify-between">
+            <div className="px-6 py-4 bg-gray-50 dark:bg-gray-700/50 border-t border-gray-200 dark:border-gray-700 rounded-b-xl flex justify-between">
               {step > 1 ? (
                 <Button
                   type="button"

@@ -8,7 +8,7 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 
 from .. import db
 from ..models import User, Product, Transfer, TransferType, ProductStatus
-from ..services.blockchain_service import BlockchainService
+from ..services.blockchain_service import blockchain_service
 
 bp = Blueprint('transfers', __name__)
 
@@ -135,8 +135,7 @@ def create_transfer():
     
     # Record on blockchain
     try:
-        blockchain = BlockchainService()
-        tx_hash, block_number = blockchain.record_transfer(
+        tx_hash, block_number = blockchain_service.record_transfer(
             product.product_id,
             user.wallet_address or '0x0000000000000000000000000000000000000000',
             recipient.wallet_address or '0x0000000000000000000000000000000000000000',

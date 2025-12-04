@@ -242,12 +242,12 @@ export default function ShipmentsPage() {
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
-            className="bg-red-50 border border-red-200 rounded-lg p-4 flex justify-between items-center"
+            className="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg p-4 flex justify-between items-center"
           >
-            <p className="text-red-700">{error}</p>
+            <p className="text-red-700 dark:text-red-400">{error}</p>
             <button
               onClick={clearError}
-              className="text-red-600 hover:text-red-800 text-sm font-medium"
+              className="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 text-sm font-medium"
             >
               Dismiss
             </button>
@@ -273,10 +273,10 @@ export default function ShipmentsPage() {
 
       {/* Empty State */}
       {!loading && filteredShipments.length === 0 && (
-        <div className="text-center py-16 bg-white rounded-xl shadow-sm border border-gray-200">
-          <Package className="h-16 w-16 mx-auto text-gray-300 mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 mb-2">No shipments found</h3>
-          <p className="text-gray-500 mb-6">
+        <div className="text-center py-16 bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
+          <Package className="h-16 w-16 mx-auto text-gray-300 dark:text-gray-600 mb-4" />
+          <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">No shipments found</h3>
+          <p className="text-gray-500 dark:text-gray-400 mb-6">
             {searchQuery || statusFilter
               ? 'Try adjusting your filters'
               : 'Create your first shipment to get started'}
@@ -295,8 +295,8 @@ export default function ShipmentsPage() {
 
       {/* Pagination */}
       {!loading && pagination.pages > 1 && (
-        <div className="flex items-center justify-between bg-white rounded-xl shadow-sm border border-gray-200 px-4 py-3">
-          <div className="text-sm text-gray-500">
+        <div className="flex items-center justify-between bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 px-4 py-3">
+          <div className="text-sm text-gray-500 dark:text-gray-400">
             Showing {((pagination.page - 1) * pagination.per_page) + 1} to{' '}
             {Math.min(pagination.page * pagination.per_page, pagination.total)} of{' '}
             {pagination.total} shipments
@@ -305,17 +305,17 @@ export default function ShipmentsPage() {
             <button
               onClick={() => handlePageChange(pagination.page - 1)}
               disabled={pagination.page === 1}
-              className="p-2 rounded-lg hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <ChevronLeft className="h-5 w-5" />
             </button>
-            <span className="text-sm font-medium">
+            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
               Page {pagination.page} of {pagination.pages}
             </span>
             <button
               onClick={() => handlePageChange(pagination.page + 1)}
               disabled={pagination.page === pagination.pages}
-              className="p-2 rounded-lg hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <ChevronRight className="h-5 w-5" />
             </button>
