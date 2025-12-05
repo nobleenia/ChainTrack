@@ -99,14 +99,19 @@ class CourierProfileService:
         
         otp = profile.generate_new_otp()
         
-        # In production, send OTP via SMS
-        # For development, we return it (REMOVE IN PRODUCTION)
-        logger.info(f"OTP generated for {phone}: {otp}")
+        # Send OTP via SMS in production
+        import os
+        if os.environ.get('FLASK_ENV') == 'production':
+            # TODO: Integrate SMS service (Twilio, etc.)
+            # from ..services.sms_service import send_sms
+            # send_sms(phone, f"Your ChainTrack verification code is: {otp}")
+            pass
+        else:
+            # Development only - log to console, NEVER return to client
+            logger.debug(f"[DEV MODE] OTP for {phone}: {otp}")
         
-        # TODO: Integrate SMS service (Twilio, etc.)
-        # sms_service.send(phone, f"Your ChainTrack verification code is: {otp}")
-        
-        return (True, "OTP sent successfully", otp)
+        # SECURITY: Never return OTP to client - always None
+        return (True, "OTP sent successfully", None)
 
     @staticmethod
     def verify_otp_and_login(

@@ -83,7 +83,7 @@ def create_shipment():
         
         return jsonify({
             'message': 'Shipment created successfully',
-            'shipment': shipment.to_dict(include_pin=True)
+            'shipment': shipment.to_dict(include_pin=True, include_pii=True)
         }), 201
         
     except Exception as e:
@@ -119,7 +119,7 @@ def list_shipments():
     stats = ShipmentService.get_shipment_stats(current_user_id)
     
     return jsonify({
-        'shipments': [s.to_dict(include_checkpoints=False) for s in shipments],
+        'shipments': [s.to_dict(include_checkpoints=False, include_pii=True) for s in shipments],
         'stats': stats,
         'count': len(shipments)
     }), 200
@@ -148,9 +148,16 @@ def get_shipment(shipment_id):
     
     # Include PIN only for sender
     include_pin = user_id and shipment.sender_id == user_id
+    # Include PII only for sender or receiver (by email match)
+    include_pii = False
+    if user_id:
+        from ..models import User
+        user = User.query.get(user_id)
+        if user and (shipment.sender_id == user_id or user.email == shipment.receiver_email):
+            include_pii = True
     
     return jsonify({
-        'shipment': shipment.to_dict(include_pin=include_pin)
+        'shipment': shipment.to_dict(include_pin=include_pin, include_pii=include_pii)
     }), 200
 
 

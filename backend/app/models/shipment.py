@@ -112,22 +112,39 @@ class Shipment(db.Model):
     def __repr__(self):
         return f'<Shipment {self.shipment_id}>'
 
-    def to_dict(self, include_pin=False, include_checkpoints=True):
-        """Convert to dictionary for API response"""
+    def to_dict(self, include_pin=False, include_checkpoints=True, include_pii=False):
+        """
+        Convert to dictionary for API response
+        
+        Args:
+            include_pin: Include tracking PIN (only for authorized users)
+            include_checkpoints: Include checkpoint history
+            include_pii: Include PII like email/phone (only for sender/receiver)
+        """
+        # Sender info - minimal by default
+        sender_info = None
+        if self.sender:
+            sender_info = {
+                'id': self.sender.id,
+                'name': self.sender.name,
+            }
+            if include_pii:
+                sender_info['email'] = self.sender.email
+        
+        # Receiver info - only expose what's needed
+        receiver_info = {
+            'name': self.receiver_name,
+        }
+        if include_pii:
+            receiver_info['email'] = self.receiver_email
+            receiver_info['phone'] = self.receiver_phone
+        
         data = {
             'id': self.id,
             'shipment_id': self.shipment_id,
             'status': self.status.value,
-            'sender': {
-                'id': self.sender.id,
-                'name': self.sender.name,
-                'email': self.sender.email
-            } if self.sender else None,
-            'receiver': {
-                'name': self.receiver_name,
-                'email': self.receiver_email,
-                'phone': self.receiver_phone
-            },
+            'sender': sender_info,
+            'receiver': receiver_info,
             'package': {
                 'description': self.description,
                 'type': self.package_type,

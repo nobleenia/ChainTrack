@@ -6,15 +6,15 @@ services:
     image: postgres:15-alpine
     container_name: chaintrack-db
     environment:
-      POSTGRES_USER: ${DB_USER:-chaintrack}
-      POSTGRES_PASSWORD: ${DB_PASSWORD:-chaintrack123}
+      POSTGRES_USER: ${DB_USER:?DB_USER is required}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD is required}
       POSTGRES_DB: ${DB_NAME:-chaintrack}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-chaintrack}"]
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER}"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -27,9 +27,9 @@ services:
     container_name: chaintrack-backend
     environment:
       - FLASK_ENV=${FLASK_ENV:-development}
-      - DATABASE_URL=postgresql://${DB_USER:-chaintrack}:${DB_PASSWORD:-chaintrack123}@db:5432/${DB_NAME:-chaintrack}
-      - SECRET_KEY=${SECRET_KEY:-dev-secret-key}
-      - JWT_SECRET_KEY=${JWT_SECRET_KEY:-jwt-dev-secret}
+      - DATABASE_URL=postgresql://${DB_USER:?DB_USER is required}:${DB_PASSWORD:?DB_PASSWORD is required}@db:5432/${DB_NAME:-chaintrack}
+      - SECRET_KEY=${SECRET_KEY:?SECRET_KEY is required}
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY:?JWT_SECRET_KEY is required}
       - CORS_ORIGINS=${CORS_ORIGINS:-http://localhost:5173}
       - ETHEREUM_RPC_URL=${ETHEREUM_RPC_URL:-}
       - CONTRACT_ADDRESS=${CONTRACT_ADDRESS:-}

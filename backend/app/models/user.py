@@ -72,16 +72,35 @@ class User(db.Model):
                             UserRole.RETAILER, UserRole.ADMIN]
     
     def to_dict(self):
-        """Serialize user to dictionary (exclude sensitive data)"""
+        """Serialize user to dictionary (private - for authenticated user's own profile)"""
         return {
             'id': self.id,
             'email': self.email,
             'name': self.name,
             'company_name': self.company_name,
+            'phone': self.phone,
             'role': self.role.value,
             'is_verified': self.is_verified,
             'wallet_address': self.wallet_address,
             'created_at': self.created_at.isoformat() if self.created_at else None
+        }
+    
+    def to_public_dict(self):
+        """Serialize user to dictionary (public - safe for other users to see)"""
+        return {
+            'id': self.id,
+            'name': self.name,
+            'company_name': self.company_name,
+            'role': self.role.value,
+            'is_verified': self.is_verified,
+        }
+    
+    def to_minimal_dict(self):
+        """Minimal user info for references in other objects"""
+        return {
+            'id': self.id,
+            'name': self.name,
+            'role': self.role.value,
         }
     
     def __repr__(self):

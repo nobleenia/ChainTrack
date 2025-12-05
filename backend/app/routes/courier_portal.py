@@ -68,11 +68,22 @@ def courier_auth_optional(f):
     return decorated
 
 
+def apply_rate_limit(limit_string):
+    """Apply rate limit if limiter is available"""
+    from .. import limiter
+    def decorator(f):
+        if limiter:
+            return limiter.limit(limit_string)(f)
+        return f
+    return decorator
+
+
 # ============================================================
 # Authentication Endpoints
 # ============================================================
 
 @bp.route('/auth/request-otp', methods=['POST'])
+@apply_rate_limit("3 per minute")
 def request_otp():
     """
     Request OTP for courier login/registration
@@ -99,14 +110,14 @@ def request_otp():
     
     response = {'message': message}
     
-    # Include OTP in development mode only (REMOVE IN PRODUCTION)
-    if otp:
-        response['_dev_otp'] = otp
+    # SECURITY: OTP is never returned to client
+    # In development, check console logs for OTP
     
     return jsonify(response), 200
 
 
 @bp.route('/auth/verify-otp', methods=['POST'])
+@apply_rate_limit("5 per minute")
 def verify_otp():
     """
     Verify OTP and create session
