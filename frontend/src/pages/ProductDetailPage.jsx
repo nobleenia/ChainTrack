@@ -194,11 +194,11 @@ export default function ProductDetailPage() {
       </Link>
 
       {/* Product Header */}
-      <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
+      <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm p-6">
         <div className="flex flex-col lg:flex-row gap-6">
           {/* QR Code */}
           <div className="flex-shrink-0">
-            <div className="w-48 h-48 bg-gray-100 rounded-xl flex items-center justify-center border-2 border-dashed border-gray-300">
+            <div className="w-48 h-48 bg-gray-100 dark:bg-gray-700 rounded-xl flex items-center justify-center border-2 border-dashed border-gray-300 dark:border-gray-600">
               {product?.qr_code ? (
                 <img 
                   src={`data:image/png;base64,${product.qr_code}`} 
@@ -223,33 +223,33 @@ export default function ProductDetailPage() {
           <div className="flex-1">
             <div className="flex items-start justify-between mb-4">
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">{product?.name}</h1>
-                <p className="text-gray-500 font-mono">{product?.product_id}</p>
+                <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{product?.name}</h1>
+                <p className="text-gray-500 dark:text-gray-400 font-mono">{product?.product_id}</p>
               </div>
               <StatusBadge status={product?.status} size="lg" />
             </div>
 
             <div className="grid md:grid-cols-2 gap-4 mb-4">
-              <div className="flex items-center gap-2 text-gray-600">
-                <Package size={18} className="text-gray-400" />
+              <div className="flex items-center gap-2 text-gray-600 dark:text-gray-300">
+                <Package size={18} className="text-gray-400 dark:text-gray-500" />
                 <span className="capitalize">{product?.category || 'General'}</span>
               </div>
-              <div className="flex items-center gap-2 text-gray-600">
-                <MapPin size={18} className="text-gray-400" />
+              <div className="flex items-center gap-2 text-gray-600 dark:text-gray-300">
+                <MapPin size={18} className="text-gray-400 dark:text-gray-500" />
                 <span>{product?.origin || 'Unknown'}</span>
               </div>
-              <div className="flex items-center gap-2 text-gray-600">
-                <Calendar size={18} className="text-gray-400" />
+              <div className="flex items-center gap-2 text-gray-600 dark:text-gray-300">
+                <Calendar size={18} className="text-gray-400 dark:text-gray-500" />
                 <span>Manufactured: {formatDate(product?.manufacturing_date)}</span>
               </div>
-              <div className="flex items-center gap-2 text-gray-600">
-                <Building size={18} className="text-gray-400" />
+              <div className="flex items-center gap-2 text-gray-600 dark:text-gray-300">
+                <Building size={18} className="text-gray-400 dark:text-gray-500" />
                 <span>{product?.manufacturer?.company_name || product?.manufacturer?.name}</span>
               </div>
             </div>
 
             {product?.description && (
-              <p className="text-gray-600 mb-4">{product.description}</p>
+              <p className="text-gray-600 dark:text-gray-300 mb-4">{product.description}</p>
             )}
 
             {/* Action Buttons */}
@@ -282,8 +282,8 @@ export default function ProductDetailPage() {
       </div>
 
       {/* Blockchain Info */}
-      <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+      <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm p-6">
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
           <Shield className="text-primary-600" size={24} />
           Blockchain Verification
         </h2>
@@ -296,14 +296,14 @@ export default function ProductDetailPage() {
             </div>
             
             <div>
-              <span className="text-sm text-gray-500">Transaction Hash</span>
+              <span className="text-sm text-gray-500 dark:text-gray-400">Transaction Hash</span>
               <div className="flex items-center gap-2 mt-1">
-                <code className="flex-1 bg-gray-100 px-3 py-2 rounded-lg text-sm font-mono text-gray-700 truncate">
+                <code className="flex-1 bg-gray-100 dark:bg-gray-700 px-3 py-2 rounded-lg text-sm font-mono text-gray-700 dark:text-gray-300 truncate">
                   {product.blockchain_hash}
                 </code>
                 <button
                   onClick={copyHash}
-                  className="p-2 text-gray-400 hover:text-gray-600 transition"
+                  className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition"
                   title="Copy hash"
                 >
                   {copiedHash ? <Check size={18} className="text-green-500" /> : <Copy size={18} />}
@@ -312,7 +312,7 @@ export default function ProductDetailPage() {
                   href={`https://sepolia.etherscan.io/tx/${product.blockchain_hash}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="p-2 text-gray-400 hover:text-gray-600 transition"
+                  className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition"
                   title="View on Etherscan"
                 >
                   <ExternalLink size={18} />
@@ -329,8 +329,8 @@ export default function ProductDetailPage() {
       </div>
 
       {/* Product Journey / Transfer History */}
-      <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+      <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm p-6">
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
           <Clock className="text-primary-600" size={24} />
           Product Journey
         </h2>
@@ -343,18 +343,18 @@ export default function ProductDetailPage() {
               <div className="flex gap-4 pb-6">
                 <div className="flex flex-col items-center">
                   <div className="w-4 h-4 rounded-full bg-primary-600" />
-                  <div className="w-0.5 flex-1 bg-gray-200" />
+                  <div className="w-0.5 flex-1 bg-gray-200 dark:bg-gray-600" />
                 </div>
                 <div className="flex-1">
                   <div className="flex items-center justify-between">
-                    <span className="font-medium text-gray-900">Manufactured</span>
-                    <span className="text-sm text-gray-500">{formatDate(product?.created_at)}</span>
+                    <span className="font-medium text-gray-900 dark:text-white">Manufactured</span>
+                    <span className="text-sm text-gray-500 dark:text-gray-400">{formatDate(product?.created_at)}</span>
                   </div>
-                  <p className="text-sm text-gray-600 flex items-center gap-1 mt-1">
+                  <p className="text-sm text-gray-600 dark:text-gray-300 flex items-center gap-1 mt-1">
                     <Building size={14} />
                     {product?.manufacturer?.company_name || product?.manufacturer?.name}
                   </p>
-                  <p className="text-sm text-gray-600 flex items-center gap-1">
+                  <p className="text-sm text-gray-600 dark:text-gray-300 flex items-center gap-1">
                     <MapPin size={14} />
                     {product?.origin || 'Unknown location'}
                   </p>
@@ -376,27 +376,27 @@ export default function ProductDetailPage() {
                       transfer.status === 'pending' ? 'bg-yellow-500' : 'bg-gray-400'
                     }`} />
                     {index < transfers.length - 1 && (
-                      <div className="w-0.5 flex-1 bg-gray-200" />
+                      <div className="w-0.5 flex-1 bg-gray-200 dark:bg-gray-600" />
                     )}
                   </div>
                   <div className="flex-1">
                     <div className="flex items-center justify-between">
-                      <span className="font-medium text-gray-900 flex items-center gap-2">
+                      <span className="font-medium text-gray-900 dark:text-white flex items-center gap-2">
                         Transferred
                         <StatusBadge status={transfer.status} size="sm" />
                       </span>
-                      <span className="text-sm text-gray-500">
+                      <span className="text-sm text-gray-500 dark:text-gray-400">
                         {formatDate(transfer.created_at)}
                       </span>
                     </div>
-                    <div className="text-sm text-gray-600 mt-1">
+                    <div className="text-sm text-gray-600 dark:text-gray-300 mt-1">
                       <span className="flex items-center gap-1">
                         <User size={14} />
                         From: {transfer.from_user?.company_name || transfer.from_user?.name}
                       </span>
                       <span className="flex items-center gap-1">
                         <ArrowRight size={14} />
-                        To: {transfer.to_user?.company_name || transfer.to_user?.name}
+                        To: {transfer.recipient?.name || transfer.to_user?.company_name || transfer.to_user?.name || 'External'}
                       </span>
                       {transfer.location && (
                         <span className="flex items-center gap-1">
@@ -412,8 +412,8 @@ export default function ProductDetailPage() {
           </div>
         ) : (
           <div className="text-center py-8">
-            <Clock size={32} className="mx-auto text-gray-300 mb-2" />
-            <p className="text-gray-500">No transfers recorded yet</p>
+            <Clock size={32} className="mx-auto text-gray-300 dark:text-gray-600 mb-2" />
+            <p className="text-gray-500 dark:text-gray-400">No transfers recorded yet</p>
           </div>
         )}
       </div>

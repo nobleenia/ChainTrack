@@ -184,14 +184,14 @@ export default function DashboardPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: index * 0.1 }}
-            className="bg-white rounded-xl p-6 shadow-sm"
+            className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm"
           >
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600">{stat.label}</p>
-                <p className="text-3xl font-bold text-gray-900 mt-1">
+                <p className="text-sm text-gray-600 dark:text-gray-400">{stat.label}</p>
+                <p className="text-3xl font-bold text-gray-900 dark:text-white mt-1">
                   {isLoading ? (
-                    <span className="inline-block w-16 h-8 bg-gray-200 rounded animate-pulse" />
+                    <span className="inline-block w-16 h-8 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
                   ) : (
                     user?.role === 'consumer' 
                       ? (stat.value || 0).toLocaleString()
@@ -209,12 +209,12 @@ export default function DashboardPage() {
 
       {/* Recent Products - hide for consumers */}
       {user?.role !== 'consumer' && (
-      <div className="bg-white rounded-xl shadow-sm" id="tour-recent-products">
-        <div className="px-6 py-4 border-b flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-gray-900">Recent Products</h2>
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm" id="tour-recent-products">
+        <div className="px-6 py-4 border-b dark:border-gray-700 flex items-center justify-between">
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Recent Products</h2>
           <Link 
             to="/products" 
-            className="text-primary-600 hover:text-primary-700 text-sm font-medium flex items-center"
+            className="text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 text-sm font-medium flex items-center"
           >
             View All
             <ArrowRight size={16} className="ml-1" />
@@ -225,35 +225,35 @@ export default function DashboardPage() {
           <div className="p-6 space-y-4">
             {[1, 2, 3].map((i) => (
               <div key={i} className="animate-pulse flex items-center space-x-4">
-                <div className="w-10 h-10 bg-gray-200 rounded-lg" />
+                <div className="w-10 h-10 bg-gray-200 dark:bg-gray-700 rounded-lg" />
                 <div className="flex-1 space-y-2">
-                  <div className="h-4 bg-gray-200 rounded w-1/3" />
-                  <div className="h-3 bg-gray-200 rounded w-1/4" />
+                  <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/3" />
+                  <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-1/4" />
                 </div>
-                <div className="h-6 w-20 bg-gray-200 rounded-full" />
+                <div className="h-6 w-20 bg-gray-200 dark:bg-gray-700 rounded-full" />
               </div>
             ))}
           </div>
         ) : recentProducts.length > 0 ? (
-          <div className="divide-y">
+          <div className="divide-y dark:divide-gray-700">
             {recentProducts.map((product) => (
               <Link
                 key={product.id}
                 to={`/products/${product.product_id}`}
-                className="flex items-center px-6 py-4 hover:bg-gray-50 transition"
+                className="flex items-center px-6 py-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition"
               >
-                <div className="w-10 h-10 bg-primary-100 rounded-lg flex items-center justify-center">
-                  <Package size={20} className="text-primary-600" />
+                <div className="w-10 h-10 bg-primary-100 dark:bg-primary-900/50 rounded-lg flex items-center justify-center">
+                  <Package size={20} className="text-primary-600 dark:text-primary-400" />
                 </div>
                 <div className="ml-4 flex-1">
-                  <p className="font-medium text-gray-900">{product.name}</p>
-                  <p className="text-sm text-gray-500">{product.product_id}</p>
+                  <p className="font-medium text-gray-900 dark:text-white">{product.name}</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">{product.product_id}</p>
                 </div>
                 <div className="flex items-center space-x-4">
                   <span className={`px-3 py-1 rounded-full text-xs font-medium capitalize ${getStatusColor(product.status)}`}>
                     {product.status?.replace('_', ' ')}
                   </span>
-                  <div className="text-sm text-gray-500 flex items-center">
+                  <div className="text-sm text-gray-500 dark:text-gray-400 flex items-center">
                     <Clock size={14} className="mr-1" />
                     {new Date(product.created_at).toLocaleDateString()}
                   </div>
@@ -263,8 +263,8 @@ export default function DashboardPage() {
           </div>
         ) : (
           <div className="p-12 text-center">
-            <Package size={48} className="mx-auto text-gray-300 mb-4" />
-            <p className="text-gray-500 mb-4">No products registered yet</p>
+            <Package size={48} className="mx-auto text-gray-300 dark:text-gray-600 mb-4" />
+            <p className="text-gray-500 dark:text-gray-400 mb-4">No products registered yet</p>
             {user?.role !== 'consumer' && (
               <Link
                 to="/products/new"
