@@ -864,7 +864,8 @@ export default function ShipmentDetailPage() {
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
             <h3 className="font-semibold text-gray-900 mb-4">Actions</h3>
             <div className="space-y-3">
-              {isSender &&
+              {/* Mark as Delivered - Only for receiver (incoming shipments) */}
+              {isReceiver &&
                 ['created', 'picked_up', 'in_transit', 'out_for_delivery'].includes(
                   shipment.status
                 ) && (

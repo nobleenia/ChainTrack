@@ -345,6 +345,105 @@ def confirm_delivery(shipment_id):
         return jsonify({'error': str(e)}), 500
 
 
+@bp.route('/<shipment_id>/deliver', methods=['POST'])
+def mark_delivered(shipment_id):
+    """
+    Mark shipment as delivered (receiver or authorized courier endpoint)
+    
+    Can be called by:
+    - Receiver using PIN (for unregistered receivers via public tracking)
+    - Registered receiver (logged in user whose email matches receiver_email)
+    - Authorized courier with auth_code or JWT
+    
+    Request Body:
+        - pin: string (required if not authenticated receiver/courier)
+        - recipient_name: string (required)
+        - delivery_photo: string (optional) - Base64 encoded photo
+        - notes: string (optional)
+    """
+    from ..services.courier_service import CourierAuthorizationService, TamperProofChainService
+    
+    user_id = get_optional_user_id()
+    data = request.get_json()
+    
+    shipment = Shipment.query.filter_by(shipment_id=shipment_id).first()
+    
+    if not shipment:
+        return jsonify({'error': 'Shipment not found'}), 404
+    
+    # Check shipment status
+    if shipment.status in [ShipmentStatus.DELIVERED, ShipmentStatus.CONFIRMED]:
+        return jsonify({'error': 'Shipment already delivered or confirmed'}), 400
+    
+    if shipment.status == ShipmentStatus.CANCELLED:
+        return jsonify({'error': 'Shipment is cancelled'}), 400
+    
+    # Validate required fields
+    if not data.get('recipient_name'):
+        return jsonify({'error': 'recipient_name is required'}), 400
+    
+    # Authorization check
+    is_authorized = False
+    handler_name = data.get('recipient_name')
+    
+    # 1. Check if receiver via PIN
+    if data.get('pin'):
+        if shipment.tracking_pin == data['pin']:
+            is_authorized = True
+            
+    # 2. Check if logged-in receiver (email match)
+    if user_id and not is_authorized:
+        from ..models import User
+        user = User.query.get(user_id)
+        if user and user.email == shipment.receiver_email:
+            is_authorized = True
+    
+    # 3. Check courier authorization
+    if not is_authorized:
+        is_auth, auth, _ = CourierAuthorizationService.verify_authorization(
+            shipment=shipment,
+            action='delivered',
+            auth_code=data.get('auth_code'),
+            user_id=user_id
+        )
+        if is_auth:
+            is_authorized = True
+            if auth:
+                handler_name = auth.courier_name or handler_name
+    
+    if not is_authorized:
+        return jsonify({
+            'error': 'Not authorized to mark as delivered',
+            'hint': 'Provide valid PIN (receiver) or auth_code (courier)'
+        }), 403
+    
+    try:
+        # Record the delivered checkpoint
+        checkpoint = ShipmentService.record_checkpoint(
+            shipment=shipment,
+            action=CheckpointAction.DELIVERED,
+            handler_id=user_id,
+            handler_name=handler_name,
+            location=data.get('location'),
+            notes=data.get('notes'),
+            photo_url=data.get('delivery_photo')  # Will handle base64 if needed
+        )
+        
+        # Add to tamper-proof chain
+        chain_entry = TamperProofChainService.add_to_chain(checkpoint)
+        
+        return jsonify({
+            'message': 'Shipment marked as delivered',
+            'shipment': shipment.to_dict(),
+            'checkpoint': checkpoint.to_dict(),
+            'shipment_status': shipment.status.value
+        }), 200
+        
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 500
+
+
 @bp.route('/<shipment_id>/cancel', methods=['POST'])
 @jwt_required()
 def cancel_shipment(shipment_id):

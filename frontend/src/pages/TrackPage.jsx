@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Search,
@@ -12,7 +12,9 @@ import {
   User,
   Calendar,
   ShieldCheck,
-  Image
+  Image,
+  Camera,
+  X
 } from 'lucide-react';
 import api from '../services/api';
 
@@ -58,6 +60,60 @@ export default function TrackPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [searched, setSearched] = useState(false);
+  
+  // Mark as delivered modal state
+  const [showDeliveryModal, setShowDeliveryModal] = useState(false);
+  const [deliveryLoading, setDeliveryLoading] = useState(false);
+  const [deliveryError, setDeliveryError] = useState('');
+  const [deliveryForm, setDeliveryForm] = useState({
+    recipient_name: '',
+    notes: '',
+    photo: null
+  });
+  const [photoPreview, setPhotoPreview] = useState(null);
+  const fileInputRef = useRef(null);
+
+  const handlePhotoChange = (e) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setDeliveryForm((prev) => ({ ...prev, photo: reader.result }));
+        setPhotoPreview(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleMarkDelivered = async (e) => {
+    e.preventDefault();
+    if (!deliveryForm.recipient_name.trim()) {
+      setDeliveryError('Recipient name is required');
+      return;
+    }
+
+    setDeliveryLoading(true);
+    setDeliveryError('');
+
+    try {
+      const response = await api.post(`/shipments/${shipment.shipment_id}/deliver`, {
+        pin: pin,
+        recipient_name: deliveryForm.recipient_name,
+        notes: deliveryForm.notes || undefined,
+        delivery_photo: deliveryForm.photo
+      });
+      
+      // Update shipment state
+      setShipment(response.data.shipment);
+      setShowDeliveryModal(false);
+      setDeliveryForm({ recipient_name: '', notes: '', photo: null });
+      setPhotoPreview(null);
+    } catch (err) {
+      setDeliveryError(err.response?.data?.error || 'Failed to mark as delivered');
+    } finally {
+      setDeliveryLoading(false);
+    }
+  };
 
   const handleSearch = async (e) => {
     e.preventDefault();
@@ -430,6 +486,26 @@ export default function TrackPage() {
                   </div>
                 </div>
               )}
+
+              {/* Receiver Actions - Mark as Delivered */}
+              {shipment && ['created', 'picked_up', 'in_transit', 'out_for_delivery'].includes(shipment.status) && (
+                <div className="mt-6 bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6">
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                    <CheckCircle className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+                    Receiver Actions
+                  </h3>
+                  <p className="text-gray-600 dark:text-gray-400 text-sm mb-4">
+                    Have you received this package? Mark it as delivered to update the shipment status.
+                  </p>
+                  <button
+                    onClick={() => setShowDeliveryModal(true)}
+                    className="w-full sm:w-auto flex items-center justify-center gap-2 bg-emerald-600 text-white px-6 py-3 rounded-lg hover:bg-emerald-700 transition-colors font-medium"
+                  >
+                    <CheckCircle className="h-5 w-5" />
+                    Mark as Delivered
+                  </button>
+                </div>
+              )}
             </div>
           </motion.section>
         )}
@@ -446,6 +522,121 @@ export default function TrackPage() {
           <p className="text-gray-500 dark:text-gray-400">No shipment found with the provided details</p>
         </motion.div>
       )}
+
+      {/* Mark as Delivered Modal */}
+      <AnimatePresence>
+        {showDeliveryModal && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto"
+            >
+              <div className="p-6 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Mark as Delivered</h3>
+                <button 
+                  onClick={() => setShowDeliveryModal(false)} 
+                  className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded text-gray-500 dark:text-gray-400"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+
+              <form onSubmit={handleMarkDelivered} className="p-6 space-y-4">
+                {deliveryError && (
+                  <div className="bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-400 p-3 rounded-lg text-sm">
+                    {deliveryError}
+                  </div>
+                )}
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Your Name (Recipient) *
+                  </label>
+                  <input
+                    type="text"
+                    value={deliveryForm.recipient_name}
+                    onChange={(e) => setDeliveryForm(prev => ({ ...prev, recipient_name: e.target.value }))}
+                    placeholder="Enter your name"
+                    className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-emerald-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Delivery Photo (optional)
+                  </label>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">
+                    Take a photo of the received package as proof
+                  </p>
+                  {photoPreview ? (
+                    <div className="relative inline-block">
+                      <img src={photoPreview} alt="Preview" className="max-w-full rounded-lg max-h-48 object-cover" />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setPhotoPreview(null);
+                          setDeliveryForm(prev => ({ ...prev, photo: null }));
+                        }}
+                        className="absolute -top-2 -right-2 bg-red-500 text-white p-1 rounded-full"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => fileInputRef.current?.click()}
+                      className="flex items-center gap-2 px-4 py-2 border border-dashed border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 w-full justify-center text-gray-700 dark:text-gray-300"
+                    >
+                      <Camera className="h-5 w-5" />
+                      Take/Upload Photo
+                    </button>
+                  )}
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    onChange={handlePhotoChange}
+                    accept="image/*"
+                    className="hidden"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Notes (optional)
+                  </label>
+                  <textarea
+                    value={deliveryForm.notes}
+                    onChange={(e) => setDeliveryForm(prev => ({ ...prev, notes: e.target.value }))}
+                    placeholder="Any delivery notes..."
+                    rows={2}
+                    className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-emerald-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500"
+                  />
+                </div>
+
+                <div className="flex gap-3 pt-4">
+                  <button
+                    type="button"
+                    onClick={() => setShowDeliveryModal(false)}
+                    className="flex-1 px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={deliveryLoading}
+                    className="flex-1 bg-emerald-600 text-white px-4 py-2.5 rounded-lg hover:bg-emerald-700 disabled:opacity-50"
+                  >
+                    {deliveryLoading ? 'Processing...' : 'Confirm Delivery'}
+                  </button>
+                </div>
+              </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
