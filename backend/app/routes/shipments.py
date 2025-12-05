@@ -572,17 +572,24 @@ def get_analytics():
     current_user_id = int(get_jwt_identity())
     days = request.args.get('days', 30, type=int)
     
+    # Get current user's email to match received shipments
+    current_user = User.query.get(current_user_id)
+    if not current_user:
+        return jsonify({'error': 'User not found'}), 404
+    
+    user_email = current_user.email
+    
     # Calculate date range
     end_date = datetime.utcnow()
     start_date = end_date - timedelta(days=days)
     prev_start_date = start_date - timedelta(days=days)
     
-    # Base query for user's shipments (as sender OR receiver)
+    # Base query for user's shipments (as sender OR receiver by email)
     from sqlalchemy import or_
     base_query = Shipment.query.filter(
         or_(
             Shipment.sender_id == current_user_id,
-            Shipment.receiver_id == current_user_id
+            Shipment.receiver_email == user_email
         ),
         Shipment.created_at >= start_date
     )
@@ -591,7 +598,7 @@ def get_analytics():
     prev_query = Shipment.query.filter(
         or_(
             Shipment.sender_id == current_user_id,
-            Shipment.receiver_id == current_user_id
+            Shipment.receiver_email == user_email
         ),
         Shipment.created_at >= prev_start_date,
         Shipment.created_at < start_date
