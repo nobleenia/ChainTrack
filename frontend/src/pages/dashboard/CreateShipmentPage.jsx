@@ -24,12 +24,14 @@ import {
   ChevronDown,
   ChevronUp,
   BookMarked,
-  FileStack
+  FileStack,
+  Printer
 } from 'lucide-react'
 import useShipmentStore from '../../store/shipmentStore'
 import { useAuthStore } from '../../store/authStore'
 import AddressBook from '../../components/shipment/AddressBook'
 import ShipmentTemplates from '../../components/shipment/ShipmentTemplates'
+import { generateShipmentLabel } from '../../utils/shipmentLabelPDF'
 
 export default function CreateShipmentPage() {
   const navigate = useNavigate()
@@ -317,19 +319,46 @@ export default function CreateShipmentPage() {
             </div>
           </div>
 
-          <div className="flex gap-4">
+          <div className="flex flex-col gap-3">
             <button
-              onClick={() => navigate('/dashboard/shipments')}
-              className="flex-1 px-4 py-2.5 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-medium"
+              onClick={() => generateShipmentLabel({
+                shipment_id: success.shipment_id,
+                tracking_id: success.shipment_id,
+                tracking_pin: success.tracking_pin,
+                created_at: new Date().toISOString(),
+                sender_name: user?.name,
+                pickup_address: formData.pickup_address,
+                pickup_city: formData.pickup_city,
+                receiver_name: formData.receiver_name,
+                receiver_phone: formData.receiver_phone,
+                delivery_address: formData.delivery_address,
+                delivery_city: formData.delivery_city,
+                description: formData.description,
+                package: {
+                  weight: formData.package_weight,
+                  dimensions: formData.package_dimensions
+                },
+                special_instructions: formData.special_instructions
+              })}
+              className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
             >
-              View All Shipments
+              <Printer className="h-5 w-5" />
+              Print Shipping Label
             </button>
-            <button
-              onClick={() => navigate(`/dashboard/shipments/${success.shipment_id}`)}
-              className="flex-1 px-4 py-2.5 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors font-medium"
-            >
-              View Shipment
-            </button>
+            <div className="flex gap-4">
+              <button
+                onClick={() => navigate('/dashboard/shipments')}
+                className="flex-1 px-4 py-2.5 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-medium"
+              >
+                View All Shipments
+              </button>
+              <button
+                onClick={() => navigate(`/dashboard/shipments/${success.shipment_id}`)}
+                className="flex-1 px-4 py-2.5 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors font-medium"
+              >
+                View Shipment
+              </button>
+            </div>
           </div>
         </motion.div>
       </div>

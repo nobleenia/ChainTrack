@@ -19,10 +19,12 @@ import {
   Calendar,
   Filter,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Printer
 } from 'lucide-react'
 import useShipmentStore from '../../store/shipmentStore'
 import { useAuthStore } from '../../store/authStore'
+import { generateShipmentLabel } from '../../utils/shipmentLabelPDF'
 
 const statusConfig = {
   created: {
@@ -108,11 +110,23 @@ function ShipmentCard({ shipment }) {
       </div>
 
       <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700 flex justify-between items-center">
-        <div className="text-sm">
-          <span className="text-gray-500 dark:text-gray-400">Checkpoints: </span>
-          <span className="font-medium text-gray-900 dark:text-gray-100">
-            {checkpointCount}
-          </span>
+        <div className="flex items-center gap-3">
+          <div className="text-sm">
+            <span className="text-gray-500 dark:text-gray-400">Checkpoints: </span>
+            <span className="font-medium text-gray-900 dark:text-gray-100">
+              {checkpointCount}
+            </span>
+          </div>
+          <button
+            onClick={(e) => {
+              e.stopPropagation()
+              generateShipmentLabel(shipment)
+            }}
+            className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded transition-colors"
+            title="Print Shipping Label"
+          >
+            <Printer className="h-4 w-4" />
+          </button>
         </div>
         <button className="text-emerald-600 hover:text-emerald-700 text-sm font-medium flex items-center gap-1">
           View Details
