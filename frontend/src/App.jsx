@@ -34,6 +34,10 @@ import CourierShipmentsPage from './pages/courier/CourierShipmentsPage'
 import CourierShipmentDetailsPage from './pages/courier/CourierShipmentDetailsPage'
 import CourierRegistrationPage from './pages/courier/CourierRegistrationPage'
 
+// Legal Pages
+import TermsOfServicePage from './pages/TermsOfServicePage'
+import PrivacyPolicyPage from './pages/PrivacyPolicyPage'
+
 // Protected Route Component
 function ProtectedRoute({ children }) {
   const { isAuthenticated } = useAuthStore()
@@ -92,6 +96,10 @@ function App() {
         <Route path="/courier/dashboard" element={<CourierDashboard />} />
         <Route path="/courier/shipments" element={<CourierShipmentsPage />} />
         <Route path="/courier/shipments/:shipmentId" element={<CourierShipmentDetailsPage />} />
+        
+        {/* Legal Pages */}
+        <Route path="/terms" element={<TermsOfServicePage />} />
+        <Route path="/privacy" element={<PrivacyPolicyPage />} />
       </Route>
 
       {/* Protected Dashboard Routes */}
