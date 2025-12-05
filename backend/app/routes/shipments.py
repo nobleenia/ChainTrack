@@ -8,7 +8,7 @@ from flask_jwt_extended import jwt_required, get_jwt_identity, verify_jwt_in_req
 from datetime import datetime
 
 from .. import db
-from ..models import Shipment, ShipmentStatus, CheckpointAction
+from ..models import Shipment, ShipmentStatus, CheckpointAction, User
 from ..services.shipment_service import ShipmentService
 
 bp = Blueprint('shipments', __name__)
