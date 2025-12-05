@@ -10,10 +10,10 @@ import { motion } from 'framer-motion'
 import { ButtonLoader } from './LoadingSpinner'
 
 const variants = {
-  primary: 'bg-primary-600 text-white hover:bg-primary-700 focus:ring-primary-300',
-  secondary: 'bg-gray-100 text-gray-700 hover:bg-gray-200 focus:ring-gray-300',
-  outline: 'border-2 border-primary-600 text-primary-600 hover:bg-primary-50 focus:ring-primary-300',
-  ghost: 'text-gray-600 hover:bg-gray-100 focus:ring-gray-300',
+  primary: 'bg-primary-600 text-white hover:bg-primary-700 focus:ring-primary-300 dark:bg-primary-500 dark:hover:bg-primary-600',
+  secondary: 'bg-gray-100 text-gray-700 hover:bg-gray-200 focus:ring-gray-300 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600',
+  outline: 'border-2 border-primary-600 text-primary-600 hover:bg-primary-50 focus:ring-primary-300 dark:border-primary-400 dark:text-primary-400 dark:hover:bg-primary-900/30',
+  ghost: 'text-gray-600 hover:bg-gray-100 focus:ring-gray-300 dark:text-gray-300 dark:hover:bg-gray-700',
   danger: 'bg-red-600 text-white hover:bg-red-700 focus:ring-red-300',
   success: 'bg-green-600 text-white hover:bg-green-700 focus:ring-green-300',
 }

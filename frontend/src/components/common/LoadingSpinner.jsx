@@ -34,7 +34,7 @@ export default function LoadingSpinner({
         animate={{ opacity: 1 }}
       />
       {text && (
-        <span className="text-sm text-gray-500">{text}</span>
+        <span className="text-sm text-gray-500 dark:text-gray-400">{text}</span>
       )}
     </div>
   )
@@ -45,7 +45,7 @@ export default function LoadingSpinner({
  */
 export function FullPageLoader({ text = 'Loading...' }) {
   return (
-    <div className="fixed inset-0 bg-white/80 backdrop-blur-sm z-50 flex items-center justify-center">
+    <div className="fixed inset-0 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm z-50 flex items-center justify-center">
       <LoadingSpinner size="xl" text={text} />
     </div>
   )
