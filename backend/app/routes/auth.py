@@ -16,11 +16,9 @@ from ..utils.security import (
     validate_password, AccountLockoutManager, 
     get_client_ip, mask_email, sanitize_input
 )
+from ..services.token_blacklist_service import TokenBlacklistService
 
 bp = Blueprint('auth', __name__)
-
-# Token blacklist for logout functionality (use Redis in production)
-_token_blacklist = set()
 
 
 def apply_rate_limit(limit_string):
@@ -170,8 +168,17 @@ def login():
 @jwt_required()
 def logout():
     """Logout and blacklist current token"""
-    jti = get_jwt()['jti']
-    _token_blacklist.add(jti)
+    jwt_data = get_jwt()
+    jti = jwt_data['jti']
+    
+    # Calculate remaining time until token expires
+    exp_timestamp = jwt_data.get('exp', 0)
+    now_timestamp = datetime.utcnow().timestamp()
+    expires_in = max(0, int(exp_timestamp - now_timestamp))
+    
+    # Blacklist the token (persists to Redis in production)
+    TokenBlacklistService.blacklist_token(jti, expires_in)
+    
     return jsonify({'message': 'Successfully logged out'}), 200
 
 
@@ -181,8 +188,8 @@ def refresh():
     """Refresh the access token using a valid refresh token"""
     jti = get_jwt()['jti']
     
-    # Check if refresh token is blacklisted
-    if jti in _token_blacklist:
+    # Check if refresh token is blacklisted (uses Redis in production)
+    if TokenBlacklistService.is_blacklisted(jti):
         return jsonify({'error': 'Token has been revoked'}), 401
     
     current_user_id = get_jwt_identity()

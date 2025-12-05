@@ -31,6 +31,7 @@ services:
       - SECRET_KEY=${SECRET_KEY:?SECRET_KEY is required}
       - JWT_SECRET_KEY=${JWT_SECRET_KEY:?JWT_SECRET_KEY is required}
       - CORS_ORIGINS=${CORS_ORIGINS:-http://localhost:5173}
+      - REDIS_URL=redis://redis:6379/0
       - ETHEREUM_RPC_URL=${ETHEREUM_RPC_URL:-}
       - CONTRACT_ADDRESS=${CONTRACT_ADDRESS:-}
       - DEPLOYER_PRIVATE_KEY=${DEPLOYER_PRIVATE_KEY:-}
@@ -40,6 +41,8 @@ services:
       - "5000:5000"
     depends_on:
       db:
+        condition: service_healthy
+      redis:
         condition: service_healthy
     command: >
       sh -c "flask db upgrade && gunicorn --bind 0.0.0.0:5000 --reload run:app"
@@ -61,7 +64,7 @@ services:
       - backend
     command: npm run dev -- --host
 
-  # Redis for caching (optional, for production)
+  # Redis for token blacklisting and caching
   redis:
     image: redis:7-alpine
     container_name: chaintrack-redis
@@ -69,8 +72,11 @@ services:
       - "6379:6379"
     volumes:
       - redis_data:/data
-    profiles:
-      - production
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
 volumes:
   postgres_data:
