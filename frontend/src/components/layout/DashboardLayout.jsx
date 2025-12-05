@@ -20,9 +20,11 @@ import {
   Trash2,
   Gift,
   Truck,
-  BarChart3
+  BarChart3,
+  RefreshCw
 } from 'lucide-react'
 import { useAuthStore } from '../../store/authStore'
+import { useNotificationStore } from '../../store/notificationStore'
 import { useTour } from '../../hooks/useTour'
 import ThemeToggle from '../common/ThemeToggle'
 import WalletConnect from '../common/WalletConnect'
@@ -52,54 +54,51 @@ const getNavigation = (userRole) => {
   ]
 }
 
-// Demo notifications
-const getInitialNotifications = () => {
-  const saved = localStorage.getItem('chaintrack-notifications')
-  if (saved) {
-    return JSON.parse(saved)
-  }
-  return [
-    {
-      id: 1,
-      type: 'success',
-      title: 'Welcome to ChainTrack!',
-      message: 'Your account has been successfully created.',
-      time: '2 minutes ago',
-      read: false
-    },
-    {
-      id: 2,
-      type: 'info',
-      title: 'Blockchain Connected',
-      message: 'Successfully connected to Ethereum network.',
-      time: '5 minutes ago',
-      read: false
-    },
-    {
-      id: 3,
-      type: 'warning',
-      title: 'Verification Pending',
-      message: 'Product PRD-001 is awaiting blockchain confirmation.',
-      time: '1 hour ago',
-      read: false
-    }
-  ]
-}
-
 export default function DashboardLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [userMenuOpen, setUserMenuOpen] = useState(false)
   const [notificationsOpen, setNotificationsOpen] = useState(false)
-  const [notifications, setNotifications] = useState(getInitialNotifications)
   const location = useLocation()
   const navigate = useNavigate()
   const { user, logout } = useAuthStore()
   const { startTour, TourComponent } = useTour()
+  
+  // Notification store
+  const { 
+    notifications, 
+    unreadCount, 
+    isLoading: notificationsLoading,
+    fetchNotifications,
+    markNotificationAsRead,
+    markAllNotificationsAsRead,
+    removeNotification,
+    clearNotifications,
+    startPolling,
+    stopPolling
+  } = useNotificationStore()
 
   const handleLogout = () => {
+    stopPolling()
     logout()
     navigate('/login')
   }
+
+  // Fetch notifications on mount and start polling
+  useEffect(() => {
+    fetchNotifications()
+    startPolling()
+    
+    return () => {
+      stopPolling()
+    }
+  }, [])
+
+  // Refresh notifications when dropdown opens
+  useEffect(() => {
+    if (notificationsOpen) {
+      fetchNotifications()
+    }
+  }, [notificationsOpen])
 
   // Close dropdowns when clicking outside
   useEffect(() => {
@@ -254,9 +253,9 @@ export default function DashboardLayout() {
                   className="notifications-btn relative text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition"
                 >
                   <Bell size={20} />
-                  {notifications.filter(n => !n.read).length > 0 && (
+                  {unreadCount > 0 && (
                     <span className="absolute top-0 right-0 w-5 h-5 bg-red-500 rounded-full text-xs text-white flex items-center justify-center">
-                      {notifications.filter(n => !n.read).length}
+                      {unreadCount > 99 ? '99+' : unreadCount}
                     </span>
                   )}
                 </button>
@@ -273,15 +272,16 @@ export default function DashboardLayout() {
                     >
                       {/* Header */}
                       <div className="px-4 py-3 bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600 flex items-center justify-between">
-                        <h3 className="font-semibold text-gray-900 dark:text-white">Notifications</h3>
-                        {notifications.length > 0 && (
+                        <div className="flex items-center gap-2">
+                          <h3 className="font-semibold text-gray-900 dark:text-white">Notifications</h3>
+                          {notificationsLoading && (
+                            <RefreshCw size={14} className="animate-spin text-gray-400" />
+                          )}
+                        </div>
+                        {unreadCount > 0 && (
                           <button
-                            onClick={() => {
-                              const updated = notifications.map(n => ({ ...n, read: true }))
-                              setNotifications(updated)
-                              localStorage.setItem('chaintrack-notifications', JSON.stringify(updated))
-                            }}
-                            className="text-xs text-primary-600 hover:text-primary-700 font-medium"
+                            onClick={markAllNotificationsAsRead}
+                            className="text-xs text-primary-600 hover:text-primary-700 dark:text-primary-400 font-medium"
                           >
                             Mark all read
                           </button>
@@ -292,51 +292,55 @@ export default function DashboardLayout() {
                       <div className="max-h-80 overflow-y-auto">
                         {notifications.length === 0 ? (
                           <div className="px-4 py-8 text-center">
-                            <Bell size={32} className="mx-auto text-gray-300 mb-2" />
-                            <p className="text-gray-500 text-sm">No notifications</p>
+                            <Bell size={32} className="mx-auto text-gray-300 dark:text-gray-600 mb-2" />
+                            <p className="text-gray-500 dark:text-gray-400 text-sm">No notifications</p>
+                            <p className="text-gray-400 dark:text-gray-500 text-xs mt-1">You're all caught up!</p>
                           </div>
                         ) : (
                           notifications.map((notification) => (
                             <div
                               key={notification.id}
-                              className={`px-4 py-3 border-b border-gray-100 hover:bg-gray-50 transition cursor-pointer ${
-                                !notification.read ? 'bg-blue-50/50' : ''
+                              className={`group px-4 py-3 border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition cursor-pointer ${
+                                !notification.is_read ? 'bg-blue-50/50 dark:bg-blue-900/10' : ''
                               }`}
                               onClick={() => {
-                                const updated = notifications.map(n =>
-                                  n.id === notification.id ? { ...n, read: true } : n
-                                )
-                                setNotifications(updated)
-                                localStorage.setItem('chaintrack-notifications', JSON.stringify(updated))
+                                if (!notification.is_read) {
+                                  markNotificationAsRead(notification.id)
+                                }
+                                // Navigate to action_url if present
+                                if (notification.action_url) {
+                                  setNotificationsOpen(false)
+                                  navigate(notification.action_url)
+                                }
                               }}
                             >
                               <div className="flex items-start gap-3">
                                 {/* Icon based on type */}
                                 <div className={`p-2 rounded-full flex-shrink-0 ${
-                                  notification.type === 'success' ? 'bg-green-100' :
-                                  notification.type === 'warning' ? 'bg-amber-100' :
-                                  notification.type === 'error' ? 'bg-red-100' :
-                                  'bg-blue-100'
+                                  notification.type === 'success' ? 'bg-green-100 dark:bg-green-900/30' :
+                                  notification.type === 'warning' ? 'bg-amber-100 dark:bg-amber-900/30' :
+                                  notification.type === 'error' ? 'bg-red-100 dark:bg-red-900/30' :
+                                  'bg-blue-100 dark:bg-blue-900/30'
                                 }`}>
-                                  {notification.type === 'success' && <CheckCircle size={16} className="text-green-600" />}
-                                  {notification.type === 'warning' && <AlertTriangle size={16} className="text-amber-600" />}
-                                  {notification.type === 'error' && <X size={16} className="text-red-600" />}
-                                  {notification.type === 'info' && <Info size={16} className="text-blue-600" />}
+                                  {notification.type === 'success' && <CheckCircle size={16} className="text-green-600 dark:text-green-400" />}
+                                  {notification.type === 'warning' && <AlertTriangle size={16} className="text-amber-600 dark:text-amber-400" />}
+                                  {notification.type === 'error' && <X size={16} className="text-red-600 dark:text-red-400" />}
+                                  {notification.type === 'info' && <Info size={16} className="text-blue-600 dark:text-blue-400" />}
                                 </div>
 
                                 <div className="flex-1 min-w-0">
                                   <div className="flex items-center justify-between">
-                                    <p className={`text-sm font-medium ${!notification.read ? 'text-gray-900' : 'text-gray-700'}`}>
+                                    <p className={`text-sm font-medium ${!notification.is_read ? 'text-gray-900 dark:text-white' : 'text-gray-700 dark:text-gray-300'}`}>
                                       {notification.title}
                                     </p>
-                                    {!notification.read && (
-                                      <span className="w-2 h-2 bg-primary-500 rounded-full flex-shrink-0" />
+                                    {!notification.is_read && (
+                                      <span className="w-2 h-2 bg-primary-500 rounded-full flex-shrink-0 ml-2" />
                                     )}
                                   </div>
-                                  <p className="text-xs text-gray-500 mt-0.5 line-clamp-2">
+                                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 line-clamp-2">
                                     {notification.message}
                                   </p>
-                                  <p className="text-xs text-gray-400 mt-1">
+                                  <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
                                     {notification.time}
                                   </p>
                                 </div>
@@ -345,11 +349,9 @@ export default function DashboardLayout() {
                                 <button
                                   onClick={(e) => {
                                     e.stopPropagation()
-                                    const updated = notifications.filter(n => n.id !== notification.id)
-                                    setNotifications(updated)
-                                    localStorage.setItem('chaintrack-notifications', JSON.stringify(updated))
+                                    removeNotification(notification.id)
                                   }}
-                                  className="p-1 text-gray-400 hover:text-red-500 transition opacity-0 group-hover:opacity-100"
+                                  className="p-1 text-gray-400 hover:text-red-500 dark:hover:text-red-400 transition opacity-0 group-hover:opacity-100"
                                 >
                                   <Trash2 size={14} />
                                 </button>
@@ -361,15 +363,18 @@ export default function DashboardLayout() {
 
                       {/* Footer */}
                       {notifications.length > 0 && (
-                        <div className="px-4 py-2 bg-gray-50 border-t border-gray-200">
+                        <div className="px-4 py-2 bg-gray-50 dark:bg-gray-700 border-t border-gray-200 dark:border-gray-600 flex justify-between">
                           <button
-                            onClick={() => {
-                              setNotifications([])
-                              localStorage.setItem('chaintrack-notifications', JSON.stringify([]))
-                            }}
-                            className="text-xs text-gray-500 hover:text-gray-700 w-full text-center"
+                            onClick={() => clearNotifications(true)}
+                            className="text-xs text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
                           >
-                            Clear all notifications
+                            Clear read
+                          </button>
+                          <button
+                            onClick={() => clearNotifications(false)}
+                            className="text-xs text-gray-500 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400"
+                          >
+                            Clear all
                           </button>
                         </div>
                       )}

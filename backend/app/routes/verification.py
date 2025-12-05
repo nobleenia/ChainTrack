@@ -64,6 +64,18 @@ def verify_product(product_id):
             # Get updated rewards info
             user_rewards = RewardsService.get_or_create_user_rewards(user_id)
             
+            # Send points earned notification
+            try:
+                from ..services.in_app_notification_service import in_app_notification_service
+                in_app_notification_service.points_earned(
+                    user_id=user_id,
+                    points=points_earned,
+                    action='product verification',
+                    total_points=user_rewards.current_points
+                )
+            except Exception as e:
+                pass  # Don't fail if notification fails
+            
             # Check if this completes a referral
             from ..models import Referral
             referral = Referral.query.filter_by(referred_id=user_id, is_completed=False).first()

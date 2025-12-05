@@ -70,6 +70,39 @@ def authorize_courier(shipment_id):
             expires_in_hours=data.get('expires_in_hours', 48)
         )
         
+        # Send notification to courier if registered user
+        if data.get('courier_user_id'):
+            try:
+                from ..services.in_app_notification_service import in_app_notification_service
+                in_app_notification_service.notify(
+                    data['courier_user_id'],
+                    'courier_authorization',
+                    context={'shipment_id': shipment.shipment_id},
+                    related_entity_type='shipment',
+                    related_entity_id=shipment.shipment_id
+                )
+            except Exception as e:
+                pass  # Don't fail if notification fails
+        
+        # Notify sender that courier was assigned
+        try:
+            from ..services.in_app_notification_service import in_app_notification_service
+            courier_name = data.get('courier_name') or 'Courier'
+            if data.get('courier_user_id'):
+                from ..models import User
+                courier_user = User.query.get(data['courier_user_id'])
+                if courier_user:
+                    courier_name = courier_user.name
+            in_app_notification_service.notify(
+                current_user_id,
+                'courier_assigned',
+                context={'courier_name': courier_name, 'shipment_id': shipment.shipment_id},
+                related_entity_type='shipment',
+                related_entity_id=shipment.shipment_id
+            )
+        except Exception as e:
+            pass  # Don't fail if notification fails
+        
         return jsonify({
             'message': 'Courier authorized successfully',
             'authorization': auth.to_dict(include_code=True)

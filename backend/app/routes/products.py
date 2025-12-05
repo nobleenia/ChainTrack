@@ -175,6 +175,17 @@ def register_product():
     
     db.session.commit()
     
+    # Send notification for product registration
+    try:
+        from ..services.in_app_notification_service import in_app_notification_service
+        in_app_notification_service.product_registered(
+            user_id=user.id,
+            product_id=product.product_id,
+            product_name=product.name
+        )
+    except Exception as e:
+        current_app.logger.error(f"Failed to send product notification: {e}")
+    
     return jsonify({
         'message': 'Product registered successfully',
         'product': product.to_dict()

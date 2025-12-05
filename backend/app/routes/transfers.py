@@ -184,6 +184,29 @@ def create_transfer():
     
     db.session.commit()
     
+    # Send notifications
+    try:
+        from ..services.in_app_notification_service import in_app_notification_service
+        # Notify sender
+        in_app_notification_service.notify(
+            user.id,
+            'transfer_initiated',
+            context={'product_name': product.name, 'recipient': recipient_name},
+            related_entity_type='transfer',
+            related_entity_id=str(transfer.id)
+        )
+        # Notify recipient if registered user
+        if recipient:
+            in_app_notification_service.notify(
+                recipient.id,
+                'transfer_received',
+                context={'product_name': product.name, 'sender': user.name},
+                related_entity_type='transfer',
+                related_entity_id=str(transfer.id)
+            )
+    except Exception as e:
+        pass  # Don't fail if notification fails
+    
     return jsonify({
         'message': 'Transfer created successfully',
         'transfer': transfer.to_dict()
@@ -209,6 +232,31 @@ def confirm_transfer(transfer_id):
     
     transfer.confirm()
     db.session.commit()
+    
+    # Send transfer completed notifications
+    try:
+        from ..services.in_app_notification_service import in_app_notification_service
+        product = Product.query.get(transfer.product_id)
+        product_name = product.name if product else 'Unknown Product'
+        
+        # Notify both sender and receiver
+        if transfer.from_user_id:
+            in_app_notification_service.notify(
+                transfer.from_user_id,
+                'transfer_completed',
+                context={'product_name': product_name},
+                related_entity_type='transfer',
+                related_entity_id=str(transfer.id)
+            )
+        in_app_notification_service.notify(
+            current_user_id,
+            'transfer_completed',
+            context={'product_name': product_name},
+            related_entity_type='transfer',
+            related_entity_id=str(transfer.id)
+        )
+    except Exception as e:
+        pass  # Don't fail if notification fails
     
     return jsonify({
         'message': 'Transfer confirmed successfully',

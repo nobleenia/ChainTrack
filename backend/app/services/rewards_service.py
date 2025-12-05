@@ -42,6 +42,9 @@ class RewardsService:
         """
         rewards = RewardsService.get_or_create_user_rewards(user_id)
         
+        # Store previous tier to check for upgrade
+        previous_tier = rewards.tier
+        
         # Get base points for action
         base_points = custom_points if custom_points else POINT_VALUES.get(action_type, 0)
         
@@ -53,6 +56,14 @@ class RewardsService:
         rewards.current_points += final_points
         rewards.total_points_earned += final_points
         rewards.update_tier()
+        
+        # Check if tier was upgraded
+        if rewards.tier != previous_tier:
+            try:
+                from .in_app_notification_service import in_app_notification_service
+                in_app_notification_service.tier_upgraded(user_id, rewards.tier.value.title())
+            except Exception as e:
+                pass  # Don't fail if notification fails
         
         # Update action-specific stats
         if action_type in [PointActionType.VERIFICATION, PointActionType.FIRST_VERIFICATION]:
@@ -126,6 +137,18 @@ class RewardsService:
                 description=f"Login streak bonus ({rewards.current_login_streak} days)"
             )
             points += streak_bonus
+        
+        # Send points earned notification for daily bonus
+        try:
+            from .in_app_notification_service import in_app_notification_service
+            in_app_notification_service.points_earned(
+                user_id=user_id,
+                points=points,
+                action=f'daily login (Day {rewards.current_login_streak})',
+                total_points=rewards.current_points
+            )
+        except Exception as e:
+            pass  # Don't fail if notification fails
         
         db.session.commit()
         return points, transaction
@@ -265,6 +288,22 @@ class RewardsService:
                 description=f"Referral completed: {referral.referred.name}"
             )
             referral.points_awarded = True
+            
+            # Send referral bonus notification
+            try:
+                from .in_app_notification_service import in_app_notification_service
+                referred_user = User.query.get(referral.referred_id)
+                referrer_rewards = RewardsService.get_or_create_user_rewards(referral.referrer_id)
+                in_app_notification_service.notify(
+                    referral.referrer_id,
+                    'referral_bonus',
+                    context={
+                        'referred_user': referred_user.name if referred_user else 'A friend',
+                        'points': POINT_VALUES[PointActionType.REFERRAL]
+                    }
+                )
+            except Exception as e:
+                pass  # Don't fail if notification fails
         
         db.session.commit()
         return True

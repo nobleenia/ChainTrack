@@ -112,6 +112,18 @@ class ShipmentService:
             except Exception as e:
                 logger.error(f"Failed to send shipment created notification: {e}")
         
+        # Send in-app notification to sender
+        try:
+            from .in_app_notification_service import in_app_notification_service
+            in_app_notification_service.shipment_status_update(
+                user_id=sender_id,
+                shipment_id=shipment.shipment_id,
+                status='created',
+                destination=delivery_city or delivery_address
+            )
+        except Exception as e:
+            logger.error(f"Failed to send in-app shipment notification: {e}")
+        
         return shipment
 
     @staticmethod
@@ -268,6 +280,28 @@ class ShipmentService:
             except Exception as e:
                 logger.error(f"Failed to send checkpoint notification: {e}")
         
+        # Send in-app notifications based on action
+        try:
+            from .in_app_notification_service import in_app_notification_service
+            status_template_map = {
+                CheckpointAction.PICKED_UP: 'picked_up',
+                CheckpointAction.CHECKPOINT: 'in_transit',
+                CheckpointAction.HANDED_OFF: 'in_transit',
+                CheckpointAction.OUT_FOR_DELIVERY: 'in_transit',
+                CheckpointAction.DELIVERED: 'delivered',
+            }
+            template_status = status_template_map.get(action, 'in_transit')
+            
+            # Notify sender
+            in_app_notification_service.shipment_status_update(
+                user_id=shipment.sender_id,
+                shipment_id=shipment.shipment_id,
+                status=template_status,
+                destination=shipment.delivery_city or shipment.delivery_address
+            )
+        except Exception as e:
+            logger.error(f"Failed to send in-app checkpoint notification: {e}")
+        
         return checkpoint
 
     @staticmethod
@@ -340,6 +374,18 @@ class ShipmentService:
                     )
             except Exception as e:
                 logger.error(f"Failed to send delivery confirmation notification: {e}")
+        
+        # Send in-app notification to sender
+        try:
+            from .in_app_notification_service import in_app_notification_service
+            in_app_notification_service.shipment_status_update(
+                user_id=shipment.sender_id,
+                shipment_id=shipment.shipment_id,
+                status='delivered',
+                destination=shipment.delivery_city or shipment.delivery_address
+            )
+        except Exception as e:
+            logger.error(f"Failed to send in-app delivery confirmation: {e}")
         
         return proof
 

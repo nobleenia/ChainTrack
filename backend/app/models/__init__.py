@@ -33,6 +33,11 @@ from .courier_profile import (
     CourierSession,
     CourierActivity
 )
+from .notification import (
+    Notification,
+    NotificationType,
+    NotificationCategory
+)
 
 __all__ = [
     'User',
@@ -59,5 +64,8 @@ __all__ = [
     'CheckpointChain',
     'CourierProfile',
     'CourierSession',
-    'CourierActivity'
+    'CourierActivity',
+    'Notification',
+    'NotificationType',
+    'NotificationCategory'
 ]

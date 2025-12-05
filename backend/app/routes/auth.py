@@ -101,6 +101,14 @@ def register():
             # Don't fail registration if referral processing fails
             pass
     
+    # Send welcome notification
+    try:
+        from ..services.in_app_notification_service import in_app_notification_service
+        in_app_notification_service.welcome_user(user.id)
+    except Exception as e:
+        # Don't fail registration if notification fails
+        pass
+    
     # Generate tokens (use string identity for Flask-JWT-Extended compatibility)
     access_token = create_access_token(identity=str(user.id))
     refresh_token = create_refresh_token(identity=str(user.id))
@@ -293,6 +301,13 @@ def change_password():
     
     user.set_password(data['new_password'])
     db.session.commit()
+    
+    # Send password changed notification
+    try:
+        from ..services.in_app_notification_service import in_app_notification_service
+        in_app_notification_service.notify(user.id, 'password_changed')
+    except Exception as e:
+        pass  # Don't fail if notification fails
     
     return jsonify({'message': 'Password changed successfully'}), 200
 
