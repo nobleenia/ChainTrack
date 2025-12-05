@@ -86,16 +86,37 @@ def register():
     db.session.add(user)
     db.session.commit()
     
+    # Process referral code if provided
+    referral_processed = False
+    if data.get('referral_code'):
+        try:
+            from ..services.rewards_service import RewardsService
+            referral = RewardsService.process_referral(
+                data['referral_code'].upper().strip(),
+                user.id
+            )
+            if referral:
+                referral_processed = True
+        except Exception as e:
+            # Don't fail registration if referral processing fails
+            pass
+    
     # Generate tokens (use string identity for Flask-JWT-Extended compatibility)
     access_token = create_access_token(identity=str(user.id))
     refresh_token = create_refresh_token(identity=str(user.id))
     
-    return jsonify({
+    response_data = {
         'message': 'User registered successfully',
         'user': user.to_dict(),
         'access_token': access_token,
         'refresh_token': refresh_token
-    }), 201
+    }
+    
+    if referral_processed:
+        response_data['referral_applied'] = True
+        response_data['message'] = 'User registered successfully with referral bonus!'
+    
+    return jsonify(response_data), 201
 
 
 @bp.route('/login', methods=['POST'])

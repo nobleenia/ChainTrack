@@ -1,7 +1,7 @@
-import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import { motion } from 'framer-motion'
-import { Mail, Lock, User, Building, Phone, ArrowRight, AlertCircle } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
+import { motion, AnimatePresence } from 'framer-motion'
+import { Mail, Lock, User, Building, Phone, ArrowRight, AlertCircle, Gift, ChevronDown, ChevronUp, Sparkles } from 'lucide-react'
 import { useAuthStore } from '../store/authStore'
 
 const roles = [
@@ -12,6 +12,8 @@ const roles = [
 ]
 
 export default function RegisterPage() {
+  const [searchParams] = useSearchParams()
+  const [showReferral, setShowReferral] = useState(false)
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -20,7 +22,17 @@ export default function RegisterPage() {
     role: 'manufacturer',
     company_name: '',
     phone: '',
+    referral_code: '',
   })
+  
+  // Check for referral code in URL (e.g., /register?ref=CTK123ABC)
+  useEffect(() => {
+    const refCode = searchParams.get('ref')
+    if (refCode) {
+      setFormData(prev => ({ ...prev, referral_code: refCode }))
+      setShowReferral(true)
+    }
+  }, [searchParams])
   const [passwordError, setPasswordError] = useState('')
   const { register, isLoading, error, clearError } = useAuthStore()
   const navigate = useNavigate()
@@ -224,6 +236,63 @@ export default function RegisterPage() {
                 />
               </div>
             </div>
+          </div>
+
+          {/* Referral Code Section */}
+          <div className="border border-dashed border-gray-300 dark:border-gray-600 rounded-lg overflow-hidden">
+            <button
+              type="button"
+              onClick={() => setShowReferral(!showReferral)}
+              className="w-full flex items-center justify-between px-4 py-3 bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 hover:from-amber-100 hover:to-orange-100 dark:hover:from-amber-900/30 dark:hover:to-orange-900/30 transition"
+            >
+              <div className="flex items-center space-x-2">
+                <Gift className="text-amber-500" size={20} />
+                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Have a referral code?
+                </span>
+                {formData.referral_code && (
+                  <span className="flex items-center text-xs text-green-600 dark:text-green-400">
+                    <Sparkles size={14} className="mr-1" />
+                    Code applied!
+                  </span>
+                )}
+              </div>
+              {showReferral ? (
+                <ChevronUp className="text-gray-400" size={20} />
+              ) : (
+                <ChevronDown className="text-gray-400" size={20} />
+              )}
+            </button>
+            
+            <AnimatePresence>
+              {showReferral && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: 'auto', opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  transition={{ duration: 0.2 }}
+                  className="overflow-hidden"
+                >
+                  <div className="px-4 py-3 bg-white dark:bg-gray-800">
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">
+                      Enter a friend's referral code to earn bonus points when you verify your first product!
+                    </p>
+                    <div className="relative">
+                      <Gift className="absolute left-3 top-1/2 -translate-y-1/2 text-amber-500" size={20} />
+                      <input
+                        id="referral_code"
+                        name="referral_code"
+                        type="text"
+                        value={formData.referral_code}
+                        onChange={handleChange}
+                        className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition uppercase"
+                        placeholder="e.g., CTK71E9A08"
+                      />
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
 
           <div className="flex items-start">
