@@ -614,8 +614,8 @@ def get_analytics():
     
     delivered = [s for s in shipments if s.status in [ShipmentStatus.DELIVERED, ShipmentStatus.CONFIRMED]]
     confirmed = [s for s in shipments if s.status == ShipmentStatus.CONFIRMED]
-    in_transit = [s for s in shipments if s.status == ShipmentStatus.IN_TRANSIT]
-    pending = [s for s in shipments if s.status == ShipmentStatus.PENDING]
+    in_transit = [s for s in shipments if s.status in [ShipmentStatus.IN_TRANSIT, ShipmentStatus.PICKED_UP, ShipmentStatus.OUT_FOR_DELIVERY]]
+    pending = [s for s in shipments if s.status == ShipmentStatus.CREATED]  # CREATED = waiting for pickup
     cancelled = [s for s in shipments if s.status == ShipmentStatus.CANCELLED]
     
     delivery_rate = (len(delivered) / total_shipments * 100) if total_shipments > 0 else 0
