@@ -16,7 +16,7 @@ from ..utils.security import (
     validate_password, AccountLockoutManager, 
     get_client_ip, mask_email, sanitize_input
 )
-from ..services.token_blacklist_service import TokenBlacklistService
+from ..services.token_blacklist_service import add_token_to_blacklist, is_token_blacklisted
 
 bp = Blueprint('auth', __name__)
 
@@ -177,7 +177,7 @@ def logout():
     expires_in = max(0, int(exp_timestamp - now_timestamp))
     
     # Blacklist the token (persists to Redis in production)
-    TokenBlacklistService.blacklist_token(jti, expires_in)
+    add_token_to_blacklist(jti, expires_in)
     
     return jsonify({'message': 'Successfully logged out'}), 200
 
@@ -189,7 +189,7 @@ def refresh():
     jti = get_jwt()['jti']
     
     # Check if refresh token is blacklisted (uses Redis in production)
-    if TokenBlacklistService.is_blacklisted(jti):
+    if is_token_blacklisted(jti):
         return jsonify({'error': 'Token has been revoked'}), 401
     
     current_user_id = get_jwt_identity()

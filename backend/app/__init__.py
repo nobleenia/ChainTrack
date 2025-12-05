@@ -75,15 +75,12 @@ def create_app(config_name='development'):
         }
     })
     
-    # Initialize token blacklist service (Redis for production)
-    from .services.token_blacklist_service import TokenBlacklistService
-    TokenBlacklistService.init_app(app)
-    
-    # JWT token blacklist check
+    # JWT token blacklist check (uses Redis in production, in-memory fallback)
     @jwt.token_in_blocklist_loader
     def check_if_token_revoked(jwt_header, jwt_payload):
+        from .services.token_blacklist_service import is_token_blacklisted
         jti = jwt_payload['jti']
-        return TokenBlacklistService.is_blacklisted(jti)
+        return is_token_blacklisted(jti)
     
     # Security headers for all responses
     @app.after_request
