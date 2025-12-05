@@ -14,6 +14,8 @@ SQLAlchemy>=2.0.0
 # Security
 Werkzeug>=3.0.0
 python-dotenv>=1.0.0
+Flask-Limiter>=3.5.0
+redis>=5.0.0
 
 # Blockchain
 web3>=6.0.0
@@ -30,6 +32,11 @@ requests>=2.31.0
 # Email & SMS Notifications
 sendgrid>=6.11.0
 twilio>=8.10.0
+
+# API Documentation
+flask-swagger-ui>=4.11.1
+apispec>=6.3.0
+marshmallow>=3.20.0
 
 # Development
 pytest>=8.0.0

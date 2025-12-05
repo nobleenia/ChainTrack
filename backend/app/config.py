@@ -11,17 +11,36 @@ from dotenv import load_dotenv
 load_dotenv()
 
 
+def get_database_url():
+    """
+    Get database URL with proper handling for different providers.
+    - Heroku/Railway use 'postgres://' which SQLAlchemy 1.4+ doesn't support
+    - We need to replace 'postgres://' with 'postgresql://'
+    """
+    database_url = os.environ.get('DATABASE_URL', '')
+    
+    # Handle Heroku-style postgres:// URLs
+    if database_url.startswith('postgres://'):
+        database_url = database_url.replace('postgres://', 'postgresql://', 1)
+    
+    return database_url
+
+
 class Config:
     """Base configuration with shared settings"""
     
     # Flask
-    SECRET_KEY = os.environ.get('SECRET_KEY') or 'dev-secret-key-change-in-production'
+    SECRET_KEY = os.environ.get('SECRET_KEY')
+    if not SECRET_KEY:
+        raise ValueError("SECRET_KEY environment variable must be set")
     
     # Database
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     
     # JWT
-    JWT_SECRET_KEY = os.environ.get('JWT_SECRET_KEY') or 'jwt-secret-key-change-in-production'
+    JWT_SECRET_KEY = os.environ.get('JWT_SECRET_KEY')
+    if not JWT_SECRET_KEY:
+        raise ValueError("JWT_SECRET_KEY environment variable must be set")
     JWT_ACCESS_TOKEN_EXPIRES = timedelta(hours=1)
     JWT_REFRESH_TOKEN_EXPIRES = timedelta(days=30)
     
@@ -60,8 +79,7 @@ class Config:
 class DevelopmentConfig(Config):
     """Development configuration"""
     DEBUG = True
-    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
-        'sqlite:///chaintrack_dev.db'
+    SQLALCHEMY_DATABASE_URI = get_database_url() or 'sqlite:///chaintrack_dev.db'
 
 
 class TestingConfig(Config):
@@ -74,11 +92,22 @@ class TestingConfig(Config):
 class ProductionConfig(Config):
     """Production configuration"""
     DEBUG = False
-    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL')
+    SQLALCHEMY_DATABASE_URI = get_database_url()
     
-    # Override with production values
+    # Production-specific SQLAlchemy settings
+    SQLALCHEMY_ENGINE_OPTIONS = {
+        'pool_pre_ping': True,  # Enable connection health checks
+        'pool_recycle': 300,    # Recycle connections after 5 minutes
+    }
+    
     @classmethod
     def init_app(cls, app):
+        """Production initialization"""
+        # Ensure required config is set
+        assert cls.SQLALCHEMY_DATABASE_URI, "DATABASE_URL must be set in production"
+        assert app.config['SECRET_KEY'] != 'dev-secret-key-change-in-production', \
+            "SECRET_KEY must be changed in production"
+        
         # Log to stderr in production
         import logging
         from logging import StreamHandler

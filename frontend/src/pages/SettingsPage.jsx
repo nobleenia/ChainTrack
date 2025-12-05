@@ -177,8 +177,8 @@ export default function SettingsPage() {
     <div className="max-w-4xl mx-auto space-y-6">
       {/* Page Header */}
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Settings</h1>
-        <p className="text-gray-600 mt-1">
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Settings</h1>
+        <p className="text-gray-600 dark:text-gray-400 mt-1">
           Manage your account settings and preferences
         </p>
       </div>
@@ -207,8 +207,8 @@ export default function SettingsPage() {
       </AnimatePresence>
 
       {/* Tabs */}
-      <div className="bg-white rounded-xl shadow-sm">
-        <div className="border-b">
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm">
+        <div className="border-b dark:border-gray-700">
           <nav className="flex -mb-px">
             {tabs.map((tab) => (
               <button
@@ -217,8 +217,8 @@ export default function SettingsPage() {
                 className={`
                   flex items-center gap-2 px-6 py-4 text-sm font-medium border-b-2 transition
                   ${activeTab === tab.id
-                    ? 'border-primary-500 text-primary-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    ? 'border-primary-500 text-primary-600 dark:text-primary-400'
+                    : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'
                   }
                 `}
               >
@@ -241,7 +241,7 @@ export default function SettingsPage() {
             >
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Full Name
                   </label>
                   <div className="relative">
@@ -250,14 +250,14 @@ export default function SettingsPage() {
                       type="text"
                       value={profile.name}
                       onChange={(e) => setProfile({ ...profile, name: e.target.value })}
-                      className="w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                      className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-700 focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                       placeholder="John Doe"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Email Address
                   </label>
                   <div className="relative">
@@ -266,14 +266,14 @@ export default function SettingsPage() {
                       type="email"
                       value={profile.email}
                       onChange={(e) => setProfile({ ...profile, email: e.target.value })}
-                      className="w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                      className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-700 focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                       placeholder="john@example.com"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Company Name
                   </label>
                   <div className="relative">
@@ -282,14 +282,14 @@ export default function SettingsPage() {
                       type="text"
                       value={profile.company_name}
                       onChange={(e) => setProfile({ ...profile, company_name: e.target.value })}
-                      className="w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                      className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-700 focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                       placeholder="Your Company Inc."
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Phone Number
                   </label>
                   <div className="relative">
@@ -298,14 +298,14 @@ export default function SettingsPage() {
                       type="tel"
                       value={profile.phone}
                       onChange={(e) => setProfile({ ...profile, phone: e.target.value })}
-                      className="w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                      className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-700 focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                       placeholder="+1 (555) 000-0000"
                     />
                   </div>
                 </div>
 
                 <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Address
                   </label>
                   <div className="relative">
@@ -314,14 +314,14 @@ export default function SettingsPage() {
                       value={profile.address}
                       onChange={(e) => setProfile({ ...profile, address: e.target.value })}
                       rows={2}
-                      className="w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                      className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-700 focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                       placeholder="123 Main St, City, Country"
                     />
                   </div>
                 </div>
 
                 <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Website
                   </label>
                   <div className="relative">
@@ -330,14 +330,14 @@ export default function SettingsPage() {
                       type="url"
                       value={profile.website}
                       onChange={(e) => setProfile({ ...profile, website: e.target.value })}
-                      className="w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                      className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-700 focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                       placeholder="https://yourcompany.com"
                     />
                   </div>
                 </div>
               </div>
 
-              <div className="flex justify-end pt-4 border-t">
+              <div className="flex justify-end pt-4 border-t dark:border-gray-700">
                 <Button type="submit" disabled={isLoading}>
                   {isLoading ? <LoadingSpinner size="sm" /> : <Save size={18} />}
                   Save Changes
@@ -355,14 +355,14 @@ export default function SettingsPage() {
             >
               {/* Change Password */}
               <form onSubmit={handlePasswordSubmit} className="space-y-6">
-                <h3 className="text-lg font-medium text-gray-900 flex items-center gap-2">
+                <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 flex items-center gap-2">
                   <Shield size={20} />
                   Change Password
                 </h3>
                 
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                       Current Password
                     </label>
                     <div className="relative">
@@ -371,13 +371,13 @@ export default function SettingsPage() {
                         type={showPasswords.current ? 'text' : 'password'}
                         value={passwords.current}
                         onChange={(e) => setPasswords({ ...passwords, current: e.target.value })}
-                        className="w-full pl-10 pr-12 py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                        className="w-full pl-10 pr-12 py-3 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-700 focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                         placeholder="Enter current password"
                       />
                       <button
                         type="button"
                         onClick={() => setShowPasswords({ ...showPasswords, current: !showPasswords.current })}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
                       >
                         {showPasswords.current ? <EyeOff size={18} /> : <Eye size={18} />}
                       </button>
@@ -385,7 +385,7 @@ export default function SettingsPage() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                       New Password
                     </label>
                     <div className="relative">
@@ -394,13 +394,13 @@ export default function SettingsPage() {
                         type={showPasswords.new ? 'text' : 'password'}
                         value={passwords.new}
                         onChange={(e) => setPasswords({ ...passwords, new: e.target.value })}
-                        className="w-full pl-10 pr-12 py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                        className="w-full pl-10 pr-12 py-3 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-700 focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                         placeholder="Enter new password"
                       />
                       <button
                         type="button"
                         onClick={() => setShowPasswords({ ...showPasswords, new: !showPasswords.new })}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
                       >
                         {showPasswords.new ? <EyeOff size={18} /> : <Eye size={18} />}
                       </button>
@@ -408,7 +408,7 @@ export default function SettingsPage() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                       Confirm New Password
                     </label>
                     <div className="relative">
@@ -417,13 +417,13 @@ export default function SettingsPage() {
                         type={showPasswords.confirm ? 'text' : 'password'}
                         value={passwords.confirm}
                         onChange={(e) => setPasswords({ ...passwords, confirm: e.target.value })}
-                        className="w-full pl-10 pr-12 py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                        className="w-full pl-10 pr-12 py-3 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-700 focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                         placeholder="Confirm new password"
                       />
                       <button
                         type="button"
                         onClick={() => setShowPasswords({ ...showPasswords, confirm: !showPasswords.confirm })}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
                       >
                         {showPasswords.confirm ? <EyeOff size={18} /> : <Eye size={18} />}
                       </button>
@@ -438,12 +438,12 @@ export default function SettingsPage() {
               </form>
 
               {/* Two-Factor Authentication */}
-              <div className="pt-8 border-t">
-                <h3 className="text-lg font-medium text-gray-900 flex items-center gap-2 mb-4">
+              <div className="pt-8 border-t dark:border-gray-700">
+                <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 flex items-center gap-2 mb-4">
                   <Shield size={20} />
                   Two-Factor Authentication
                 </h3>
-                <p className="text-gray-600 text-sm mb-4">
+                <p className="text-gray-600 dark:text-gray-400 text-sm mb-4">
                   Add an extra layer of security to your account by enabling two-factor authentication.
                 </p>
                 <Button variant="outline">
@@ -460,13 +460,13 @@ export default function SettingsPage() {
               animate={{ opacity: 1 }}
               className="space-y-6"
             >
-              <h3 className="text-lg font-medium text-gray-900">Email Notifications</h3>
+              <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">Email Notifications</h3>
               
               <div className="space-y-4">
-                <label className="flex items-center justify-between p-4 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100 transition">
+                <label className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 transition">
                   <div>
-                    <p className="font-medium text-gray-900">Transfer Updates</p>
-                    <p className="text-sm text-gray-500">
+                    <p className="font-medium text-gray-900 dark:text-gray-100">Transfer Updates</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
                       Receive emails when products are transferred to or from you
                     </p>
                   </div>
@@ -478,10 +478,10 @@ export default function SettingsPage() {
                   />
                 </label>
 
-                <label className="flex items-center justify-between p-4 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100 transition">
+                <label className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 transition">
                   <div>
-                    <p className="font-medium text-gray-900">Verification Alerts</p>
-                    <p className="text-sm text-gray-500">
+                    <p className="font-medium text-gray-900 dark:text-gray-100">Verification Alerts</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
                       Get notified when your products are verified by consumers
                     </p>
                   </div>
@@ -493,10 +493,10 @@ export default function SettingsPage() {
                   />
                 </label>
 
-                <label className="flex items-center justify-between p-4 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100 transition">
+                <label className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 transition">
                   <div>
-                    <p className="font-medium text-gray-900">Newsletter</p>
-                    <p className="text-sm text-gray-500">
+                    <p className="font-medium text-gray-900 dark:text-gray-100">Newsletter</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
                       Receive updates about new features and industry news
                     </p>
                   </div>
@@ -509,13 +509,13 @@ export default function SettingsPage() {
                 </label>
               </div>
 
-              <h3 className="text-lg font-medium text-gray-900 pt-6">Push Notifications</h3>
+              <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 pt-6">Push Notifications</h3>
               
               <div className="space-y-4">
-                <label className="flex items-center justify-between p-4 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100 transition">
+                <label className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 transition">
                   <div>
-                    <p className="font-medium text-gray-900">Transfer Updates</p>
-                    <p className="text-sm text-gray-500">
+                    <p className="font-medium text-gray-900 dark:text-gray-100">Transfer Updates</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
                       Receive push notifications for transfer activities
                     </p>
                   </div>
@@ -527,10 +527,10 @@ export default function SettingsPage() {
                   />
                 </label>
 
-                <label className="flex items-center justify-between p-4 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100 transition">
+                <label className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 transition">
                   <div>
-                    <p className="font-medium text-gray-900">Verification Alerts</p>
-                    <p className="text-sm text-gray-500">
+                    <p className="font-medium text-gray-900 dark:text-gray-100">Verification Alerts</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
                       Receive push notifications when products are verified
                     </p>
                   </div>
@@ -543,7 +543,7 @@ export default function SettingsPage() {
                 </label>
               </div>
 
-              <div className="flex justify-end pt-4 border-t">
+              <div className="flex justify-end pt-4 border-t dark:border-gray-700">
                 <Button onClick={saveNotifications} disabled={isLoading}>
                   {isLoading ? <LoadingSpinner size="sm" /> : <Save size={18} />}
                   Save Preferences
@@ -568,10 +568,10 @@ export default function SettingsPage() {
 
               {walletAddress ? (
                 <div className="space-y-4">
-                  <div className="p-4 bg-gray-50 rounded-lg">
-                    <p className="text-sm text-gray-600 mb-2">Connected Wallet Address</p>
+                  <div className="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">Connected Wallet Address</p>
                     <div className="flex items-center gap-2">
-                      <code className="flex-1 text-sm font-mono bg-white px-3 py-2 rounded border break-all">
+                      <code className="flex-1 text-sm font-mono bg-white dark:bg-gray-800 px-3 py-2 rounded border dark:border-gray-600 break-all text-gray-900 dark:text-gray-100">
                         {walletAddress}
                       </code>
                       <Button
@@ -589,8 +589,8 @@ export default function SettingsPage() {
                     <span className="text-sm font-medium">Wallet Connected</span>
                   </div>
 
-                  <div className="p-4 bg-amber-50 rounded-lg border border-amber-200">
-                    <p className="text-sm text-amber-700">
+                  <div className="p-4 bg-amber-50 dark:bg-amber-900/30 rounded-lg border border-amber-200 dark:border-amber-700">
+                    <p className="text-sm text-amber-700 dark:text-amber-300">
                       <strong>Note:</strong> This wallet will be used to sign product registrations 
                       and transfer confirmations on the Ethereum Sepolia testnet.
                     </p>
@@ -598,8 +598,8 @@ export default function SettingsPage() {
                 </div>
               ) : (
                 <div className="text-center py-8">
-                  <Wallet size={48} className="mx-auto text-gray-300 mb-4" />
-                  <p className="text-gray-500 mb-4">No wallet connected</p>
+                  <Wallet size={48} className="mx-auto text-gray-300 dark:text-gray-600 mb-4" />
+                  <p className="text-gray-500 dark:text-gray-400 mb-4">No wallet connected</p>
                   <Button onClick={connectWallet}>
                     <LinkIcon size={18} />
                     Connect MetaMask Wallet
@@ -607,9 +607,9 @@ export default function SettingsPage() {
                 </div>
               )}
 
-              <div className="pt-6 border-t">
-                <h4 className="font-medium text-gray-900 mb-4">Test Network Faucets</h4>
-                <p className="text-sm text-gray-600 mb-4">
+              <div className="pt-6 border-t dark:border-gray-700">
+                <h4 className="font-medium text-gray-900 dark:text-gray-100 mb-4">Test Network Faucets</h4>
+                <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
                   Get free test ETH for the Sepolia testnet to use with ChainTrack.
                 </p>
                 <div className="flex gap-4">

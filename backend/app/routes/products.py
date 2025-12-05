@@ -10,7 +10,7 @@ from datetime import datetime
 from .. import db
 from ..models import User, Product, ProductStatus
 from ..services.qr_service import generate_qr_code
-from ..services.blockchain_service import BlockchainService
+from ..services.blockchain_service import blockchain_service
 
 bp = Blueprint('products', __name__)
 
@@ -161,8 +161,7 @@ def register_product():
     
     # Register on blockchain (async in production)
     try:
-        blockchain = BlockchainService()
-        tx_hash, block_number = blockchain.register_product(
+        tx_hash, block_number = blockchain_service.register_product(
             product.product_id,
             product.generate_hash(),
             user.wallet_address or '0x0000000000000000000000000000000000000000'

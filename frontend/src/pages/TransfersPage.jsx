@@ -130,14 +130,14 @@ export default function TransfersPage() {
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Transfers</h1>
-          <p className="text-gray-500 mt-1">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Transfers</h1>
+          <p className="text-gray-500 dark:text-gray-400 mt-1">
             Manage custody transfers for your products
           </p>
         </div>
 
         {pendingCount > 0 && (
-          <div className="bg-yellow-50 border border-yellow-200 text-yellow-800 px-4 py-2 rounded-lg flex items-center gap-2">
+          <div className="bg-yellow-50 dark:bg-yellow-900/30 border border-yellow-200 dark:border-yellow-700 text-yellow-800 dark:text-yellow-300 px-4 py-2 rounded-lg flex items-center gap-2">
             <Clock size={18} />
             <span className="font-medium">{pendingCount} pending transfer{pendingCount !== 1 ? 's' : ''}</span>
           </div>
@@ -145,7 +145,7 @@ export default function TransfersPage() {
       </div>
 
       {/* Tabs & Filters */}
-      <div className="bg-white rounded-xl border border-gray-200 p-4">
+      <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           {/* Tabs */}
           <div className="flex gap-2">
@@ -157,8 +157,8 @@ export default function TransfersPage() {
                   onClick={() => setActiveTab(tab.id)}
                   className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition ${
                     activeTab === tab.id
-                      ? 'bg-primary-100 text-primary-700'
-                      : 'text-gray-500 hover:bg-gray-100'
+                      ? 'bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-400'
+                      : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
                   }`}
                 >
                   <Icon size={18} />
@@ -175,7 +175,7 @@ export default function TransfersPage() {
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                className="pl-10 pr-8 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 appearance-none bg-white"
+                className="pl-10 pr-8 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 appearance-none bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
               >
                 {statusFilters.map(opt => (
                   <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -186,7 +186,7 @@ export default function TransfersPage() {
             <button
               onClick={fetchTransfers}
               disabled={isLoading}
-              className="p-2 text-gray-400 hover:text-gray-600 rounded-lg transition disabled:opacity-50"
+              className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg transition disabled:opacity-50"
               title="Refresh"
             >
               <RefreshCw size={20} className={isLoading ? 'animate-spin' : ''} />
@@ -200,7 +200,7 @@ export default function TransfersPage() {
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg"
+          className="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-700 text-red-600 dark:text-red-400 px-4 py-3 rounded-lg"
         >
           {error}
         </motion.div>
@@ -220,11 +220,11 @@ export default function TransfersPage() {
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          className="text-center py-16 bg-white rounded-xl border border-gray-200"
+          className="text-center py-16 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700"
         >
-          <ArrowRightLeft size={48} className="mx-auto text-gray-300 mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 mb-2">No transfers found</h3>
-          <p className="text-gray-500">
+          <ArrowRightLeft size={48} className="mx-auto text-gray-300 dark:text-gray-600 mb-4" />
+          <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">No transfers found</h3>
+          <p className="text-gray-500 dark:text-gray-400">
             {activeTab === 'incoming'
               ? "You don't have any incoming transfers"
               : activeTab === 'outgoing'
@@ -287,7 +287,7 @@ export default function TransfersPage() {
           </div>
         }
       >
-        <p className="text-gray-600">
+        <p className="text-gray-600 dark:text-gray-400">
           {actionType === 'confirm'
             ? 'By confirming, you acknowledge receiving custody of this product. This action will be recorded on the blockchain.'
             : 'Are you sure you want to reject this transfer? This action cannot be undone.'}

@@ -19,10 +19,12 @@ import {
   Calendar,
   Filter,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Printer
 } from 'lucide-react'
 import useShipmentStore from '../../store/shipmentStore'
 import { useAuthStore } from '../../store/authStore'
+import { generateShipmentLabel } from '../../utils/shipmentLabelPDF'
 
 const statusConfig = {
   created: {
@@ -67,17 +69,24 @@ function ShipmentCard({ shipment }) {
   const StatusIcon = statusConfig[shipment.status]?.icon || Package
   const statusStyle = statusConfig[shipment.status] || statusConfig.created
 
+  // Handle both nested and flat data structures
+  const description = shipment.package?.description || shipment.description || 'No description'
+  const pickupCity = shipment.pickup?.city || shipment.pickup_city || 'N/A'
+  const deliveryCity = shipment.delivery?.city || shipment.delivery_city || 'N/A'
+  const createdAt = shipment.timestamps?.created_at || shipment.created_at
+  const checkpointCount = shipment.checkpoints?.length || shipment.checkpoint_count || 0
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-white rounded-xl shadow-sm border border-gray-200 p-5 hover:shadow-md transition-shadow cursor-pointer"
-      onClick={() => navigate(`/dashboard/shipments/${shipment.id}`)}
+      className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-5 hover:shadow-md transition-shadow cursor-pointer"
+      onClick={() => navigate(`/dashboard/shipments/${shipment.shipment_id}`)}
     >
       <div className="flex justify-between items-start mb-4">
         <div>
-          <h3 className="font-semibold text-gray-900">{shipment.shipment_id}</h3>
-          <p className="text-sm text-gray-500">{shipment.description || 'No description'}</p>
+          <h3 className="font-semibold text-gray-900 dark:text-gray-100">{shipment.shipment_id}</h3>
+          <p className="text-sm text-gray-500 dark:text-gray-400">{description}</p>
         </div>
         <span
           className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium ${statusStyle.color}`}
@@ -88,24 +97,36 @@ function ShipmentCard({ shipment }) {
       </div>
 
       <div className="space-y-2 text-sm">
-        <div className="flex items-center gap-2 text-gray-600">
+        <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
           <MapPin className="h-4 w-4 text-gray-400" />
           <span className="truncate">
-            {shipment.pickup_city || 'N/A'} → {shipment.delivery_city || 'N/A'}
+            {pickupCity} → {deliveryCity}
           </span>
         </div>
-        <div className="flex items-center gap-2 text-gray-600">
+        <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
           <Calendar className="h-4 w-4 text-gray-400" />
-          <span>Created {new Date(shipment.created_at).toLocaleDateString()}</span>
+          <span>Created {createdAt ? new Date(createdAt).toLocaleDateString() : 'N/A'}</span>
         </div>
       </div>
 
-      <div className="mt-4 pt-4 border-t border-gray-100 flex justify-between items-center">
-        <div className="text-sm">
-          <span className="text-gray-500">Checkpoints: </span>
-          <span className="font-medium text-gray-900">
-            {shipment.checkpoint_count || 0}
-          </span>
+      <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700 flex justify-between items-center">
+        <div className="flex items-center gap-3">
+          <div className="text-sm">
+            <span className="text-gray-500 dark:text-gray-400">Checkpoints: </span>
+            <span className="font-medium text-gray-900 dark:text-gray-100">
+              {checkpointCount}
+            </span>
+          </div>
+          <button
+            onClick={(e) => {
+              e.stopPropagation()
+              generateShipmentLabel(shipment)
+            }}
+            className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded transition-colors"
+            title="Print Shipping Label"
+          >
+            <Printer className="h-4 w-4" />
+          </button>
         </div>
         <button className="text-emerald-600 hover:text-emerald-700 text-sm font-medium flex items-center gap-1">
           View Details
@@ -155,10 +176,12 @@ export default function ShipmentsPage() {
   const filteredShipments = shipments.filter((shipment) => {
     if (!searchQuery) return true
     const query = searchQuery.toLowerCase()
+    const description = shipment.package?.description || shipment.description || ''
+    const receiverName = shipment.receiver?.name || shipment.receiver_name || ''
     return (
       shipment.shipment_id?.toLowerCase().includes(query) ||
-      shipment.description?.toLowerCase().includes(query) ||
-      shipment.receiver_name?.toLowerCase().includes(query)
+      description.toLowerCase().includes(query) ||
+      receiverName.toLowerCase().includes(query)
     )
   })
 
@@ -167,8 +190,8 @@ export default function ShipmentsPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Shipments</h1>
-          <p className="text-gray-500">Track and manage your P2P deliveries</p>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Shipments</h1>
+          <p className="text-gray-500 dark:text-gray-400">Track and manage your P2P deliveries</p>
         </div>
         <Link
           to="/dashboard/shipments/create"
@@ -180,7 +203,7 @@ export default function ShipmentsPage() {
       </div>
 
       {/* Filters */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
         <div className="flex flex-col md:flex-row gap-4">
           {/* Search */}
           <div className="flex-1 relative">
@@ -190,7 +213,7 @@ export default function ShipmentsPage() {
               placeholder="Search by ID, description, or receiver..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+              className="w-full pl-10 pr-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
             />
           </div>
 
@@ -200,7 +223,7 @@ export default function ShipmentsPage() {
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="border border-gray-300 rounded-lg px-3 py-2.5 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+              className="border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2.5 text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-700 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
             >
               <option value="">All Statuses</option>
               <option value="created">Created</option>
@@ -217,11 +240,11 @@ export default function ShipmentsPage() {
           <select
             value={roleFilter}
             onChange={(e) => setRoleFilter(e.target.value)}
-            className="border border-gray-300 rounded-lg px-3 py-2.5 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+            className="border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2.5 text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-700 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
           >
-            <option value="">All Roles</option>
-            <option value="sender">As Sender</option>
-            <option value="receiver">As Receiver</option>
+            <option value="">All Shipments</option>
+            <option value="sent">Sent by Me</option>
+            <option value="handling">I'm Handling</option>
           </select>
         </div>
       </div>
@@ -233,12 +256,12 @@ export default function ShipmentsPage() {
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
-            className="bg-red-50 border border-red-200 rounded-lg p-4 flex justify-between items-center"
+            className="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg p-4 flex justify-between items-center"
           >
-            <p className="text-red-700">{error}</p>
+            <p className="text-red-700 dark:text-red-400">{error}</p>
             <button
               onClick={clearError}
-              className="text-red-600 hover:text-red-800 text-sm font-medium"
+              className="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 text-sm font-medium"
             >
               Dismiss
             </button>
@@ -264,10 +287,10 @@ export default function ShipmentsPage() {
 
       {/* Empty State */}
       {!loading && filteredShipments.length === 0 && (
-        <div className="text-center py-16 bg-white rounded-xl shadow-sm border border-gray-200">
-          <Package className="h-16 w-16 mx-auto text-gray-300 mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 mb-2">No shipments found</h3>
-          <p className="text-gray-500 mb-6">
+        <div className="text-center py-16 bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
+          <Package className="h-16 w-16 mx-auto text-gray-300 dark:text-gray-600 mb-4" />
+          <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">No shipments found</h3>
+          <p className="text-gray-500 dark:text-gray-400 mb-6">
             {searchQuery || statusFilter
               ? 'Try adjusting your filters'
               : 'Create your first shipment to get started'}
@@ -286,8 +309,8 @@ export default function ShipmentsPage() {
 
       {/* Pagination */}
       {!loading && pagination.pages > 1 && (
-        <div className="flex items-center justify-between bg-white rounded-xl shadow-sm border border-gray-200 px-4 py-3">
-          <div className="text-sm text-gray-500">
+        <div className="flex items-center justify-between bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 px-4 py-3">
+          <div className="text-sm text-gray-500 dark:text-gray-400">
             Showing {((pagination.page - 1) * pagination.per_page) + 1} to{' '}
             {Math.min(pagination.page * pagination.per_page, pagination.total)} of{' '}
             {pagination.total} shipments
@@ -296,17 +319,17 @@ export default function ShipmentsPage() {
             <button
               onClick={() => handlePageChange(pagination.page - 1)}
               disabled={pagination.page === 1}
-              className="p-2 rounded-lg hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <ChevronLeft className="h-5 w-5" />
             </button>
-            <span className="text-sm font-medium">
+            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
               Page {pagination.page} of {pagination.pages}
             </span>
             <button
               onClick={() => handlePageChange(pagination.page + 1)}
               disabled={pagination.page === pagination.pages}
-              className="p-2 rounded-lg hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <ChevronRight className="h-5 w-5" />
             </button>

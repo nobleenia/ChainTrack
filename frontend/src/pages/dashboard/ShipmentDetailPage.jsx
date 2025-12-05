@@ -28,10 +28,20 @@ import {
   Loader2,
   FileText,
   Shield,
-  X
+  UserPlus,
+  Users,
+  Link2,
+  X,
+  ExternalLink,
+  Hash,
+  Printer
 } from 'lucide-react'
+import { generateShipmentLabel } from '../../utils/shipmentLabelPDF'
 import useShipmentStore from '../../store/shipmentStore'
 import { useAuthStore } from '../../store/authStore'
+import AuthorizeCourierModal from '../../components/shipment/AuthorizeCourierModal'
+import CourierAuthorizationsList from '../../components/shipment/CourierAuthorizationsList'
+import ChainIntegrityVerification from '../../components/shipment/ChainIntegrityVerification'
 
 const statusConfig = {
   created: {
@@ -139,26 +149,26 @@ function AddCheckpointModal({ shipmentId, onClose, onSuccess }) {
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="bg-white rounded-xl shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto"
+        className="bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto"
       >
-        <div className="p-6 border-b border-gray-200 flex justify-between items-center">
-          <h3 className="text-lg font-semibold">Add Checkpoint</h3>
-          <button onClick={onClose} className="p-1 hover:bg-gray-100 rounded">
-            <X className="h-5 w-5" />
+        <div className="p-6 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Add Checkpoint</h3>
+          <button onClick={onClose} className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded">
+            <X className="h-5 w-5 text-gray-500 dark:text-gray-400" />
           </button>
         </div>
 
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
           {error && (
-            <div className="bg-red-50 text-red-700 p-3 rounded-lg text-sm">{error}</div>
+            <div className="bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-400 p-3 rounded-lg text-sm">{error}</div>
           )}
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Action</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Action</label>
             <select
               value={formData.action}
               onChange={(e) => setFormData((prev) => ({ ...prev, action: e.target.value }))}
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+              className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-emerald-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
             >
               <option value="checkpoint">Checkpoint / Scan</option>
               <option value="picked_up">Picked Up</option>
@@ -176,12 +186,12 @@ function AddCheckpointModal({ shipmentId, onClose, onSuccess }) {
               value={formData.location}
               onChange={(e) => setFormData((prev) => ({ ...prev, location: e.target.value }))}
               placeholder="e.g., Ikeja, Lagos"
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+              className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-emerald-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Handler Name (optional)
             </label>
             <input
@@ -189,12 +199,12 @@ function AddCheckpointModal({ shipmentId, onClose, onSuccess }) {
               value={formData.handler_name}
               onChange={(e) => setFormData((prev) => ({ ...prev, handler_name: e.target.value }))}
               placeholder="Courier name"
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+              className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-emerald-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Notes (optional)
             </label>
             <textarea
@@ -202,12 +212,12 @@ function AddCheckpointModal({ shipmentId, onClose, onSuccess }) {
               onChange={(e) => setFormData((prev) => ({ ...prev, notes: e.target.value }))}
               placeholder="Any additional notes..."
               rows={2}
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+              className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-emerald-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Photo (optional)
             </label>
             {photoPreview ? (
@@ -316,22 +326,22 @@ function DeliveryModal({ shipmentId, onClose, onSuccess }) {
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="bg-white rounded-xl shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto"
+        className="bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto"
       >
-        <div className="p-6 border-b border-gray-200 flex justify-between items-center">
-          <h3 className="text-lg font-semibold">Mark as Delivered</h3>
-          <button onClick={onClose} className="p-1 hover:bg-gray-100 rounded">
+        <div className="p-6 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
+          <h3 className="text-lg font-semibold dark:text-white">Mark as Delivered</h3>
+          <button onClick={onClose} className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded dark:text-gray-400">
             <X className="h-5 w-5" />
           </button>
         </div>
 
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
           {error && (
-            <div className="bg-red-50 text-red-700 p-3 rounded-lg text-sm">{error}</div>
+            <div className="bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-400 p-3 rounded-lg text-sm">{error}</div>
           )}
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Recipient Name *
             </label>
             <input
@@ -341,15 +351,15 @@ function DeliveryModal({ shipmentId, onClose, onSuccess }) {
                 setFormData((prev) => ({ ...prev, recipient_name: e.target.value }))
               }
               placeholder="Person who received the package"
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+              className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-emerald-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Delivery Photo *
             </label>
-            <p className="text-xs text-gray-500 mb-2">
+            <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">
               Take a photo of the delivered package as proof of delivery
             </p>
             {photoPreview ? (
@@ -370,7 +380,7 @@ function DeliveryModal({ shipmentId, onClose, onSuccess }) {
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                className="flex items-center gap-2 px-4 py-2 border border-dashed border-gray-300 rounded-lg hover:bg-gray-50 w-full justify-center"
+                className="flex items-center gap-2 px-4 py-2 border border-dashed border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 w-full justify-center text-gray-700 dark:text-gray-300"
               >
                 <Camera className="h-5 w-5" />
                 Take/Upload Photo
@@ -386,7 +396,7 @@ function DeliveryModal({ shipmentId, onClose, onSuccess }) {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Notes (optional)
             </label>
             <textarea
@@ -394,7 +404,7 @@ function DeliveryModal({ shipmentId, onClose, onSuccess }) {
               onChange={(e) => setFormData((prev) => ({ ...prev, notes: e.target.value }))}
               placeholder="Any delivery notes..."
               rows={2}
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+              className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-emerald-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500"
             />
           </div>
 
@@ -402,7 +412,7 @@ function DeliveryModal({ shipmentId, onClose, onSuccess }) {
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 px-4 py-2.5 border border-gray-300 rounded-lg hover:bg-gray-50"
+              className="flex-1 px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300"
             >
               Cancel
             </button>
@@ -616,6 +626,9 @@ export default function ShipmentDetailPage() {
   const [showAddCheckpoint, setShowAddCheckpoint] = useState(false)
   const [showDelivery, setShowDelivery] = useState(false)
   const [showConfirm, setShowConfirm] = useState(false)
+  const [showAuthorizeCourier, setShowAuthorizeCourier] = useState(false)
+  const [showCourierAuthorizations, setShowCourierAuthorizations] = useState(false)
+  const [showChainVerification, setShowChainVerification] = useState(false)
 
   useEffect(() => {
     fetchShipment(id)
@@ -626,8 +639,8 @@ export default function ShipmentDetailPage() {
     navigator.clipboard.writeText(text)
   }
 
-  const isSender = shipment?.sender_id === user?.id
-  const isReceiver = shipment?.receiver_email === user?.email
+  const isSender = (shipment?.sender?.id || shipment?.sender_id) === user?.id
+  const isReceiver = (shipment?.receiver?.email || shipment?.receiver_email) === user?.email
 
   if (loading) {
     return (
@@ -664,7 +677,7 @@ export default function ShipmentDetailPage() {
       <div>
         <button
           onClick={() => navigate('/dashboard/shipments')}
-          className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-4"
+          className="flex items-center gap-2 text-gray-500 dark:text-gray-300 hover:text-gray-700 dark:hover:text-white mb-4 transition-colors"
         >
           <ArrowLeft className="h-5 w-5" />
           Back to Shipments
@@ -673,22 +686,22 @@ export default function ShipmentDetailPage() {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <div className="flex items-center gap-3">
-              <h1 className="text-2xl font-bold text-gray-900">{shipment.shipment_id}</h1>
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{shipment.shipment_id}</h1>
               <button
                 onClick={() => copyToClipboard(shipment.shipment_id)}
-                className="p-1.5 hover:bg-gray-100 rounded"
+                className="p-1.5 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors"
                 title="Copy ID"
               >
-                <Copy className="h-4 w-4 text-gray-500" />
+                <Copy className="h-4 w-4 text-gray-500 dark:text-gray-400" />
               </button>
             </div>
-            <p className="text-gray-500">{shipment.description}</p>
+            <p className="text-gray-600 dark:text-gray-300">{shipment.package?.description || shipment.description || 'Shipment'}</p>
           </div>
 
           <div className="flex items-center gap-3">
             <button
               onClick={() => setShowQR(true)}
-              className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+              className="flex items-center gap-2 px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white transition-colors"
             >
               <QrCode className="h-5 w-5" />
               QR Code
@@ -723,18 +736,16 @@ export default function ShipmentDetailPage() {
               <div className="flex-1 space-y-4">
                 <div>
                   <p className="text-sm text-gray-500">Pickup Location</p>
-                  <p className="font-medium">{shipment.pickup_address}</p>
-                  <p className="text-gray-600">
-                    {shipment.pickup_city}
-                    {shipment.pickup_state && `, ${shipment.pickup_state}`}
+                  <p className="font-medium text-gray-900">{shipment.pickup?.address || shipment.pickup_address || 'N/A'}</p>
+                  <p className="text-gray-700">
+                    {shipment.pickup?.city || shipment.pickup_city || ''}
                   </p>
                 </div>
                 <div>
                   <p className="text-sm text-gray-500">Delivery Location</p>
-                  <p className="font-medium">{shipment.delivery_address}</p>
-                  <p className="text-gray-600">
-                    {shipment.delivery_city}
-                    {shipment.delivery_state && `, ${shipment.delivery_state}`}
+                  <p className="font-medium text-gray-900">{shipment.delivery?.address || shipment.delivery_address || 'N/A'}</p>
+                  <p className="text-gray-700">
+                    {shipment.delivery?.city || shipment.delivery_city || ''}
                   </p>
                 </div>
               </div>
@@ -760,8 +771,8 @@ export default function ShipmentDetailPage() {
               {/* Shipment created */}
               <TimelineItem
                 action="created"
-                timestamp={shipment.created_at}
-                location={`${shipment.pickup_city}, ${shipment.pickup_country}`}
+                timestamp={shipment.timestamps?.created_at || shipment.created_at}
+                location={shipment.pickup?.city || shipment.pickup_city || 'Origin'}
                 notes="Shipment created"
                 isFirst
               />
@@ -806,34 +817,42 @@ export default function ShipmentDetailPage() {
           {/* Package Details */}
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
             <h2 className="text-lg font-semibold text-gray-900 mb-4">Package Details</h2>
-            <div className="grid grid-cols-2 gap-4">
-              {shipment.package_weight && (
-                <div>
-                  <p className="text-sm text-gray-500">Weight</p>
-                  <p className="font-medium">{shipment.package_weight} kg</p>
-                </div>
-              )}
-              {shipment.package_dimensions && (
-                <div>
-                  <p className="text-sm text-gray-500">Dimensions</p>
-                  <p className="font-medium">{shipment.package_dimensions}</p>
-                </div>
-              )}
-              {shipment.package_value && (
-                <div>
-                  <p className="text-sm text-gray-500">Declared Value</p>
-                  <p className="font-medium">₦{shipment.package_value.toLocaleString()}</p>
-                </div>
-              )}
+            <div className="space-y-3">
               <div>
-                <p className="text-sm text-gray-500">Fragile</p>
-                <p className="font-medium">{shipment.fragile ? 'Yes' : 'No'}</p>
+                <p className="text-sm text-gray-500">Description</p>
+                <p className="font-medium text-gray-900">{shipment.package?.description || shipment.description || 'N/A'}</p>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                {(shipment.package?.weight || shipment.weight) && (
+                  <div>
+                    <p className="text-sm text-gray-500">Weight</p>
+                    <p className="font-medium text-gray-900">{shipment.package?.weight || shipment.weight} kg</p>
+                  </div>
+                )}
+                {(shipment.package?.dimensions || shipment.dimensions) && (
+                  <div>
+                    <p className="text-sm text-gray-500">Dimensions</p>
+                    <p className="font-medium text-gray-900">{shipment.package?.dimensions || shipment.dimensions}</p>
+                  </div>
+                )}
+                {(shipment.package?.declared_value || shipment.declared_value) && (
+                  <div>
+                    <p className="text-sm text-gray-500">Declared Value</p>
+                    <p className="font-medium text-gray-900">₦{(shipment.package?.declared_value || shipment.declared_value)?.toLocaleString()}</p>
+                  </div>
+                )}
+                {shipment.package?.type && (
+                  <div>
+                    <p className="text-sm text-gray-500">Package Type</p>
+                    <p className="font-medium text-gray-900">{shipment.package.type}</p>
+                  </div>
+                )}
               </div>
             </div>
-            {shipment.special_instructions && (
+            {(shipment.package?.special_instructions || shipment.special_instructions) && (
               <div className="mt-4 pt-4 border-t border-gray-100">
                 <p className="text-sm text-gray-500">Special Instructions</p>
-                <p className="text-gray-700">{shipment.special_instructions}</p>
+                <p className="text-gray-700">{shipment.package?.special_instructions || shipment.special_instructions}</p>
               </div>
             )}
           </div>
@@ -845,7 +864,8 @@ export default function ShipmentDetailPage() {
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
             <h3 className="font-semibold text-gray-900 mb-4">Actions</h3>
             <div className="space-y-3">
-              {isSender &&
+              {/* Mark as Delivered - Only for receiver (incoming shipments) */}
+              {isReceiver &&
                 ['created', 'picked_up', 'in_transit', 'out_for_delivery'].includes(
                   shipment.status
                 ) && (
@@ -872,12 +892,52 @@ export default function ShipmentDetailPage() {
                 shipment.status === 'created' && (
                   <button
                     onClick={() => setShowAddCheckpoint(true)}
-                    className="w-full flex items-center justify-center gap-2 border border-gray-300 px-4 py-2.5 rounded-lg hover:bg-gray-50"
+                    className="w-full flex items-center justify-center gap-2 border border-gray-300 text-gray-700 px-4 py-2.5 rounded-lg hover:bg-gray-50"
                   >
                     <Plus className="h-5 w-5" />
                     Add Checkpoint
                   </button>
                 )}
+
+              {/* Courier Authorization - Only for sender */}
+              {isSender && !['delivered', 'confirmed', 'cancelled'].includes(shipment.status) && (
+                <>
+                  <button
+                    onClick={() => setShowAuthorizeCourier(true)}
+                    className="w-full flex items-center justify-center gap-2 border border-emerald-300 text-emerald-700 px-4 py-2.5 rounded-lg hover:bg-emerald-50"
+                  >
+                    <UserPlus className="h-5 w-5" />
+                    Authorize Courier
+                  </button>
+                  <button
+                    onClick={() => setShowCourierAuthorizations(true)}
+                    className="w-full flex items-center justify-center gap-2 border border-gray-300 text-gray-700 px-4 py-2.5 rounded-lg hover:bg-gray-50"
+                  >
+                    <Users className="h-5 w-5" />
+                    Manage Authorizations
+                  </button>
+                </>
+              )}
+
+              {/* Chain Verification - Available to sender and receiver */}
+              {(isSender || isReceiver) && shipment.checkpoints?.length > 0 && (
+                <button
+                  onClick={() => setShowChainVerification(true)}
+                  className="w-full flex items-center justify-center gap-2 border border-blue-300 text-blue-700 px-4 py-2.5 rounded-lg hover:bg-blue-50"
+                >
+                  <Link2 className="h-5 w-5" />
+                  Verify Chain Integrity
+                </button>
+              )}
+
+              {/* Print Shipping Label - Always available */}
+              <button
+                onClick={() => generateShipmentLabel(shipment)}
+                className="w-full flex items-center justify-center gap-2 border border-gray-300 text-gray-700 px-4 py-2.5 rounded-lg hover:bg-gray-50"
+              >
+                <Printer className="h-5 w-5" />
+                Print Shipping Label
+              </button>
             </div>
           </div>
 
@@ -887,16 +947,16 @@ export default function ShipmentDetailPage() {
             <div className="space-y-3">
               <div className="flex items-center gap-3">
                 <User className="h-5 w-5 text-gray-400" />
-                <span>{shipment.receiver_name}</span>
+                <span className="text-gray-900">{shipment.receiver?.name || shipment.receiver_name || 'N/A'}</span>
               </div>
               <div className="flex items-center gap-3">
                 <Phone className="h-5 w-5 text-gray-400" />
-                <span>{shipment.receiver_phone}</span>
+                <span className="text-gray-900">{shipment.receiver?.phone || shipment.receiver_phone || 'N/A'}</span>
               </div>
-              {shipment.receiver_email && (
+              {(shipment.receiver?.email || shipment.receiver_email) && (
                 <div className="flex items-center gap-3">
                   <Mail className="h-5 w-5 text-gray-400" />
-                  <span>{shipment.receiver_email}</span>
+                  <span className="text-gray-900">{shipment.receiver?.email || shipment.receiver_email}</span>
                 </div>
               )}
             </div>
@@ -910,33 +970,95 @@ export default function ShipmentDetailPage() {
                 <Calendar className="h-5 w-5 text-gray-400" />
                 <div>
                   <p className="text-sm text-gray-500">Created</p>
-                  <p>{new Date(shipment.created_at).toLocaleString()}</p>
+                  <p className="text-gray-900">{(shipment.timestamps?.created_at || shipment.created_at) ? new Date(shipment.timestamps?.created_at || shipment.created_at).toLocaleString() : 'N/A'}</p>
                 </div>
               </div>
-              {shipment.delivered_at && (
+              {(shipment.timestamps?.delivered_at || shipment.delivered_at) && (
                 <div className="flex items-center gap-3">
                   <CheckCircle className="h-5 w-5 text-gray-400" />
                   <div>
                     <p className="text-sm text-gray-500">Delivered</p>
-                    <p>{new Date(shipment.delivered_at).toLocaleString()}</p>
+                    <p className="text-gray-900">{new Date(shipment.timestamps?.delivered_at || shipment.delivered_at).toLocaleString()}</p>
+                  </div>
+                </div>
+              )}
+              {(shipment.timestamps?.confirmed_at || shipment.confirmed_at) && (
+                <div className="flex items-center gap-3">
+                  <Shield className="h-5 w-5 text-emerald-500" />
+                  <div>
+                    <p className="text-sm text-gray-500">Confirmed</p>
+                    <p className="text-gray-900">{new Date(shipment.timestamps?.confirmed_at || shipment.confirmed_at).toLocaleString()}</p>
                   </div>
                 </div>
               )}
             </div>
           </div>
 
-          {/* Blockchain Info */}
-          {shipment.blockchain_tx_hash && (
+          {/* Blockchain Info - Only visible to sender for security */}
+          {(shipment.blockchain?.hash || shipment.blockchain_hash) && isSender && (
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
               <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
                 <Shield className="h-5 w-5 text-emerald-600" />
                 Blockchain Verified
               </h3>
-              <div className="bg-gray-50 rounded-lg p-3">
-                <p className="text-xs text-gray-500 mb-1">Transaction Hash</p>
-                <p className="font-mono text-xs text-gray-700 break-all">
-                  {shipment.blockchain_tx_hash}
-                </p>
+              <div className="space-y-3">
+                <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-3">
+                  <div className="flex items-center gap-2 text-emerald-700 text-sm font-medium mb-1">
+                    <CheckCircle className="h-4 w-4" />
+                    On-Chain Record
+                  </div>
+                  <p className="text-xs text-emerald-600">This shipment is recorded on the Sepolia testnet blockchain</p>
+                </div>
+                <div className="bg-gray-50 rounded-lg p-3">
+                  <p className="text-xs text-gray-500 mb-1 flex items-center gap-1">
+                    <Hash className="h-3 w-3" />
+                    Transaction Hash
+                  </p>
+                  <div className="flex items-center gap-2">
+                    <p className="font-mono text-xs text-gray-700 break-all flex-1">
+                      {shipment.blockchain?.hash || shipment.blockchain_hash}
+                    </p>
+                    <button
+                      onClick={() => copyToClipboard(shipment.blockchain?.hash || shipment.blockchain_hash)}
+                      className="p-1 hover:bg-gray-200 rounded flex-shrink-0"
+                      title="Copy hash"
+                    >
+                      <Copy className="h-3 w-3 text-gray-500" />
+                    </button>
+                  </div>
+                </div>
+                {(shipment.blockchain?.block || shipment.blockchain_block) && (
+                  <div className="bg-gray-50 rounded-lg p-3">
+                    <p className="text-xs text-gray-500 mb-1">Block Number</p>
+                    <p className="font-mono text-sm text-gray-700">
+                      #{shipment.blockchain?.block || shipment.blockchain_block}
+                    </p>
+                  </div>
+                )}
+                <a
+                  href={`https://sepolia.etherscan.io/tx/${shipment.blockchain?.hash || shipment.blockchain_hash}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-center gap-2 text-sm text-emerald-600 hover:text-emerald-700 bg-emerald-50 hover:bg-emerald-100 px-4 py-2 rounded-lg transition-colors"
+                >
+                  <ExternalLink className="h-4 w-4" />
+                  View on Etherscan
+                </a>
+              </div>
+            </div>
+          )}
+
+          {/* Blockchain Verified Badge - For non-senders (doesn't show tx hash) */}
+          {(shipment.blockchain?.hash || shipment.blockchain_hash) && !isSender && (
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-emerald-100 rounded-full flex items-center justify-center">
+                  <Shield className="h-5 w-5 text-emerald-600" />
+                </div>
+                <div>
+                  <p className="font-semibold text-gray-900">Blockchain Verified</p>
+                  <p className="text-sm text-gray-500">This shipment is recorded on-chain</p>
+                </div>
               </div>
             </div>
           )}
@@ -1007,6 +1129,62 @@ export default function ShipmentDetailPage() {
             fetchShipment(id)
           }}
         />
+      )}
+
+      {/* Courier Authorization Modals */}
+      {showAuthorizeCourier && (
+        <AuthorizeCourierModal
+          shipmentId={shipment.shipment_id}
+          onClose={() => setShowAuthorizeCourier(false)}
+        />
+      )}
+
+      {showCourierAuthorizations && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 overflow-y-auto">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            className="bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-2xl w-full my-8"
+          >
+            <div className="p-6 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Authorized Couriers</h3>
+              <button
+                onClick={() => setShowCourierAuthorizations(false)}
+                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
+              >
+                <X className="h-5 w-5 text-gray-500 dark:text-gray-400" />
+              </button>
+            </div>
+            <div className="p-6">
+              <CourierAuthorizationsList shipmentId={shipment.shipment_id} />
+            </div>
+          </motion.div>
+        </div>
+      )}
+
+      {showChainVerification && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 overflow-y-auto">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            className="bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-3xl w-full my-8"
+          >
+            <div className="p-6 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Chain Integrity Verification</h3>
+              <button
+                onClick={() => setShowChainVerification(false)}
+                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
+              >
+                <X className="h-5 w-5 text-gray-500 dark:text-gray-400" />
+              </button>
+            </div>
+            <div className="p-6">
+              <ChainIntegrityVerification shipmentId={shipment.shipment_id} />
+            </div>
+          </motion.div>
+        </div>
       )}
     </div>
   )

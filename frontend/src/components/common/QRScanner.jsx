@@ -191,24 +191,24 @@ export default function QRScanner({ isOpen, onClose, onScan }) {
         initial={{ scale: 0.95, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0.95, opacity: 0 }}
-        className="bg-white rounded-2xl w-full max-w-lg overflow-hidden shadow-2xl"
+        className="bg-white dark:bg-gray-800 rounded-2xl w-full max-w-lg overflow-hidden shadow-2xl"
       >
         {/* Header */}
-        <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between bg-gray-50">
+        <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between bg-gray-50 dark:bg-gray-700/50">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-primary-100 rounded-lg">
-              <QrCode size={20} className="text-primary-600" />
+            <div className="p-2 bg-primary-100 dark:bg-primary-900/50 rounded-lg">
+              <QrCode size={20} className="text-primary-600 dark:text-primary-400" />
             </div>
             <div>
-              <h3 className="font-semibold text-gray-900">Scan QR Code or Barcode</h3>
-              <p className="text-xs text-gray-500">Point your camera at the code</p>
+              <h3 className="font-semibold text-gray-900 dark:text-white">Scan QR Code or Barcode</h3>
+              <p className="text-xs text-gray-500 dark:text-gray-400">Point your camera at the code</p>
             </div>
           </div>
           <button 
             onClick={handleClose}
-            className="p-2 hover:bg-gray-200 rounded-lg transition"
+            className="p-2 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition"
           >
-            <X size={20} className="text-gray-500" />
+            <X size={20} className="text-gray-500 dark:text-gray-400" />
           </button>
         </div>
 
@@ -264,9 +264,9 @@ export default function QRScanner({ isOpen, onClose, onScan }) {
         </div>
 
         {/* Controls */}
-        <div className="px-6 py-4 bg-gray-50 border-t border-gray-200">
+        <div className="px-6 py-4 bg-gray-50 dark:bg-gray-700/50 border-t border-gray-200 dark:border-gray-700">
           <div className="flex items-center justify-between">
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-gray-500 dark:text-gray-400">
               {isScanning ? 'Scanning...' : 'Initializing camera...'}
             </p>
             
@@ -292,7 +292,7 @@ export default function QRScanner({ isOpen, onClose, onScan }) {
           </div>
           
           {/* Supported formats hint */}
-          <p className="text-xs text-gray-400 mt-3 text-center">
+          <p className="text-xs text-gray-400 dark:text-gray-500 mt-3 text-center">
             Supports QR codes, EAN-13, EAN-8, Code 128, Code 39, UPC-A, UPC-E
           </p>
         </div>

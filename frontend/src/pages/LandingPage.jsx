@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { 
@@ -12,8 +13,10 @@ import {
   CheckCircle,
   QrCode,
   Lock,
-  Globe
+  Globe,
+  Sparkles
 } from 'lucide-react'
+import DemoLoginModal from '../components/demo/DemoLoginModal'
 
 const features = [
   {
@@ -69,10 +72,146 @@ const stats = [
 ]
 
 export default function LandingPage() {
+  const [showDemoModal, setShowDemoModal] = useState(false)
+
   return (
     <div className="overflow-hidden">
+      {/* Demo Login Modal */}
+      <DemoLoginModal 
+        isOpen={showDemoModal} 
+        onClose={() => setShowDemoModal(false)} 
+      />
+
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-br from-primary-600 via-primary-700 to-primary-900 text-white">
+      <section className="relative bg-gradient-to-br from-primary-600 via-primary-700 to-primary-900 text-white overflow-hidden">
+        {/* Floating geometric shapes */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          {/* Floating cubes - enhanced motion */}
+          <motion.div
+            className="absolute top-20 left-[10%] w-16 h-16 border-2 border-white/10"
+            animate={{ y: [0, -30, 0], x: [0, 10, 0], rotate: [45, 90, 45], scale: [1, 1.1, 1] }}
+            transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+          />
+          <motion.div
+            className="absolute top-40 right-[15%] w-12 h-12 border-2 border-white/10"
+            animate={{ y: [0, 25, 0], x: [0, -15, 0], rotate: [12, 45, 12], opacity: [0.1, 0.2, 0.1] }}
+            transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+          />
+          <motion.div
+            className="absolute bottom-32 left-[20%] w-20 h-20 border border-white/5"
+            animate={{ y: [0, -35, 0], rotate: [30, 75, 30], scale: [1, 0.9, 1] }}
+            transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
+          />
+          <motion.div
+            className="absolute top-[60%] right-[30%] w-10 h-10 border border-white/10"
+            animate={{ y: [0, 28, 0], x: [0, 12, 0], rotate: [20, 60, 20] }}
+            transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }}
+          />
+          <motion.div
+            className="absolute top-16 right-[40%] w-8 h-8 border border-white/8"
+            animate={{ y: [0, -20, 0], x: [0, -8, 0], rotate: [60, 120, 60], opacity: [0.08, 0.15, 0.08] }}
+            transition={{ duration: 9, repeat: Infinity, ease: "easeInOut" }}
+          />
+          <motion.div
+            className="absolute bottom-20 left-[45%] w-14 h-14 border border-white/5"
+            animate={{ y: [0, 30, 0], rotate: [15, 50, 15], scale: [1, 1.15, 1] }}
+            transition={{ duration: 11, repeat: Infinity, ease: "easeInOut" }}
+          />
+          
+          {/* Floating hexagons - enhanced motion */}
+          <motion.div
+            className="absolute top-32 right-[25%] w-14 h-14 bg-white/5"
+            style={{ clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)' }}
+            animate={{ y: [0, 30, 0], x: [0, -10, 0], scale: [1, 1.2, 1], rotate: [0, 30, 0] }}
+            transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }}
+          />
+          <motion.div
+            className="absolute bottom-20 right-[10%] w-10 h-10 bg-white/5"
+            style={{ clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)' }}
+            animate={{ y: [0, -25, 0], scale: [1, 0.8, 1], rotate: [0, -20, 0], opacity: [0.05, 0.12, 0.05] }}
+            transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
+          />
+          <motion.div
+            className="absolute top-1/2 left-[5%] w-8 h-8 bg-white/5"
+            style={{ clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)' }}
+            animate={{ y: [0, 18, 0], x: [0, 15, 0], rotate: [0, 45, 0] }}
+            transition={{ duration: 9, repeat: Infinity, ease: "easeInOut" }}
+          />
+          <motion.div
+            className="absolute top-[70%] left-[35%] w-12 h-12 bg-white/4"
+            style={{ clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)' }}
+            animate={{ y: [0, -28, 0], scale: [1, 1.15, 1], rotate: [0, -25, 0] }}
+            transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+          />
+          <motion.div
+            className="absolute top-[20%] left-[55%] w-6 h-6 bg-white/6"
+            style={{ clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)' }}
+            animate={{ y: [0, 22, 0], x: [0, -10, 0], rotate: [0, 60, 0], opacity: [0.06, 0.12, 0.06] }}
+            transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+          />
+          <motion.div
+            className="absolute bottom-[35%] right-[8%] w-16 h-16 bg-white/3"
+            style={{ clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)' }}
+            animate={{ y: [0, 35, 0], rotate: [0, 40, 0], scale: [1, 1.1, 1] }}
+            transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
+          />
+          
+          {/* Small floating dots/circles - enhanced motion */}
+          <motion.div
+            className="absolute top-24 left-[40%] w-3 h-3 rounded-full bg-white/10"
+            animate={{ y: [0, -18, 0], x: [0, 8, 0], scale: [1, 1.5, 1] }}
+            transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+          />
+          <motion.div
+            className="absolute bottom-40 left-[60%] w-2 h-2 rounded-full bg-white/15"
+            animate={{ y: [0, 22, 0], x: [0, -6, 0], opacity: [0.15, 0.3, 0.15] }}
+            transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+          />
+          <motion.div
+            className="absolute top-1/3 right-[5%] w-4 h-4 rounded-full bg-white/10"
+            animate={{ y: [0, -20, 0], x: [0, -12, 0], scale: [1, 1.3, 1] }}
+            transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+          />
+          <motion.div
+            className="absolute top-[15%] left-[25%] w-2 h-2 rounded-full bg-white/12"
+            animate={{ y: [0, 15, 0], x: [0, 10, 0], opacity: [0.12, 0.25, 0.12] }}
+            transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
+          />
+          <motion.div
+            className="absolute bottom-[25%] left-[8%] w-3 h-3 rounded-full bg-white/8"
+            animate={{ y: [0, -22, 0], x: [0, 8, 0], scale: [1, 1.4, 1] }}
+            transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }}
+          />
+          <motion.div
+            className="absolute top-[45%] right-[20%] w-2 h-2 rounded-full bg-white/10"
+            animate={{ y: [0, 16, 0], x: [0, -5, 0], opacity: [0.1, 0.2, 0.1] }}
+            transition={{ duration: 4.5, repeat: Infinity, ease: "easeInOut" }}
+          />
+          <motion.div
+            className="absolute bottom-[15%] left-[70%] w-4 h-4 rounded-full bg-white/8"
+            animate={{ y: [0, -15, 0], x: [0, -10, 0], scale: [1, 1.2, 1] }}
+            transition={{ duration: 5.5, repeat: Infinity, ease: "easeInOut" }}
+          />
+          <motion.div
+            className="absolute top-[80%] left-[15%] w-2 h-2 rounded-full bg-white/12"
+            animate={{ y: [0, 20, 0], x: [0, 6, 0], opacity: [0.12, 0.22, 0.12] }}
+            transition={{ duration: 6.5, repeat: Infinity, ease: "easeInOut" }}
+          />
+          
+          {/* Triangles - enhanced motion */}
+          <motion.div
+            className="absolute top-[25%] right-[35%] w-0 h-0 border-l-[10px] border-l-transparent border-r-[10px] border-r-transparent border-b-[16px] border-b-white/8"
+            animate={{ y: [0, -25, 0], x: [0, 10, 0], rotate: [0, 30, 0], scale: [1, 1.2, 1] }}
+            transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+          />
+          <motion.div
+            className="absolute bottom-[45%] left-[30%] w-0 h-0 border-l-[8px] border-l-transparent border-r-[8px] border-r-transparent border-b-[12px] border-b-white/6"
+            animate={{ y: [0, 20, 0], x: [0, -8, 0], rotate: [0, -25, 0], opacity: [0.06, 0.12, 0.06] }}
+            transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }}
+          />
+        </div>
+        
+        {/* Original blur effects */}
         <div className="absolute inset-0 overflow-hidden">
           <div className="absolute -top-40 -right-40 w-80 h-80 bg-primary-500 rounded-full opacity-20 blur-3xl" />
           <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-primary-400 rounded-full opacity-20 blur-3xl" />
@@ -101,6 +240,15 @@ export default function LandingPage() {
                   Get Started Free
                   <ArrowRight className="ml-2" size={20} />
                 </Link>
+                {/* Demo button temporarily hidden
+                <button
+                  onClick={() => setShowDemoModal(true)}
+                  className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-amber-400 to-orange-500 text-white font-semibold rounded-lg hover:from-amber-500 hover:to-orange-600 transition shadow-lg animate-pulse hover:animate-none"
+                >
+                  <Sparkles className="mr-2" size={20} />
+                  Try Demo
+                </button>
+                */}
                 <Link
                   to="/verify"
                   className="inline-flex items-center px-6 py-3 border-2 border-white text-white font-semibold rounded-lg hover:bg-white/10 transition"
@@ -159,7 +307,7 @@ export default function LandingPage() {
       </section>
 
       {/* Stats Section */}
-      <section className="bg-white py-12 border-b">
+      <section className="bg-white dark:bg-gray-800 py-12 border-b dark:border-gray-700">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             {stats.map((stat, index) => (
@@ -171,8 +319,8 @@ export default function LandingPage() {
                 transition={{ delay: index * 0.1 }}
                 className="text-center"
               >
-                <div className="text-3xl sm:text-4xl font-bold text-primary-600">{stat.value}</div>
-                <div className="text-gray-600 mt-1">{stat.label}</div>
+                <div className="text-3xl sm:text-4xl font-bold text-primary-600 dark:text-primary-400">{stat.value}</div>
+                <div className="text-gray-600 dark:text-gray-400 mt-1">{stat.label}</div>
               </motion.div>
             ))}
           </div>
@@ -180,7 +328,7 @@ export default function LandingPage() {
       </section>
 
       {/* Features Section */}
-      <section id="features" className="py-20 bg-gray-50">
+      <section id="features" className="py-20 bg-gray-50 dark:bg-gray-900">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -188,10 +336,10 @@ export default function LandingPage() {
             viewport={{ once: true }}
             className="text-center mb-16"
           >
-            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900">
+            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white">
               Why Choose ChainTrack?
             </h2>
-            <p className="mt-4 text-xl text-gray-600 max-w-2xl mx-auto">
+            <p className="mt-4 text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
               Built on Ethereum blockchain for maximum security and transparency
             </p>
           </motion.div>
@@ -204,13 +352,13 @@ export default function LandingPage() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.1 }}
-                className="bg-white rounded-xl p-6 shadow-sm hover:shadow-lg transition card-hover"
+                className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm hover:shadow-lg transition card-hover"
               >
-                <div className="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center mb-4">
-                  <feature.icon size={24} className="text-primary-600" />
+                <div className="w-12 h-12 bg-primary-100 dark:bg-primary-900/50 rounded-lg flex items-center justify-center mb-4">
+                  <feature.icon size={24} className="text-primary-600 dark:text-primary-400" />
                 </div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">{feature.title}</h3>
-                <p className="text-gray-600">{feature.description}</p>
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">{feature.title}</h3>
+                <p className="text-gray-600 dark:text-gray-400">{feature.description}</p>
               </motion.div>
             ))}
           </div>
@@ -218,7 +366,7 @@ export default function LandingPage() {
       </section>
 
       {/* How It Works Section */}
-      <section id="how-it-works" className="py-20 bg-white">
+      <section id="how-it-works" className="py-20 bg-white dark:bg-gray-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -226,10 +374,10 @@ export default function LandingPage() {
             viewport={{ once: true }}
             className="text-center mb-16"
           >
-            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900">
+            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white">
               How It Works
             </h2>
-            <p className="mt-4 text-xl text-gray-600 max-w-2xl mx-auto">
+            <p className="mt-4 text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
               From factory to consumer, every step is verified on the blockchain
             </p>
           </motion.div>
@@ -245,17 +393,17 @@ export default function LandingPage() {
                 className="relative"
               >
                 {index < steps.length - 1 && (
-                  <div className="hidden md:block absolute top-8 left-1/2 w-full h-0.5 bg-gray-200" />
+                  <div className="hidden md:block absolute top-8 left-1/2 w-full h-0.5 bg-gray-200 dark:bg-gray-600" />
                 )}
                 <div className="relative z-10 flex flex-col items-center text-center">
                   <div className="w-16 h-16 bg-primary-600 rounded-full flex items-center justify-center mb-4 shadow-lg">
                     <step.icon size={28} className="text-white" />
                   </div>
-                  <div className="absolute -top-2 -right-2 w-6 h-6 bg-primary-100 rounded-full flex items-center justify-center text-sm font-bold text-primary-600">
+                  <div className="absolute -top-2 -right-2 w-6 h-6 bg-primary-100 dark:bg-primary-900 rounded-full flex items-center justify-center text-sm font-bold text-primary-600 dark:text-primary-400">
                     {index + 1}
                   </div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">{step.title}</h3>
-                  <p className="text-gray-600 text-sm">{step.description}</p>
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">{step.title}</h3>
+                  <p className="text-gray-600 dark:text-gray-400 text-sm">{step.description}</p>
                 </div>
               </motion.div>
             ))}

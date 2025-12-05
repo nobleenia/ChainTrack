@@ -5,7 +5,7 @@
 
 import api from './api'
 
-const SHIPMENTS_BASE = '/shipments'
+const SHIPMENTS_BASE = '/shipments/'
 
 export const shipmentApi = {
   /**

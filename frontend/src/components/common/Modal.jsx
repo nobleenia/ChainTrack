@@ -70,18 +70,18 @@ export default function Modal({
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
             transition={{ duration: 0.2 }}
-            className={`relative bg-white rounded-xl shadow-2xl w-full ${sizes[size]}`}
+            className={`relative bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full ${sizes[size]}`}
           >
             {/* Header */}
             {(title || showClose) && (
-              <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+              <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-gray-700">
                 {title && (
-                  <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{title}</h3>
                 )}
                 {showClose && (
                   <button
                     onClick={onClose}
-                    className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition"
+                    className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition"
                     aria-label="Close modal"
                   >
                     <X size={20} />
@@ -97,7 +97,7 @@ export default function Modal({
             
             {/* Footer */}
             {footer && (
-              <div className="px-6 py-4 border-t border-gray-100 bg-gray-50 rounded-b-xl">
+              <div className="px-6 py-4 border-t border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/50 rounded-b-xl">
                 {footer}
               </div>
             )}
@@ -139,7 +139,7 @@ export function ConfirmModal({
           <button
             onClick={onClose}
             disabled={isLoading}
-            className="px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition"
+            className="px-4 py-2 text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-600 hover:bg-gray-200 dark:hover:bg-gray-500 rounded-lg transition"
           >
             {cancelText}
           </button>
@@ -153,7 +153,7 @@ export function ConfirmModal({
         </div>
       }
     >
-      <p className="text-gray-600">{message}</p>
+      <p className="text-gray-600 dark:text-gray-300">{message}</p>
     </Modal>
   )
 }

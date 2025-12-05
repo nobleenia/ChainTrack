@@ -1,0 +1,18 @@
+{
+  "network": "sepolia",
+  "deployer": "0x2D7B510c225C95ff9AEf657E046Fe358e1290a83",
+  "timestamp": "2025-12-03T15:03:57.662Z",
+  "blockNumber": 9760880,
+  "contracts": {
+    "ProductRegistry": {
+      "address": "0x141878E69201172C2aeeC39C4882b61089f64177",
+      "deployer": "0x2D7B510c225C95ff9AEf657E046Fe358e1290a83",
+      "timestamp": "2025-12-03T15:02:00.515Z"
+    },
+    "ShipmentRegistry": {
+      "address": "0xd0Db8e81115297194659543c47BFda3b061B059b",
+      "deployer": "0x2D7B510c225C95ff9AEf657E046Fe358e1290a83",
+      "timestamp": "2025-12-03T15:02:48.836Z"
+    }
+  }
+}

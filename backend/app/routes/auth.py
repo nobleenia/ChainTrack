@@ -10,13 +10,28 @@ from flask_jwt_extended import (
 )
 from datetime import datetime
 
-from .. import db
+from .. import db, limiter
 from ..models import User, UserRole
+from ..utils.security import (
+    validate_password, AccountLockoutManager, 
+    get_client_ip, mask_email, sanitize_input
+)
+from ..services.token_blacklist_service import add_token_to_blacklist, is_token_blacklisted
 
 bp = Blueprint('auth', __name__)
 
 
+def apply_rate_limit(limit_string):
+    """Apply rate limit if limiter is available"""
+    def decorator(f):
+        if limiter:
+            return limiter.limit(limit_string)(f)
+        return f
+    return decorator
+
+
 @bp.route('/register', methods=['POST'])
+@apply_rate_limit("5 per minute")
 def register():
     """
     Register a new user
@@ -37,8 +52,17 @@ def register():
         if not data.get(field):
             return jsonify({'error': f'{field} is required'}), 400
     
+    # Sanitize inputs
+    email = sanitize_input(data.get('email', ''), 120).lower()
+    name = sanitize_input(data.get('name', ''), 100)
+    
+    # Validate password strength
+    is_valid, error_msg = validate_password(data['password'])
+    if not is_valid:
+        return jsonify({'error': error_msg}), 400
+    
     # Check if user already exists
-    if User.query.filter_by(email=data['email']).first():
+    if User.query.filter_by(email=email).first():
         return jsonify({'error': 'Email already registered'}), 409
     
     # Validate role
@@ -50,11 +74,11 @@ def register():
     
     # Create new user
     user = User(
-        email=data['email'],
-        name=data['name'],
+        email=email,
+        name=name,
         role=role,
-        company_name=data.get('company_name'),
-        phone=data.get('phone'),
+        company_name=sanitize_input(data.get('company_name', ''), 200),
+        phone=sanitize_input(data.get('phone', ''), 20),
         wallet_address=data.get('wallet_address')
     )
     user.set_password(data['password'])
@@ -62,19 +86,41 @@ def register():
     db.session.add(user)
     db.session.commit()
     
+    # Process referral code if provided
+    referral_processed = False
+    if data.get('referral_code'):
+        try:
+            from ..services.rewards_service import RewardsService
+            referral = RewardsService.process_referral(
+                data['referral_code'].upper().strip(),
+                user.id
+            )
+            if referral:
+                referral_processed = True
+        except Exception as e:
+            # Don't fail registration if referral processing fails
+            pass
+    
     # Generate tokens (use string identity for Flask-JWT-Extended compatibility)
     access_token = create_access_token(identity=str(user.id))
     refresh_token = create_refresh_token(identity=str(user.id))
     
-    return jsonify({
+    response_data = {
         'message': 'User registered successfully',
         'user': user.to_dict(),
         'access_token': access_token,
         'refresh_token': refresh_token
-    }), 201
+    }
+    
+    if referral_processed:
+        response_data['referral_applied'] = True
+        response_data['message'] = 'User registered successfully with referral bonus!'
+    
+    return jsonify(response_data), 201
 
 
 @bp.route('/login', methods=['POST'])
+@apply_rate_limit("10 per minute")
 def login():
     """
     Authenticate user and return tokens
@@ -88,13 +134,40 @@ def login():
     if not data.get('email') or not data.get('password'):
         return jsonify({'error': 'Email and password are required'}), 400
     
-    user = User.query.filter_by(email=data['email']).first()
+    email = sanitize_input(data.get('email', ''), 120).lower()
+    
+    # Check account lockout
+    is_locked, seconds_remaining = AccountLockoutManager.is_locked(email)
+    if is_locked:
+        minutes = seconds_remaining // 60 + 1
+        return jsonify({
+            'error': f'Account temporarily locked. Try again in {minutes} minutes.',
+            'locked': True,
+            'retry_after': seconds_remaining
+        }), 429
+    
+    user = User.query.filter_by(email=email).first()
     
     if not user or not user.check_password(data['password']):
-        return jsonify({'error': 'Invalid email or password'}), 401
+        # Record failed attempt
+        is_now_locked, remaining = AccountLockoutManager.record_failed_attempt(email)
+        
+        if is_now_locked:
+            return jsonify({
+                'error': 'Too many failed attempts. Account temporarily locked.',
+                'locked': True
+            }), 429
+        
+        return jsonify({
+            'error': 'Invalid email or password',
+            'attempts_remaining': remaining
+        }), 401
     
     if not user.is_active:
         return jsonify({'error': 'Account is deactivated'}), 403
+    
+    # Clear failed attempts on successful login
+    AccountLockoutManager.clear_attempts(email)
     
     # Update last login
     user.last_login = datetime.utcnow()
@@ -112,10 +185,34 @@ def login():
     }), 200
 
 
+@bp.route('/logout', methods=['POST'])
+@jwt_required()
+def logout():
+    """Logout and blacklist current token"""
+    jwt_data = get_jwt()
+    jti = jwt_data['jti']
+    
+    # Calculate remaining time until token expires
+    exp_timestamp = jwt_data.get('exp', 0)
+    now_timestamp = datetime.utcnow().timestamp()
+    expires_in = max(0, int(exp_timestamp - now_timestamp))
+    
+    # Blacklist the token (persists to Redis in production)
+    add_token_to_blacklist(jti, expires_in)
+    
+    return jsonify({'message': 'Successfully logged out'}), 200
+
+
 @bp.route('/refresh', methods=['POST'])
 @jwt_required(refresh=True)
 def refresh():
     """Refresh the access token using a valid refresh token"""
+    jti = get_jwt()['jti']
+    
+    # Check if refresh token is blacklisted (uses Redis in production)
+    if is_token_blacklisted(jti):
+        return jsonify({'error': 'Token has been revoked'}), 401
+    
     current_user_id = get_jwt_identity()
     access_token = create_access_token(identity=current_user_id)
     
@@ -189,10 +286,17 @@ def change_password():
     if not user.check_password(data['current_password']):
         return jsonify({'error': 'Current password is incorrect'}), 401
     
-    if len(data['new_password']) < 8:
-        return jsonify({'error': 'New password must be at least 8 characters'}), 400
+    # Validate new password strength
+    is_valid, error_msg = validate_password(data['new_password'])
+    if not is_valid:
+        return jsonify({'error': error_msg}), 400
     
     user.set_password(data['new_password'])
     db.session.commit()
     
     return jsonify({'message': 'Password changed successfully'}), 200
+
+
+def is_token_blacklisted(jti: str) -> bool:
+    """Check if a token JTI is blacklisted"""
+    return jti in _token_blacklist
