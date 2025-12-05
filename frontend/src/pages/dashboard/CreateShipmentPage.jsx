@@ -269,50 +269,50 @@ export default function CreateShipmentPage() {
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 text-center"
+          className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-8 text-center"
         >
-          <div className="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-6">
-            <CheckCircle className="h-10 w-10 text-emerald-600" />
+          <div className="w-20 h-20 bg-emerald-100 dark:bg-emerald-900/30 rounded-full flex items-center justify-center mx-auto mb-6">
+            <CheckCircle className="h-10 w-10 text-emerald-600 dark:text-emerald-400" />
           </div>
 
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Shipment Created!</h2>
-          <p className="text-gray-500 mb-8">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Shipment Created!</h2>
+          <p className="text-gray-500 dark:text-gray-400 mb-8">
             Your shipment has been created successfully. Share the tracking details with the receiver.
           </p>
 
-          <div className="bg-gray-50 rounded-xl p-6 mb-6 text-left">
+          <div className="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-6 mb-6 text-left">
             <div className="space-y-4">
               <div>
-                <label className="text-sm text-gray-500">Shipment ID</label>
+                <label className="text-sm text-gray-500 dark:text-gray-400">Shipment ID</label>
                 <div className="flex items-center gap-2">
-                  <span className="text-xl font-mono font-bold text-gray-900">
+                  <span className="text-xl font-mono font-bold text-gray-900 dark:text-white">
                     {success.shipment_id}
                   </span>
                   <button
                     onClick={() => copyToClipboard(success.shipment_id)}
-                    className="p-1.5 hover:bg-gray-200 rounded transition-colors"
+                    className="p-1.5 hover:bg-gray-200 dark:hover:bg-gray-600 rounded transition-colors"
                     title="Copy"
                   >
-                    <Copy className="h-4 w-4 text-gray-500" />
+                    <Copy className="h-4 w-4 text-gray-500 dark:text-gray-400" />
                   </button>
                 </div>
               </div>
 
               <div>
-                <label className="text-sm text-gray-500">Tracking PIN</label>
+                <label className="text-sm text-gray-500 dark:text-gray-400">Tracking PIN</label>
                 <div className="flex items-center gap-2">
-                  <span className="text-3xl font-mono font-bold text-emerald-600 tracking-wider">
+                  <span className="text-3xl font-mono font-bold text-emerald-600 dark:text-emerald-400 tracking-wider">
                     {success.tracking_pin}
                   </span>
                   <button
                     onClick={() => copyToClipboard(success.tracking_pin)}
-                    className="p-1.5 hover:bg-gray-200 rounded transition-colors"
+                    className="p-1.5 hover:bg-gray-200 dark:hover:bg-gray-600 rounded transition-colors"
                     title="Copy"
                   >
-                    <Copy className="h-4 w-4 text-gray-500" />
+                    <Copy className="h-4 w-4 text-gray-500 dark:text-gray-400" />
                   </button>
                 </div>
-                <p className="text-xs text-amber-600 mt-1">
+                <p className="text-xs text-amber-600 dark:text-amber-400 mt-1">
                   ⚠️ Share this PIN securely with the receiver. They'll need it to track the package.
                 </p>
               </div>
@@ -348,7 +348,7 @@ export default function CreateShipmentPage() {
             <div className="flex gap-4">
               <button
                 onClick={() => navigate('/dashboard/shipments')}
-                className="flex-1 px-4 py-2.5 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-medium"
+                className="flex-1 px-4 py-2.5 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors font-medium"
               >
                 View All Shipments
               </button>
