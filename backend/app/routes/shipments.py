@@ -577,15 +577,22 @@ def get_analytics():
     start_date = end_date - timedelta(days=days)
     prev_start_date = start_date - timedelta(days=days)
     
-    # Base query for user's shipments
+    # Base query for user's shipments (as sender OR receiver)
+    from sqlalchemy import or_
     base_query = Shipment.query.filter(
-        Shipment.sender_id == current_user_id,
+        or_(
+            Shipment.sender_id == current_user_id,
+            Shipment.receiver_id == current_user_id
+        ),
         Shipment.created_at >= start_date
     )
     
     # Previous period query for comparison
     prev_query = Shipment.query.filter(
-        Shipment.sender_id == current_user_id,
+        or_(
+            Shipment.sender_id == current_user_id,
+            Shipment.receiver_id == current_user_id
+        ),
         Shipment.created_at >= prev_start_date,
         Shipment.created_at < start_date
     )

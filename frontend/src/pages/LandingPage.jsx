@@ -112,6 +112,7 @@ export default function LandingPage() {
                   Get Started Free
                   <ArrowRight className="ml-2" size={20} />
                 </Link>
+                {/* Demo button temporarily hidden
                 <button
                   onClick={() => setShowDemoModal(true)}
                   className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-amber-400 to-orange-500 text-white font-semibold rounded-lg hover:from-amber-500 hover:to-orange-600 transition shadow-lg animate-pulse hover:animate-none"
@@ -119,6 +120,7 @@ export default function LandingPage() {
                   <Sparkles className="mr-2" size={20} />
                   Try Demo
                 </button>
+                */}
                 <Link
                   to="/verify"
                   className="inline-flex items-center px-6 py-3 border-2 border-white text-white font-semibold rounded-lg hover:bg-white/10 transition"

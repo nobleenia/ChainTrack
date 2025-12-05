@@ -79,88 +79,9 @@ function ShipmentAnalyticsPage() {
       setAnalytics(response.data)
     } catch (err) {
       console.error('Failed to fetch analytics:', err)
-      // Generate mock data for demo if API fails
-      setAnalytics(generateMockAnalytics(parseInt(dateRange)))
+      setError(err.response?.data?.error || 'Failed to load analytics data')
     } finally {
       setLoading(false)
-    }
-  }
-
-  // Generate mock data for demonstration
-  const generateMockAnalytics = (days) => {
-    const dailyData = []
-    const today = new Date()
-    
-    for (let i = days - 1; i >= 0; i--) {
-      const date = subDays(today, i)
-      const baseShipments = Math.floor(Math.random() * 15) + 5
-      const deliveryRate = 0.7 + Math.random() * 0.25
-      
-      dailyData.push({
-        date: format(date, 'yyyy-MM-dd'),
-        dateLabel: format(date, 'MMM dd'),
-        created: baseShipments,
-        delivered: Math.floor(baseShipments * deliveryRate),
-        inTransit: Math.floor(baseShipments * (1 - deliveryRate)),
-        avgDeliveryTime: Math.floor(Math.random() * 48) + 24,
-        revenue: baseShipments * (Math.random() * 50 + 20)
-      })
-    }
-    
-    const totalCreated = dailyData.reduce((sum, d) => sum + d.created, 0)
-    const totalDelivered = dailyData.reduce((sum, d) => sum + d.delivered, 0)
-    const avgDeliveryTime = dailyData.reduce((sum, d) => sum + d.avgDeliveryTime, 0) / days
-    
-    return {
-      summary: {
-        totalShipments: totalCreated,
-        activeShipments: Math.floor(totalCreated * 0.15),
-        deliveredShipments: totalDelivered,
-        confirmedShipments: Math.floor(totalDelivered * 0.85),
-        cancelledShipments: Math.floor(totalCreated * 0.05),
-        deliveryRate: (totalDelivered / totalCreated) * 100,
-        avgDeliveryTime: avgDeliveryTime,
-        onTimeDeliveryRate: 78 + Math.random() * 15,
-        totalRevenue: dailyData.reduce((sum, d) => sum + d.revenue, 0)
-      },
-      trends: {
-        shipmentsChange: Math.floor(Math.random() * 30) - 10,
-        deliveryRateChange: Math.floor(Math.random() * 10) - 3,
-        avgTimeChange: Math.floor(Math.random() * 20) - 8
-      },
-      dailyData,
-      statusBreakdown: [
-        { name: 'Delivered', value: totalDelivered, color: STATUS_COLORS.delivered },
-        { name: 'In Transit', value: Math.floor(totalCreated * 0.12), color: STATUS_COLORS.in_transit },
-        { name: 'Pending', value: Math.floor(totalCreated * 0.03), color: STATUS_COLORS.pending },
-        { name: 'Confirmed', value: Math.floor(totalDelivered * 0.85), color: STATUS_COLORS.confirmed },
-        { name: 'Cancelled', value: Math.floor(totalCreated * 0.05), color: STATUS_COLORS.cancelled }
-      ],
-      topRoutes: [
-        { origin: 'Lagos', destination: 'Abuja', count: Math.floor(Math.random() * 50) + 20, avgTime: 36 },
-        { origin: 'Port Harcourt', destination: 'Lagos', count: Math.floor(Math.random() * 40) + 15, avgTime: 28 },
-        { origin: 'Kano', destination: 'Lagos', count: Math.floor(Math.random() * 35) + 10, avgTime: 48 },
-        { origin: 'Lagos', destination: 'Ibadan', count: Math.floor(Math.random() * 30) + 12, avgTime: 8 },
-        { origin: 'Abuja', destination: 'Kaduna', count: Math.floor(Math.random() * 25) + 8, avgTime: 12 }
-      ],
-      courierPerformance: [
-        { name: 'FastTrack Logistics', deliveries: Math.floor(Math.random() * 100) + 50, rating: 4.8, onTime: 95 },
-        { name: 'SwiftMove Express', deliveries: Math.floor(Math.random() * 80) + 40, rating: 4.6, onTime: 88 },
-        { name: 'QuickShip Nigeria', deliveries: Math.floor(Math.random() * 60) + 30, rating: 4.5, onTime: 82 },
-        { name: 'Express Delivery Co', deliveries: Math.floor(Math.random() * 40) + 20, rating: 4.3, onTime: 76 }
-      ],
-      weeklyComparison: Array.from({ length: 4 }, (_, i) => ({
-        week: `Week ${i + 1}`,
-        current: Math.floor(Math.random() * 80) + 40,
-        previous: Math.floor(Math.random() * 70) + 35
-      })),
-      deliveryTimeDistribution: [
-        { range: '0-12h', count: Math.floor(Math.random() * 20) + 10 },
-        { range: '12-24h', count: Math.floor(Math.random() * 40) + 25 },
-        { range: '24-48h', count: Math.floor(Math.random() * 35) + 20 },
-        { range: '48-72h', count: Math.floor(Math.random() * 15) + 5 },
-        { range: '72h+', count: Math.floor(Math.random() * 8) + 2 }
-      ]
     }
   }
 
