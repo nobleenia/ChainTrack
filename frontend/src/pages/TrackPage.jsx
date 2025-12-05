@@ -71,7 +71,7 @@ export default function TrackPage() {
     setSearched(true);
 
     try {
-      const response = await api.get(`/api/shipments/${trackingId.trim()}?pin=${pin.trim()}`);
+      const response = await api.get(`/shipments/${trackingId.trim()}?pin=${pin.trim()}`);
       setShipment(response.data.shipment || response.data);
     } catch (err) {
       setShipment(null);
