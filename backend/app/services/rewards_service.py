@@ -55,7 +55,7 @@ class RewardsService:
         rewards.update_tier()
         
         # Update action-specific stats
-        if action_type == PointActionType.VERIFICATION:
+        if action_type in [PointActionType.VERIFICATION, PointActionType.FIRST_VERIFICATION]:
             rewards.total_verifications += 1
         elif action_type == PointActionType.REFERRAL:
             rewards.total_referrals += 1
