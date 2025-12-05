@@ -37,6 +37,8 @@ import CourierRegistrationPage from './pages/courier/CourierRegistrationPage'
 // Legal Pages
 import TermsOfServicePage from './pages/TermsOfServicePage'
 import PrivacyPolicyPage from './pages/PrivacyPolicyPage'
+import ContactPage from './pages/ContactPage'
+import DocumentationPage from './pages/DocumentationPage'
 
 // Protected Route Component
 function ProtectedRoute({ children }) {
@@ -100,6 +102,8 @@ function App() {
         {/* Legal Pages */}
         <Route path="/terms" element={<TermsOfServicePage />} />
         <Route path="/privacy" element={<PrivacyPolicyPage />} />
+        <Route path="/contact" element={<ContactPage />} />
+        <Route path="/docs" element={<DocumentationPage />} />
       </Route>
 
       {/* Protected Dashboard Routes */}

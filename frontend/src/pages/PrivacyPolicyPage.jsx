@@ -295,11 +295,11 @@ For complaints, you may also have the right to lodge a complaint with your local
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Header */}
-      <div className="bg-gradient-to-r from-secondary-600 to-secondary-800 text-white">
+      <div className="bg-gradient-to-r from-emerald-600 to-teal-700 text-white">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <Link 
             to="/register" 
-            className="inline-flex items-center text-secondary-100 hover:text-white mb-6 transition"
+            className="inline-flex items-center text-emerald-100 hover:text-white mb-6 transition"
           >
             <ArrowLeft size={20} className="mr-2" />
             Back to Registration
@@ -312,10 +312,10 @@ For complaints, you may also have the right to lodge a complaint with your local
               <Shield size={40} />
               <h1 className="text-3xl sm:text-4xl font-bold">Privacy Policy</h1>
             </div>
-            <p className="text-secondary-100 text-lg">
+            <p className="text-emerald-100 text-lg">
               Your privacy is important to us. Learn how we collect, use, and protect your data.
             </p>
-            <div className="mt-2 text-secondary-200 text-sm space-x-4">
+            <div className="mt-2 text-emerald-200 text-sm space-x-4">
               <span>Effective: {effectiveDate}</span>
               <span>•</span>
               <span>Last Updated: {lastUpdated}</span>
@@ -326,7 +326,7 @@ For complaints, you may also have the right to lodge a complaint with your local
 
       {/* Quick Summary */}
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="bg-gradient-to-r from-primary-50 to-secondary-50 dark:from-primary-900/20 dark:to-secondary-900/20 rounded-xl p-6 mb-8 border border-primary-100 dark:border-primary-800">
+        <div className="bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20 rounded-xl p-6 mb-8 border border-emerald-100 dark:border-emerald-800">
           <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">Privacy at a Glance</h2>
           <div className="grid sm:grid-cols-2 gap-4 text-sm">
             <div className="flex items-start space-x-2">
@@ -364,7 +364,7 @@ For complaints, you may also have the right to lodge a complaint with your local
               <a
                 key={section.id}
                 href={`#${section.id}`}
-                className="text-secondary-600 dark:text-secondary-400 hover:underline text-sm"
+                className="text-emerald-600 dark:text-emerald-400 hover:underline text-sm"
               >
                 {section.title}
               </a>
@@ -384,8 +384,8 @@ For complaints, you may also have the right to lodge a complaint with your local
               className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6"
             >
               <div className="flex items-center space-x-3 mb-4">
-                <div className="p-2 bg-secondary-100 dark:bg-secondary-900/30 rounded-lg">
-                  <section.icon className="text-secondary-600 dark:text-secondary-400" size={24} />
+                <div className="p-2 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg">
+                  <section.icon className="text-emerald-600 dark:text-emerald-400" size={24} />
                 </div>
                 <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
                   {section.title}
@@ -408,11 +408,11 @@ For complaints, you may also have the right to lodge a complaint with your local
         <div className="mt-12 text-center text-gray-500 dark:text-gray-400 text-sm">
           <p>By using ChainTrack, you acknowledge that you have read and understood this Privacy Policy.</p>
           <div className="mt-4 space-x-4">
-            <Link to="/terms" className="text-secondary-600 dark:text-secondary-400 hover:underline">
+            <Link to="/terms" className="text-emerald-600 dark:text-emerald-400 hover:underline">
               Terms of Service
             </Link>
             <span>•</span>
-            <Link to="/register" className="text-secondary-600 dark:text-secondary-400 hover:underline">
+            <Link to="/register" className="text-emerald-600 dark:text-emerald-400 hover:underline">
               Back to Registration
             </Link>
           </div>

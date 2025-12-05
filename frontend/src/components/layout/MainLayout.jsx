@@ -222,15 +222,16 @@ export default function MainLayout() {
                 <li><Link to="/#how-it-works" className="hover:text-white transition">How It Works</Link></li>
                 <li><Link to="/verify" className="hover:text-white transition">Verify Product</Link></li>
                 <li><Link to="/courier" className="hover:text-white transition">Courier Portal</Link></li>
+                <li><Link to="/docs" className="hover:text-white transition">Documentation</Link></li>
               </ul>
             </div>
             
             <div>
-              <h4 className="text-white font-semibold mb-4">Legal</h4>
+              <h4 className="text-white font-semibold mb-4">Company</h4>
               <ul className="space-y-2">
+                <li><Link to="/contact" className="hover:text-white transition">Contact Us</Link></li>
                 <li><Link to="/terms" className="hover:text-white transition">Terms of Service</Link></li>
                 <li><Link to="/privacy" className="hover:text-white transition">Privacy Policy</Link></li>
-                <li><a href="mailto:support@chaintrack.io" className="hover:text-white transition">Contact</a></li>
               </ul>
             </div>
           </div>
