@@ -24,11 +24,15 @@ import {
   Shield,
   Link as LinkIcon,
   Copy,
-  CheckCircle
+  CheckCircle,
+  Key,
+  Smartphone,
+  X
 } from 'lucide-react'
 import { useAuthStore } from '../store/authStore'
 import { authService } from '../services/productService'
 import { Button, LoadingSpinner } from '../components/common'
+import api from '../services/api'
 
 // Tab configuration
 const tabs = [
@@ -93,6 +97,31 @@ export default function SettingsPage() {
   // Wallet state
   const [walletAddress, setWalletAddress] = useState(user?.wallet_address || '')
   const [copied, setCopied] = useState(false)
+  
+  // 2FA state
+  const [twoFactorStatus, setTwoFactorStatus] = useState({
+    is_enabled: false,
+    method: null,
+    has_backup_codes: false
+  })
+  const [twoFactorStep, setTwoFactorStep] = useState(null) // 'setup', 'verify', 'backup', 'disable'
+  const [otpCode, setOtpCode] = useState('')
+  const [disablePassword, setDisablePassword] = useState('')
+  const [backupCodes, setBackupCodes] = useState([])
+  const [twoFactorLoading, setTwoFactorLoading] = useState(false)
+  
+  // Fetch 2FA status
+  useEffect(() => {
+    const fetch2FAStatus = async () => {
+      try {
+        const response = await api.get('/auth/2fa/status')
+        setTwoFactorStatus(response.data)
+      } catch (error) {
+        console.error('Failed to fetch 2FA status:', error)
+      }
+    }
+    fetch2FAStatus()
+  }, [])
 
   const showMessage = (type, text) => {
     setMessage({ type, text })
@@ -148,6 +177,99 @@ export default function SettingsPage() {
       ...prev,
       [key]: !prev[key]
     }))
+  }
+
+  // ========== 2FA Functions ==========
+  
+  // Start 2FA setup
+  const initiate2FASetup = async () => {
+    setTwoFactorLoading(true)
+    try {
+      const response = await api.post('/auth/2fa/setup/initiate')
+      showMessage('success', response.data.message)
+      setTwoFactorStep('verify')
+    } catch (error) {
+      showMessage('error', error.response?.data?.error || 'Failed to initiate 2FA setup')
+    } finally {
+      setTwoFactorLoading(false)
+    }
+  }
+  
+  // Verify OTP and complete 2FA setup
+  const verify2FASetup = async () => {
+    if (otpCode.length !== 6) {
+      showMessage('error', 'Please enter a 6-digit code')
+      return
+    }
+    
+    setTwoFactorLoading(true)
+    try {
+      const response = await api.post('/auth/2fa/setup/verify', { code: otpCode })
+      setBackupCodes(response.data.backup_codes)
+      setTwoFactorStep('backup')
+      setOtpCode('')
+      showMessage('success', '2FA enabled successfully!')
+    } catch (error) {
+      showMessage('error', error.response?.data?.error || 'Invalid verification code')
+    } finally {
+      setTwoFactorLoading(false)
+    }
+  }
+  
+  // Finish 2FA setup (after viewing backup codes)
+  const finish2FASetup = () => {
+    setTwoFactorStep(null)
+    setBackupCodes([])
+    setTwoFactorStatus(prev => ({ ...prev, is_enabled: true, has_backup_codes: true }))
+  }
+  
+  // Disable 2FA
+  const disable2FA = async () => {
+    if (!disablePassword) {
+      showMessage('error', 'Please enter your password')
+      return
+    }
+    
+    setTwoFactorLoading(true)
+    try {
+      await api.post('/auth/2fa/disable', { password: disablePassword })
+      setTwoFactorStatus(prev => ({ ...prev, is_enabled: false }))
+      setTwoFactorStep(null)
+      setDisablePassword('')
+      showMessage('success', 'Two-factor authentication disabled')
+    } catch (error) {
+      showMessage('error', error.response?.data?.error || 'Failed to disable 2FA')
+    } finally {
+      setTwoFactorLoading(false)
+    }
+  }
+  
+  // Regenerate backup codes
+  const regenerateBackupCodes = async () => {
+    if (!disablePassword) {
+      showMessage('error', 'Please enter your password')
+      return
+    }
+    
+    setTwoFactorLoading(true)
+    try {
+      const response = await api.post('/auth/2fa/backup-codes/regenerate', { password: disablePassword })
+      setBackupCodes(response.data.backup_codes)
+      setTwoFactorStep('backup')
+      setDisablePassword('')
+      showMessage('success', 'New backup codes generated!')
+    } catch (error) {
+      showMessage('error', error.response?.data?.error || 'Failed to regenerate backup codes')
+    } finally {
+      setTwoFactorLoading(false)
+    }
+  }
+  
+  // Copy backup codes to clipboard
+  const copyBackupCodes = () => {
+    const codesText = backupCodes.join('\n')
+    navigator.clipboard.writeText(codesText)
+    showMessage('success', 'Backup codes copied to clipboard!')
   }
 
   // Save notification preferences
@@ -484,16 +606,255 @@ export default function SettingsPage() {
 
               {/* Two-Factor Authentication */}
               <div className="pt-8 border-t dark:border-gray-700">
-                <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 flex items-center gap-2 mb-4">
-                  <Shield size={20} />
-                  Two-Factor Authentication
-                </h3>
-                <p className="text-gray-600 dark:text-gray-400 text-sm mb-4">
-                  Add an extra layer of security to your account by enabling two-factor authentication.
-                </p>
-                <Button variant="outline">
-                  Enable 2FA
-                </Button>
+                <div className="flex items-center justify-between mb-4">
+                  <div>
+                    <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 flex items-center gap-2">
+                      <Shield size={20} />
+                      Two-Factor Authentication
+                    </h3>
+                    <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">
+                      Add an extra layer of security to your account
+                    </p>
+                  </div>
+                  {twoFactorStatus.is_enabled && (
+                    <span className="flex items-center gap-1 text-green-600 dark:text-green-400 text-sm font-medium">
+                      <CheckCircle size={16} />
+                      Enabled
+                    </span>
+                  )}
+                </div>
+                
+                {/* 2FA Status & Actions */}
+                {!twoFactorStep && (
+                  <div className="space-y-4">
+                    {twoFactorStatus.is_enabled ? (
+                      <>
+                        <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4">
+                          <div className="flex items-start gap-3">
+                            <Shield className="text-green-600 dark:text-green-400 flex-shrink-0 mt-0.5" size={20} />
+                            <div>
+                              <p className="font-medium text-green-800 dark:text-green-200">2FA is enabled</p>
+                              <p className="text-sm text-green-700 dark:text-green-300 mt-1">
+                                Your account is protected with email-based verification codes.
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div className="flex flex-wrap gap-3">
+                          <Button 
+                            variant="outline" 
+                            onClick={() => setTwoFactorStep('regenerate')}
+                          >
+                            <Key size={18} />
+                            Regenerate Backup Codes
+                          </Button>
+                          <Button 
+                            variant="outline" 
+                            className="text-red-600 border-red-300 hover:bg-red-50 dark:text-red-400 dark:border-red-800 dark:hover:bg-red-900/20"
+                            onClick={() => setTwoFactorStep('disable')}
+                          >
+                            <X size={18} />
+                            Disable 2FA
+                          </Button>
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-4">
+                          <div className="flex items-start gap-3">
+                            <AlertCircle className="text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" size={20} />
+                            <div>
+                              <p className="font-medium text-amber-800 dark:text-amber-200">2FA is not enabled</p>
+                              <p className="text-sm text-amber-700 dark:text-amber-300 mt-1">
+                                Enable two-factor authentication to add an extra layer of security.
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <Button onClick={initiate2FASetup} disabled={twoFactorLoading}>
+                          {twoFactorLoading ? <LoadingSpinner size="sm" /> : <Smartphone size={18} />}
+                          Enable 2FA
+                        </Button>
+                      </>
+                    )}
+                  </div>
+                )}
+                
+                {/* 2FA Setup - Verify Code Step */}
+                {twoFactorStep === 'verify' && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-6 space-y-4"
+                  >
+                    <div className="flex items-center justify-between">
+                      <h4 className="font-medium text-gray-900 dark:text-gray-100">Enter Verification Code</h4>
+                      <button
+                        onClick={() => { setTwoFactorStep(null); setOtpCode('') }}
+                        className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                      >
+                        <X size={20} />
+                      </button>
+                    </div>
+                    
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                      We've sent a 6-digit verification code to your email address. Enter it below to enable 2FA.
+                    </p>
+                    
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Verification Code
+                      </label>
+                      <input
+                        type="text"
+                        value={otpCode}
+                        onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                        placeholder="000000"
+                        maxLength={6}
+                        className="w-full px-4 py-3 text-center text-2xl font-mono tracking-widest border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-700 focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                      />
+                    </div>
+                    
+                    <div className="flex gap-3">
+                      <Button onClick={verify2FASetup} disabled={twoFactorLoading || otpCode.length !== 6}>
+                        {twoFactorLoading ? <LoadingSpinner size="sm" /> : <Check size={18} />}
+                        Verify & Enable
+                      </Button>
+                      <Button variant="outline" onClick={initiate2FASetup} disabled={twoFactorLoading}>
+                        Resend Code
+                      </Button>
+                    </div>
+                  </motion.div>
+                )}
+                
+                {/* 2FA Setup - Backup Codes Step */}
+                {twoFactorStep === 'backup' && backupCodes.length > 0 && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-6 space-y-4"
+                  >
+                    <div className="flex items-center gap-2">
+                      <Key className="text-primary-600" size={20} />
+                      <h4 className="font-medium text-gray-900 dark:text-gray-100">Save Your Backup Codes</h4>
+                    </div>
+                    
+                    <div className="bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-700 rounded-lg p-3">
+                      <p className="text-sm text-amber-700 dark:text-amber-300">
+                        <strong>Important:</strong> Save these backup codes in a secure location. You won't be able to see them again! Use them to access your account if you lose access to your email.
+                      </p>
+                    </div>
+                    
+                    <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg p-4">
+                      <div className="grid grid-cols-2 gap-2">
+                        {backupCodes.map((code, index) => (
+                          <code key={index} className="px-3 py-2 bg-gray-100 dark:bg-gray-700 rounded text-center font-mono text-sm">
+                            {code}
+                          </code>
+                        ))}
+                      </div>
+                    </div>
+                    
+                    <div className="flex gap-3">
+                      <Button variant="outline" onClick={copyBackupCodes}>
+                        <Copy size={18} />
+                        Copy Codes
+                      </Button>
+                      <Button onClick={finish2FASetup}>
+                        <Check size={18} />
+                        I've Saved My Codes
+                      </Button>
+                    </div>
+                  </motion.div>
+                )}
+                
+                {/* Disable 2FA */}
+                {twoFactorStep === 'disable' && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="bg-red-50 dark:bg-red-900/20 rounded-lg p-6 space-y-4"
+                  >
+                    <div className="flex items-center justify-between">
+                      <h4 className="font-medium text-red-800 dark:text-red-200">Disable Two-Factor Authentication</h4>
+                      <button
+                        onClick={() => { setTwoFactorStep(null); setDisablePassword('') }}
+                        className="text-red-400 hover:text-red-600"
+                      >
+                        <X size={20} />
+                      </button>
+                    </div>
+                    
+                    <p className="text-sm text-red-700 dark:text-red-300">
+                      This will remove the extra security layer from your account. Enter your password to confirm.
+                    </p>
+                    
+                    <div>
+                      <label className="block text-sm font-medium text-red-800 dark:text-red-200 mb-2">
+                        Current Password
+                      </label>
+                      <input
+                        type="password"
+                        value={disablePassword}
+                        onChange={(e) => setDisablePassword(e.target.value)}
+                        placeholder="Enter your password"
+                        className="w-full px-4 py-3 border border-red-300 dark:border-red-700 rounded-lg text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-700 focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                      />
+                    </div>
+                    
+                    <Button 
+                      className="bg-red-600 hover:bg-red-700 text-white"
+                      onClick={disable2FA} 
+                      disabled={twoFactorLoading}
+                    >
+                      {twoFactorLoading ? <LoadingSpinner size="sm" /> : <X size={18} />}
+                      Disable 2FA
+                    </Button>
+                  </motion.div>
+                )}
+                
+                {/* Regenerate Backup Codes */}
+                {twoFactorStep === 'regenerate' && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-6 space-y-4"
+                  >
+                    <div className="flex items-center justify-between">
+                      <h4 className="font-medium text-gray-900 dark:text-gray-100">Regenerate Backup Codes</h4>
+                      <button
+                        onClick={() => { setTwoFactorStep(null); setDisablePassword('') }}
+                        className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                      >
+                        <X size={20} />
+                      </button>
+                    </div>
+                    
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                      This will invalidate your current backup codes and generate new ones. Enter your password to continue.
+                    </p>
+                    
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Current Password
+                      </label>
+                      <input
+                        type="password"
+                        value={disablePassword}
+                        onChange={(e) => setDisablePassword(e.target.value)}
+                        placeholder="Enter your password"
+                        className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-700 focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                      />
+                    </div>
+                    
+                    <Button onClick={regenerateBackupCodes} disabled={twoFactorLoading}>
+                      {twoFactorLoading ? <LoadingSpinner size="sm" /> : <Key size={18} />}
+                      Generate New Codes
+                    </Button>
+                  </motion.div>
+                )}
               </div>
             </motion.div>
           )}

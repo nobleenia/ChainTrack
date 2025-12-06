@@ -96,6 +96,7 @@ def create_app(config_name='development'):
     from .routes import auth, products, transfers, verification, rewards, shipments, notifications, couriers, tokens
     from .routes.uploads import uploads_bp
     from .routes.courier_portal import bp as courier_portal_bp
+    from .routes.two_factor import two_factor_bp
     app.register_blueprint(auth.bp, url_prefix='/api/auth')
     app.register_blueprint(products.bp, url_prefix='/api/products')
     app.register_blueprint(transfers.bp, url_prefix='/api/transfers')
@@ -107,6 +108,7 @@ def create_app(config_name='development'):
     app.register_blueprint(couriers.bp, url_prefix='/api/couriers')
     app.register_blueprint(courier_portal_bp, url_prefix='/api/courier-portal')
     app.register_blueprint(tokens.bp, url_prefix='/api/tokens')
+    app.register_blueprint(two_factor_bp)  # Has its own prefix /api/auth/2fa
     
     # Initialize Swagger UI for API documentation
     from .swagger import init_swagger

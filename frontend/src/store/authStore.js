@@ -11,12 +11,34 @@ export const useAuthStore = create(
       isAuthenticated: false,
       isLoading: false,
       error: null,
+      
+      // 2FA state
+      requires2FA: false,
+      twoFactorEmail: null,
+      twoFactorTempToken: null,
 
       // Login action
-      login: async (email, password) => {
+      login: async (email, password, otpCode = null) => {
         set({ isLoading: true, error: null })
         try {
-          const response = await api.post('/auth/login', { email, password })
+          const payload = { email, password }
+          if (otpCode) {
+            payload.otp_code = otpCode
+          }
+          
+          const response = await api.post('/auth/login', payload)
+          
+          // Check if 2FA is required
+          if (response.data.requires_2fa) {
+            set({
+              isLoading: false,
+              requires2FA: true,
+              twoFactorEmail: response.data.email,
+              twoFactorTempToken: response.data.temp_token,
+            })
+            return { success: false, requires2FA: true, message: response.data.message }
+          }
+          
           const { user, access_token, refresh_token } = response.data
 
           set({
@@ -25,6 +47,9 @@ export const useAuthStore = create(
             refreshToken: refresh_token,
             isAuthenticated: true,
             isLoading: false,
+            requires2FA: false,
+            twoFactorEmail: null,
+            twoFactorTempToken: null,
           })
 
           // Set token for API calls
@@ -33,9 +58,19 @@ export const useAuthStore = create(
           return { success: true }
         } catch (error) {
           const message = error.response?.data?.error || 'Login failed'
+          const requires2FA = error.response?.data?.requires_2fa || false
           set({ isLoading: false, error: message })
-          return { success: false, error: message }
+          return { success: false, error: message, requires2FA }
         }
+      },
+      
+      // Clear 2FA state
+      clear2FA: () => {
+        set({
+          requires2FA: false,
+          twoFactorEmail: null,
+          twoFactorTempToken: null,
+        })
       },
 
       // Register action
