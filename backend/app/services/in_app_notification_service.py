@@ -64,9 +64,17 @@ class InAppNotificationService:
         # Transfer Notifications
         'transfer_initiated': {
             'title': 'Transfer Initiated',
-            'message': 'A transfer of "{product_name}" to {recipient} has been initiated.',
+            'message': 'A transfer of "{product_name}" to {recipient} has been initiated. Awaiting acceptance.',
             'type': NotificationType.INFO,
-            'category': NotificationCategory.TRANSFER
+            'category': NotificationCategory.TRANSFER,
+            'action_url': '/transfers'
+        },
+        'transfer_pending_acceptance': {
+            'title': 'Incoming Transfer',
+            'message': '"{product_name}" is being transferred to you by {sender}. Please review and accept to claim ownership.',
+            'type': NotificationType.WARNING,
+            'category': NotificationCategory.TRANSFER,
+            'action_url': '/transfers?tab=pending'
         },
         'transfer_received': {
             'title': 'Transfer Received',
@@ -80,6 +88,38 @@ class InAppNotificationService:
             'message': 'Transfer of "{product_name}" has been completed and recorded on the blockchain.',
             'type': NotificationType.SUCCESS,
             'category': NotificationCategory.TRANSFER
+        },
+        'transfer_accepted': {
+            'title': 'Transfer Accepted',
+            'message': '{recipient} has accepted the transfer of "{product_name}". Ownership has been transferred.',
+            'type': NotificationType.SUCCESS,
+            'category': NotificationCategory.TRANSFER
+        },
+        'transfer_rejected': {
+            'title': 'Transfer Rejected',
+            'message': '{recipient} has declined the transfer of "{product_name}". Reason: {reason}',
+            'type': NotificationType.WARNING,
+            'category': NotificationCategory.TRANSFER,
+            'action_url': '/transfers'
+        },
+        'transfer_cancelled': {
+            'title': 'Transfer Cancelled',
+            'message': '{sender} has cancelled the transfer of "{product_name}" to you.',
+            'type': NotificationType.INFO,
+            'category': NotificationCategory.TRANSFER
+        },
+        'transfer_claimed': {
+            'title': 'Transfer Claimed',
+            'message': '{recipient} has claimed the transfer of "{product_name}" via claim link.',
+            'type': NotificationType.SUCCESS,
+            'category': NotificationCategory.TRANSFER
+        },
+        'transfer_reminder': {
+            'title': 'Pending Transfer Reminder',
+            'message': 'Shipment of "{product_name}" has been delivered. Don\'t forget to initiate an ownership transfer if applicable.',
+            'type': NotificationType.INFO,
+            'category': NotificationCategory.TRANSFER,
+            'action_url': '/products/{product_id}'
         },
         
         # Shipment Notifications
@@ -331,6 +371,16 @@ class InAppNotificationService:
             context=context,
             related_entity_type='shipment',
             related_entity_id=shipment_id
+        )
+    
+    def transfer_reminder(self, user_id: int, product_name: str, product_id: str) -> Notification:
+        """Remind user to initiate transfer after shipment delivery"""
+        return self.notify(
+            user_id,
+            'transfer_reminder',
+            context={'product_name': product_name, 'product_id': product_id},
+            related_entity_type='product',
+            related_entity_id=product_id
         )
     
     def points_earned(self, user_id: int, points: int, action: str, total_points: int) -> Notification:

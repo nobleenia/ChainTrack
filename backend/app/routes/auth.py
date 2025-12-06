@@ -82,6 +82,7 @@ def register():
         wallet_address=data.get('wallet_address')
     )
     user.set_password(data['password'])
+    user.ensure_user_id()  # Generate unique user_id
     
     db.session.add(user)
     db.session.commit()
@@ -312,6 +313,77 @@ def change_password():
     return jsonify({'message': 'Password changed successfully'}), 200
 
 
-def is_token_blacklisted(jti: str) -> bool:
-    """Check if a token JTI is blacklisted"""
-    return jti in _token_blacklist
+@bp.route('/users/search', methods=['GET'])
+@jwt_required()
+def search_users():
+    """
+    Search for registered users by name, company name, or user ID.
+    Used for finding recipients when initiating transfers.
+    
+    Query Parameters:
+        - q: Search query (searches name, company_name, user_id)
+        - role: Filter by role (optional)
+        - limit: Max results (default 10, max 50)
+    """
+    from sqlalchemy import or_
+    
+    current_user_id = int(get_jwt_identity())
+    query = request.args.get('q', '').strip()
+    role_filter = request.args.get('role', '').strip()
+    limit = min(int(request.args.get('limit', 10)), 50)
+    
+    if len(query) < 2:
+        return jsonify({'error': 'Search query must be at least 2 characters'}), 400
+    
+    # Build search filter
+    search_filter = or_(
+        User.name.ilike(f'%{query}%'),
+        User.company_name.ilike(f'%{query}%'),
+        User.user_id.ilike(f'%{query}%')
+    )
+    
+    # Base query - exclude current user and inactive users
+    users_query = User.query.filter(
+        search_filter,
+        User.id != current_user_id,
+        User.is_active == True
+    )
+    
+    # Apply role filter if specified
+    if role_filter:
+        try:
+            from ..models import UserRole
+            role_enum = UserRole(role_filter)
+            users_query = users_query.filter(User.role == role_enum)
+        except ValueError:
+            pass  # Invalid role, ignore filter
+    
+    users = users_query.limit(limit).all()
+    
+    return jsonify({
+        'users': [u.to_public_dict() for u in users],
+        'count': len(users),
+        'query': query
+    }), 200
+
+
+@bp.route('/users/<user_id_or_id>', methods=['GET'])
+@jwt_required()
+def get_user_by_id(user_id_or_id):
+    """
+    Get a user by their user_id (e.g., MFR-ABC123) or numeric ID.
+    Returns public user info only.
+    """
+    # Try to find by user_id first
+    user = User.query.filter_by(user_id=user_id_or_id).first()
+    
+    # If not found, try numeric ID
+    if not user and user_id_or_id.isdigit():
+        user = User.query.get(int(user_id_or_id))
+    
+    if not user:
+        return jsonify({'error': 'User not found'}), 404
+    
+    return jsonify({
+        'user': user.to_public_dict()
+    }), 200

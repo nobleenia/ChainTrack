@@ -1073,9 +1073,9 @@ export default function ShipmentDetailPage() {
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="bg-white rounded-xl shadow-xl p-6 max-w-sm w-full text-center"
+              className="bg-white dark:bg-gray-800 rounded-xl shadow-xl p-6 max-w-sm w-full text-center"
             >
-              <h3 className="text-lg font-semibold mb-4">Scan to Track</h3>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Scan to Track</h3>
               <div className="bg-white p-4 rounded-lg inline-block mb-4">
                 <QRCodeSVG
                   value={`${window.location.origin}/track?id=${shipment.shipment_id}`}
@@ -1083,12 +1083,12 @@ export default function ShipmentDetailPage() {
                   level="H"
                 />
               </div>
-              <p className="text-sm text-gray-500 mb-4">
+              <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
                 Scan this QR code to track this shipment
               </p>
               <button
                 onClick={() => setShowQR(false)}
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg hover:bg-gray-50"
+                className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 transition"
               >
                 Close
               </button>

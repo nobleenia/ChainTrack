@@ -3,6 +3,7 @@ User Model
 Represents users in the supply chain with role-based access
 """
 
+import uuid
 from enum import Enum
 from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -25,6 +26,10 @@ class User(db.Model):
     __tablename__ = 'users'
     
     id = db.Column(db.Integer, primary_key=True)
+    
+    # Unique human-readable user ID for easy identification
+    user_id = db.Column(db.String(20), unique=True, nullable=True, index=True)
+    
     email = db.Column(db.String(120), unique=True, nullable=False, index=True)
     password_hash = db.Column(db.String(256), nullable=False)
     
@@ -62,6 +67,25 @@ class User(db.Model):
         """Verify the password against the stored hash"""
         return check_password_hash(self.password_hash, password)
     
+    @staticmethod
+    def generate_user_id(role):
+        """Generate a unique human-readable user ID based on role"""
+        role_prefix = {
+            UserRole.MANUFACTURER: 'MFR',
+            UserRole.DISTRIBUTOR: 'DST',
+            UserRole.RETAILER: 'RTL',
+            UserRole.CONSUMER: 'CSM',
+            UserRole.ADMIN: 'ADM',
+        }
+        prefix = role_prefix.get(role, 'USR')
+        unique_part = uuid.uuid4().hex[:6].upper()
+        return f"{prefix}-{unique_part}"
+    
+    def ensure_user_id(self):
+        """Ensure the user has a user_id, generate one if missing"""
+        if not self.user_id:
+            self.user_id = self.generate_user_id(self.role)
+    
     def can_register_products(self):
         """Check if user can register new products"""
         return self.role in [UserRole.MANUFACTURER, UserRole.ADMIN]
@@ -75,6 +99,7 @@ class User(db.Model):
         """Serialize user to dictionary (private - for authenticated user's own profile)"""
         return {
             'id': self.id,
+            'user_id': self.user_id,
             'email': self.email,
             'name': self.name,
             'company_name': self.company_name,
@@ -89,6 +114,7 @@ class User(db.Model):
         """Serialize user to dictionary (public - safe for other users to see)"""
         return {
             'id': self.id,
+            'user_id': self.user_id,
             'name': self.name,
             'company_name': self.company_name,
             'role': self.role.value,
@@ -99,7 +125,9 @@ class User(db.Model):
         """Minimal user info for references in other objects"""
         return {
             'id': self.id,
+            'user_id': self.user_id,
             'name': self.name,
+            'company_name': self.company_name,
             'role': self.role.value,
         }
     

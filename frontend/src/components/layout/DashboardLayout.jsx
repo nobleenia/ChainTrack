@@ -29,11 +29,13 @@ import { useTour } from '../../hooks/useTour'
 import ThemeToggle from '../common/ThemeToggle'
 import WalletConnect from '../common/WalletConnect'
 
-// Navigation items - all roles get Verify Product and Shipments, consumers don't see Products/Transfers
+// Navigation items - all roles get Verify Product and Shipments
+// Consumers get Products (view only) but not Transfers (they receive, don't initiate transfers)
 const getNavigation = (userRole) => {
   if (userRole === 'consumer') {
     return [
       { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
+      { name: 'Products', href: '/products', icon: Package },  // View owned products
       { name: 'Shipments', href: '/dashboard/shipments', icon: Truck },
       { name: 'Analytics', href: '/dashboard/shipments/analytics', icon: BarChart3 },
       { name: 'Verify Product', href: '/verify', icon: ShieldCheck },

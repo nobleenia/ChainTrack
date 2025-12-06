@@ -105,6 +105,30 @@ export const shipmentApi = {
   },
 
   /**
+   * Get active shipments for a product
+   * @param {string} productId - Product ID (e.g., PRD-XXXXXX)
+   * @returns {Promise} Active shipment info
+   */
+  getProductShipments: async (productId) => {
+    const response = await api.get(`${SHIPMENTS_BASE}/product/${productId}`)
+    return response.data
+  },
+
+  /**
+   * Claim a shipment for tracking (add to user's tracked shipments)
+   * @param {string} shipmentId - Shipment ID (SHP-XXXXXX format)
+   * @param {string} pin - Tracking PIN
+   * @returns {Promise} Tracking record
+   */
+  claimForTracking: async (shipmentId, pin) => {
+    const response = await api.post(`${SHIPMENTS_BASE}/claim-tracking`, {
+      shipment_id: shipmentId,
+      pin
+    })
+    return response.data
+  },
+
+  /**
    * Upload photo to IPFS
    * @param {File} file - Photo file
    * @returns {Promise} IPFS hash

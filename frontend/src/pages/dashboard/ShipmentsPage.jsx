@@ -20,11 +20,14 @@ import {
   Filter,
   ChevronLeft,
   ChevronRight,
-  Printer
+  Printer,
+  Eye,
+  X
 } from 'lucide-react'
 import useShipmentStore from '../../store/shipmentStore'
 import { useAuthStore } from '../../store/authStore'
 import { generateShipmentLabel } from '../../utils/shipmentLabelPDF'
+import shipmentApi from '../../services/shipmentApi'
 
 const statusConfig = {
   created: {
@@ -75,6 +78,7 @@ function ShipmentCard({ shipment }) {
   const deliveryCity = shipment.delivery?.city || shipment.delivery_city || 'N/A'
   const createdAt = shipment.timestamps?.created_at || shipment.created_at
   const checkpointCount = shipment.checkpoints?.length || shipment.checkpoint_count || 0
+  const isTracked = shipment.is_tracked
 
   return (
     <motion.div
@@ -85,7 +89,15 @@ function ShipmentCard({ shipment }) {
     >
       <div className="flex justify-between items-start mb-4">
         <div>
-          <h3 className="font-semibold text-gray-900 dark:text-gray-100">{shipment.shipment_id}</h3>
+          <div className="flex items-center gap-2">
+            <h3 className="font-semibold text-gray-900 dark:text-gray-100">{shipment.shipment_id}</h3>
+            {isTracked && (
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800 dark:bg-purple-900/40 dark:text-purple-300">
+                <Eye className="h-3 w-3" />
+                Tracked
+              </span>
+            )}
+          </div>
           <p className="text-sm text-gray-500 dark:text-gray-400">{description}</p>
         </div>
         <span
@@ -152,6 +164,10 @@ export default function ShipmentsPage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState('')
   const [roleFilter, setRoleFilter] = useState('')
+  const [showTrackModal, setShowTrackModal] = useState(false)
+  const [trackingForm, setTrackingForm] = useState({ shipmentId: '', pin: '' })
+  const [trackingError, setTrackingError] = useState('')
+  const [trackingLoading, setTrackingLoading] = useState(false)
 
   useEffect(() => {
     fetchShipments({
@@ -161,6 +177,29 @@ export default function ShipmentsPage() {
       role: roleFilter || undefined
     })
   }, [pagination.page, statusFilter, roleFilter])
+
+  const handleClaimTracking = async (e) => {
+    e.preventDefault()
+    setTrackingError('')
+    setTrackingLoading(true)
+
+    try {
+      await shipmentApi.claimForTracking(trackingForm.shipmentId, trackingForm.pin)
+      setShowTrackModal(false)
+      setTrackingForm({ shipmentId: '', pin: '' })
+      // Refresh shipments list to include the new tracked shipment
+      fetchShipments({
+        page: 1,
+        per_page: pagination.per_page,
+        status: statusFilter || undefined,
+        role: roleFilter || undefined
+      })
+    } catch (err) {
+      setTrackingError(err.response?.data?.error || 'Failed to add shipment to tracking')
+    } finally {
+      setTrackingLoading(false)
+    }
+  }
 
   const handlePageChange = (newPage) => {
     if (newPage >= 1 && newPage <= pagination.pages) {
@@ -187,19 +226,127 @@ export default function ShipmentsPage() {
 
   return (
     <div className="space-y-6">
+      {/* Track Shipment Modal */}
+      <AnimatePresence>
+        {showTrackModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50"
+            onClick={() => setShowTrackModal(false)}
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-md w-full p-6"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-bold text-gray-900 dark:text-white">Track a Shipment</h2>
+                <button
+                  onClick={() => setShowTrackModal(false)}
+                  className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                Enter a shipment ID and PIN to add it to your tracking list. You'll be able to monitor its progress from your shipments dashboard.
+              </p>
+
+              <form onSubmit={handleClaimTracking} className="space-y-4">
+                {trackingError && (
+                  <div className="p-3 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg text-red-700 dark:text-red-400 text-sm">
+                    {trackingError}
+                  </div>
+                )}
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Shipment ID
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="SHP-XXXXXX"
+                    value={trackingForm.shipmentId}
+                    onChange={(e) => setTrackingForm({ ...trackingForm, shipmentId: e.target.value })}
+                    className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Tracking PIN
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Enter 6-digit PIN"
+                    value={trackingForm.pin}
+                    onChange={(e) => setTrackingForm({ ...trackingForm, pin: e.target.value })}
+                    className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                    required
+                    maxLength={6}
+                  />
+                </div>
+
+                <div className="flex gap-3 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => setShowTrackModal(false)}
+                    className="flex-1 px-4 py-2.5 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 font-medium"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={trackingLoading}
+                    className="flex-1 px-4 py-2.5 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  >
+                    {trackingLoading ? (
+                      <>
+                        <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+                        Adding...
+                      </>
+                    ) : (
+                      <>
+                        <Eye className="h-4 w-4" />
+                        Add to Tracking
+                      </>
+                    )}
+                  </button>
+                </div>
+              </form>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Shipments</h1>
           <p className="text-gray-500 dark:text-gray-400">Track and manage your P2P deliveries</p>
         </div>
-        <Link
-          to="/dashboard/shipments/create"
-          className="inline-flex items-center gap-2 bg-emerald-600 text-white px-4 py-2.5 rounded-lg hover:bg-emerald-700 transition-colors font-medium"
-        >
-          <Plus className="h-5 w-5" />
-          New Shipment
-        </Link>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => setShowTrackModal(true)}
+            className="inline-flex items-center gap-2 bg-purple-600 text-white px-4 py-2.5 rounded-lg hover:bg-purple-700 transition-colors font-medium"
+          >
+            <Eye className="h-5 w-5" />
+            Track Shipment
+          </button>
+          <Link
+            to="/dashboard/shipments/create"
+            className="inline-flex items-center gap-2 bg-emerald-600 text-white px-4 py-2.5 rounded-lg hover:bg-emerald-700 transition-colors font-medium"
+          >
+            <Plus className="h-5 w-5" />
+            New Shipment
+          </Link>
+        </div>
       </div>
 
       {/* Filters */}
@@ -245,6 +392,7 @@ export default function ShipmentsPage() {
             <option value="">All Shipments</option>
             <option value="sent">Sent by Me</option>
             <option value="handling">I'm Handling</option>
+            <option value="tracked">Tracked by Me</option>
           </select>
         </div>
       </div>

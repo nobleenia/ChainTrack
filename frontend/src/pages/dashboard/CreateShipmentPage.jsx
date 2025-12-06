@@ -245,7 +245,9 @@ export default function CreateShipmentPage() {
         dimensions: formData.package_dimensions || undefined,
         declared_value: formData.package_value ? parseFloat(formData.package_value) : undefined,
         special_instructions: formData.special_instructions || undefined,
-        sender_photo_url: photoData
+        sender_photo_url: photoData,
+        // Link to product if shipping a tracked product
+        product_id: formData.product_id || undefined
       }
 
       const result = await createShipment(shipmentData)

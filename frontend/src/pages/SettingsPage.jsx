@@ -4,7 +4,7 @@
  * User settings including profile, password, notifications, and wallet.
  */
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { 
   User, 
@@ -43,6 +43,21 @@ export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState('profile')
   const [isLoading, setIsLoading] = useState(false)
   const [message, setMessage] = useState(null)
+  
+  // Fetch fresh user data on mount to get latest fields like user_id
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const response = await authService.getCurrentUser()
+        if (response.user) {
+          updateUser(response.user)
+        }
+      } catch (error) {
+        console.error('Failed to fetch user data:', error)
+      }
+    }
+    fetchUserData()
+  }, [updateUser])
   
   // Profile form state
   const [profile, setProfile] = useState({
@@ -239,6 +254,36 @@ export default function SettingsPage() {
               onSubmit={handleProfileSubmit}
               className="space-y-6"
             >
+              {/* User ID Card */}
+              {user?.user_id && (
+                <div className="bg-primary-50 dark:bg-primary-900/20 border border-primary-200 dark:border-primary-800 rounded-lg p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-primary-800 dark:text-primary-200">Your User ID</p>
+                      <p className="text-xs text-primary-600 dark:text-primary-400 mt-0.5">
+                        Share this ID with others to receive transfers directly to your account
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <code className="px-3 py-2 bg-white dark:bg-gray-800 border border-primary-200 dark:border-primary-700 rounded-lg text-primary-700 dark:text-primary-300 font-mono font-bold">
+                        {user.user_id}
+                      </code>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          navigator.clipboard.writeText(user.user_id)
+                          showMessage('success', 'User ID copied to clipboard!')
+                        }}
+                        className="p-2 text-primary-600 hover:bg-primary-100 dark:hover:bg-primary-900/30 rounded-lg transition"
+                        title="Copy User ID"
+                      >
+                        <Copy size={18} />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">

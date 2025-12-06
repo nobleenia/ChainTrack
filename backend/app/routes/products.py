@@ -20,9 +20,14 @@ bp = Blueprint('products', __name__)
 def get_products():
     """
     Get products based on user role
-    - Manufacturers see their registered products
-    - Distributors/Retailers see products in their custody
+    - Manufacturers see products they currently own (manufactured AND still hold, OR received via transfer)
+    - Distributors/Retailers/Consumers see products in their custody
     - Admins see all products
+    
+    Query params:
+        - ownership: 'manufactured' (only for manufacturers - products they created)
+                    'held' (products currently in their custody)
+                    default: shows products user currently owns/holds
     """
     current_user_id = get_jwt_identity()
     user = User.query.get(int(current_user_id))
@@ -36,13 +41,42 @@ def get_products():
     status = request.args.get('status')
     search = request.args.get('search')
     category = request.args.get('category')
+    ownership = request.args.get('ownership', 'held')  # 'manufactured', 'held', or 'all'
     
     # Base query based on role
     if user.role.value == 'admin':
         query = Product.query
     elif user.role.value == 'manufacturer':
-        query = Product.query.filter_by(manufacturer_id=user.id)
+        if ownership == 'manufactured':
+            # Products this manufacturer created (historical view)
+            query = Product.query.filter_by(manufacturer_id=user.id)
+        elif ownership == 'all':
+            # Products created OR currently held
+            query = Product.query.filter(
+                db.or_(
+                    Product.manufacturer_id == user.id,
+                    Product.current_holder_id == user.id
+                )
+            )
+        else:
+            # Default: Products manufacturer currently owns/holds
+            # Either manufactured and never transferred, or received back via transfer
+            query = Product.query.filter(
+                db.or_(
+                    # Products they manufactured and still hold (never transferred or current_holder matches)
+                    db.and_(
+                        Product.manufacturer_id == user.id,
+                        db.or_(
+                            Product.current_holder_id == None,
+                            Product.current_holder_id == user.id
+                        )
+                    ),
+                    # Products they received via transfer
+                    Product.current_holder_id == user.id
+                )
+            )
     else:
+        # Distributors, Retailers, Consumers - show products they currently hold
         query = Product.query.filter_by(current_holder_id=user.id)
     
     # Apply filters
@@ -69,8 +103,23 @@ def get_products():
         page=page, per_page=per_page, error_out=False
     )
     
+    # Add ownership info to each product
+    products_with_ownership = []
+    for p in pagination.items:
+        product_dict = p.to_dict()
+        # Determine if current user is the owner
+        is_owner = (p.current_holder_id == user.id) or (
+            p.current_holder_id is None and p.manufacturer_id == user.id
+        )
+        # Determine if current user is the original manufacturer
+        is_manufacturer = p.manufacturer_id == user.id
+        product_dict['is_owner'] = is_owner
+        product_dict['is_manufacturer'] = is_manufacturer
+        product_dict['transferred_away'] = is_manufacturer and not is_owner
+        products_with_ownership.append(product_dict)
+    
     return jsonify({
-        'products': [p.to_dict() for p in pagination.items],
+        'products': products_with_ownership,
         'total': pagination.total,
         'pages': pagination.pages,
         'current_page': page

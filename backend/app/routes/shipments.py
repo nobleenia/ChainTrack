@@ -8,7 +8,7 @@ from flask_jwt_extended import jwt_required, get_jwt_identity, verify_jwt_in_req
 from datetime import datetime
 
 from .. import db
-from ..models import Shipment, ShipmentStatus, CheckpointAction, User
+from ..models import Shipment, ShipmentStatus, CheckpointAction, User, ShipmentTracking
 from ..services.shipment_service import ShipmentService
 
 bp = Blueprint('shipments', __name__)
@@ -47,6 +47,7 @@ def create_shipment():
         - delivery_city: string (optional)
         - sender_photo_url: string (optional but recommended)
         - sender_photo_ipfs_hash: string (optional)
+        - product_id: string (optional) - Link to a product being shipped
     """
     current_user_id = int(get_jwt_identity())
     data = request.get_json()
@@ -78,7 +79,8 @@ def create_shipment():
             pickup_city=data.get('pickup_city'),
             delivery_city=data.get('delivery_city'),
             sender_photo_url=data.get('sender_photo_url'),
-            sender_photo_ipfs_hash=data.get('sender_photo_ipfs_hash')
+            sender_photo_ipfs_hash=data.get('sender_photo_ipfs_hash'),
+            product_id=data.get('product_id')
         )
         
         return jsonify({
@@ -98,7 +100,7 @@ def list_shipments():
     List shipments for current user
     
     Query params:
-        - role: 'sent', 'handling', or 'all' (default: 'all')
+        - role: 'sent', 'handling', 'tracked', or 'all' (default: 'all')
         - status: filter by status
     """
     current_user_id = int(get_jwt_identity())
@@ -115,13 +117,76 @@ def list_shipments():
         except ValueError:
             pass
     
+    # Get the list of shipment IDs the user is explicitly tracking
+    tracked_ids = set(
+        t.shipment_id for t in ShipmentTracking.query.filter_by(user_id=current_user_id).all()
+    )
+    
     # Get stats
     stats = ShipmentService.get_shipment_stats(current_user_id)
     
+    # Add is_tracked flag to each shipment
+    shipment_list = []
+    for s in shipments:
+        shipment_data = s.to_dict(include_checkpoints=False, include_pii=True)
+        shipment_data['is_tracked'] = s.id in tracked_ids
+        shipment_list.append(shipment_data)
+    
     return jsonify({
-        'shipments': [s.to_dict(include_checkpoints=False, include_pii=True) for s in shipments],
+        'shipments': shipment_list,
         'stats': stats,
         'count': len(shipments)
+    }), 200
+
+
+@bp.route('/product/<product_id>', methods=['GET'])
+@jwt_required()
+def get_product_shipments(product_id):
+    """
+    Get active and recently delivered shipments for a product
+    
+    Returns:
+        - has_active_shipment: bool
+        - active_shipments: list of shipments in progress
+        - recently_delivered: shipment delivered in last 7 days (for transfer prompt)
+    """
+    from ..models.shipment import ShipmentStatus
+    from datetime import datetime, timedelta
+    
+    # Get all shipments for this product that are "in progress"
+    active_statuses = [
+        ShipmentStatus.CREATED,
+        ShipmentStatus.PICKED_UP,
+        ShipmentStatus.IN_TRANSIT,
+        ShipmentStatus.OUT_FOR_DELIVERY
+    ]
+    
+    active_shipments = Shipment.query.filter(
+        Shipment.product_id == product_id,
+        Shipment.status.in_(active_statuses)
+    ).all()
+    
+    # Get recently delivered shipment (last 7 days) for transfer prompt
+    # Only if there's no pending transfer on the product
+    from ..models import Product, Transfer
+    product = Product.query.filter_by(product_id=product_id).first()
+    
+    recently_delivered = None
+    if product and not product.pending_transfer_id:
+        seven_days_ago = datetime.utcnow() - timedelta(days=7)
+        delivered_shipment = Shipment.query.filter(
+            Shipment.product_id == product_id,
+            Shipment.status.in_([ShipmentStatus.DELIVERED, ShipmentStatus.CONFIRMED]),
+            Shipment.delivered_at >= seven_days_ago
+        ).order_by(Shipment.delivered_at.desc()).first()
+        
+        if delivered_shipment:
+            recently_delivered = delivered_shipment.to_dict(include_checkpoints=False)
+    
+    return jsonify({
+        'has_active_shipment': len(active_shipments) > 0,
+        'active_shipments': [s.to_dict(include_checkpoints=False) for s in active_shipments],
+        'recently_delivered': recently_delivered
     }), 200
 
 
@@ -227,6 +292,17 @@ def record_checkpoint(shipment_id):
     # Can't use CREATED or CONFIRMED through this endpoint
     if action in [CheckpointAction.CREATED, CheckpointAction.CONFIRMED]:
         return jsonify({'error': f'Action {action.value} not allowed via checkpoint endpoint'}), 400
+    
+    # DELIVERED action requires courier authorization, sender cannot mark as delivered
+    # (to prevent fraud - only someone who physically has the package can mark delivered)
+    if action == CheckpointAction.DELIVERED:
+        # Check if this is the sender trying to mark delivered
+        if user_id and shipment.sender_id == user_id and not data.get('auth_code'):
+            return jsonify({
+                'error': 'Sender cannot mark shipment as delivered',
+                'details': 'Only authorized couriers or receivers can mark a shipment as delivered',
+                'hint': 'Use the Authorize Courier feature to allow a courier to deliver'
+            }), 403
     
     # Verify courier authorization
     is_authorized, auth, auth_message = CourierAuthorizationService.verify_authorization(
@@ -484,6 +560,92 @@ def cancel_shipment(shipment_id):
     except Exception as e:
         db.session.rollback()
         return jsonify({'error': str(e)}), 500
+
+
+@bp.route('/add-tracking', methods=['POST'])
+@jwt_required()
+def add_shipment_to_tracking():
+    """
+    Add a shipment to user's tracking list (receiver claiming tracking access)
+    
+    Allows registered users to track shipments they're receiving by providing
+    the shipment ID and PIN shared by the sender.
+    
+    Request Body:
+        - shipment_id: string (required)
+        - pin: string (required)
+    
+    Returns:
+        Shipment details if PIN is valid
+    """
+    current_user_id = int(get_jwt_identity())
+    data = request.get_json()
+    
+    if not data:
+        return jsonify({'error': 'Request body required'}), 400
+    
+    shipment_id = data.get('shipment_id')
+    pin = data.get('pin')
+    
+    if not shipment_id or not pin:
+        return jsonify({'error': 'Both shipment_id and pin are required'}), 400
+    
+    shipment = Shipment.query.filter_by(shipment_id=shipment_id).first()
+    
+    if not shipment:
+        return jsonify({'error': 'Shipment not found'}), 404
+    
+    # Verify PIN
+    if shipment.tracking_pin != pin:
+        return jsonify({'error': 'Invalid PIN'}), 403
+    
+    # Check if user is already the sender (they already have access)
+    if shipment.sender_id == current_user_id:
+        return jsonify({'error': 'You are the sender of this shipment and already have access'}), 400
+    
+    # Check if already tracking this shipment
+    existing_tracking = ShipmentTracking.query.filter_by(
+        user_id=current_user_id,
+        shipment_id=shipment.id
+    ).first()
+    
+    if existing_tracking:
+        return jsonify({'error': 'You are already tracking this shipment'}), 400
+    
+    # Create tracking record
+    tracking = ShipmentTracking(
+        user_id=current_user_id,
+        shipment_id=shipment.id
+    )
+    db.session.add(tracking)
+    db.session.commit()
+    
+    # Get user info to potentially link as receiver
+    user = User.query.get(current_user_id)
+    
+    # If user's email matches receiver_email, this is the intended receiver
+    is_receiver = user and user.email == shipment.receiver_email
+    
+    # Return shipment details with tracking access
+    return jsonify({
+        'message': 'Shipment added to your tracking list',
+        'is_receiver': is_receiver,
+        'shipment': shipment.to_dict(include_pin=True, include_checkpoints=True, include_pii=is_receiver),
+        'can_confirm_delivery': is_receiver and shipment.status not in [ShipmentStatus.CONFIRMED, ShipmentStatus.CANCELLED]
+    }), 200
+
+
+@bp.route('/claim-tracking', methods=['POST'])
+@jwt_required()
+def claim_tracking():
+    """
+    Alias for add-tracking - claim a shipment for tracking
+    
+    Request Body:
+        - shipment_id: string (required)
+        - pin: string (required)
+    """
+    return add_shipment_to_tracking()
 
 
 @bp.route('/track/<shipment_id>', methods=['POST'])

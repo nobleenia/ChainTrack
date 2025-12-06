@@ -18,6 +18,7 @@ class ProductStatus(Enum):
     DELIVERED = 'delivered'
     VERIFIED = 'verified'
     RECALLED = 'recalled'
+    PENDING_TRANSFER = 'pending_transfer'  # Awaiting ownership transfer acceptance
 
 
 class Product(db.Model):
@@ -46,6 +47,9 @@ class Product(db.Model):
     current_location = db.Column(db.String(255), nullable=True)
     current_holder_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
     
+    # Pending transfer lock - prevents multiple transfers, unlocks on accept/reject/cancel
+    pending_transfer_id = db.Column(db.Integer, db.ForeignKey('transfers.id'), nullable=True)
+    
     # Blockchain data
     blockchain_hash = db.Column(db.String(66), nullable=True)  # Ethereum tx hash
     blockchain_block = db.Column(db.Integer, nullable=True)
@@ -56,8 +60,20 @@ class Product(db.Model):
     
     # Relationships
     manufacturer_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    transfers = db.relationship('Transfer', backref='product', lazy='dynamic',
+    
+    # Specify foreign_keys to disambiguate since we have two FK relationships with transfers table
+    # (product_id on Transfer, and pending_transfer_id on Product)
+    transfers = db.relationship('Transfer', 
+                               foreign_keys='Transfer.product_id',
+                               backref='product', 
+                               lazy='dynamic',
                                order_by='Transfer.created_at')
+    
+    # Relationship to the pending transfer (if any)
+    pending_transfer = db.relationship('Transfer',
+                                       foreign_keys=[pending_transfer_id],
+                                       uselist=False,
+                                       post_update=True)
     
     # Timestamps
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
@@ -109,6 +125,9 @@ class Product(db.Model):
     
     def to_dict(self, include_journey=False):
         """Serialize product to dictionary"""
+        # Check if product has a pending transfer
+        has_pending_transfer = self.pending_transfer_id is not None
+        
         data = {
             'id': self.id,
             'product_id': self.product_id,
@@ -121,13 +140,18 @@ class Product(db.Model):
             'manufacturing_location': self.manufacturing_location,
             'status': self.status.value,
             'current_location': self.current_location,
+            'current_holder_id': self.current_holder_id,
             'blockchain_hash': self.blockchain_hash,
             'blockchain_block': self.blockchain_block,
             'qr_code_url': self.qr_code_url,
             'manufacturer': self.manufacturer.to_dict() if self.manufacturer else None,
             'verification_count': self.verification_count,
             'last_verified_at': self.last_verified_at.isoformat() if self.last_verified_at else None,
-            'created_at': self.created_at.isoformat() if self.created_at else None
+            'created_at': self.created_at.isoformat() if self.created_at else None,
+            # Transfer status fields
+            'has_pending_transfer': has_pending_transfer,
+            'pending_transfer_id': self.pending_transfer_id,
+            'can_transfer': not has_pending_transfer,  # Can only transfer if no pending transfer
         }
         
         if include_journey:

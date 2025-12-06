@@ -51,21 +51,64 @@ export const transferService = {
     return response.data
   },
 
+  // Get pending incoming transfers
+  getPendingTransfers: async () => {
+    const response = await api.get('/transfers', { params: { direction: 'pending' } })
+    return response.data
+  },
+
   // Create a new transfer
   createTransfer: async (transferData) => {
     const response = await api.post('/transfers', transferData)
     return response.data
   },
 
-  // Confirm a transfer
+  // Accept a transfer (new owner confirms)
+  acceptTransfer: async (transferId, confirmIrreversible = true) => {
+    const response = await api.post(`/transfers/${transferId}/accept`, {
+      confirm_irreversible: confirmIrreversible
+    })
+    return response.data
+  },
+
+  // Reject a transfer
+  rejectTransfer: async (transferId, reason = null) => {
+    const response = await api.post(`/transfers/${transferId}/reject`, { reason })
+    return response.data
+  },
+
+  // Cancel a transfer (sender cancels)
+  cancelTransfer: async (transferId, reason = null) => {
+    const response = await api.post(`/transfers/${transferId}/cancel`, { reason })
+    return response.data
+  },
+
+  // Confirm a transfer (legacy - calls accept)
   confirmTransfer: async (transferId) => {
-    const response = await api.post(`/transfers/${transferId}/confirm`)
+    const response = await api.post(`/transfers/${transferId}/accept`, {
+      confirm_irreversible: true
+    })
     return response.data
   },
 
   // Get transfers for a specific product
   getProductTransfers: async (productId) => {
     const response = await api.get(`/transfers/product/${productId}`)
+    return response.data
+  },
+
+  // Get claim details by token (public)
+  getClaimDetails: async (claimToken) => {
+    const response = await api.get(`/transfers/claim/${claimToken}`)
+    return response.data
+  },
+
+  // Claim a transfer by token (public)
+  claimTransfer: async (claimToken, data = {}) => {
+    const response = await api.post(`/transfers/claim/${claimToken}`, {
+      confirm_irreversible: true,
+      ...data
+    })
     return response.data
   },
 }
@@ -89,6 +132,21 @@ export const authService = {
       current_password: currentPassword,
       new_password: newPassword,
     })
+    return response.data
+  },
+}
+
+export const userService = {
+  // Search for users by name, company name, or user ID
+  searchUsers: async (query, options = {}) => {
+    const params = { q: query, ...options }
+    const response = await api.get('/auth/users/search', { params })
+    return response.data
+  },
+
+  // Get user by user_id or numeric ID
+  getUser: async (userId) => {
+    const response = await api.get(`/auth/users/${userId}`)
     return response.data
   },
 }

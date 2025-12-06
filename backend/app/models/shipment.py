@@ -68,6 +68,9 @@ class Shipment(db.Model):
     receiver_email = db.Column(db.String(120), nullable=True)
     receiver_phone = db.Column(db.String(20), nullable=True)
     
+    # Optional link to a product being shipped
+    product_id = db.Column(db.String(50), nullable=True, index=True)  # References Product.product_id
+    
     # Package details
     description = db.Column(db.Text, nullable=False)
     package_type = db.Column(db.String(50), nullable=True)  # e.g., "Food", "Electronics", "Documents"
@@ -143,6 +146,7 @@ class Shipment(db.Model):
             'id': self.id,
             'shipment_id': self.shipment_id,
             'status': self.status.value,
+            'product_id': self.product_id,  # Link to product if applicable
             'sender': sender_info,
             'receiver': receiver_info,
             'package': {
@@ -318,4 +322,43 @@ class DeliveryProof(db.Model):
             'condition_notes': self.condition_notes,
             'blockchain_hash': self.blockchain_hash,
             'confirmed_at': self.confirmed_at.isoformat() if self.confirmed_at else None
+        }
+
+
+class ShipmentTracking(db.Model):
+    """
+    Tracks which users are following/tracking specific shipments
+    Allows users to add external shipments to their tracking list
+    """
+    __tablename__ = 'shipment_tracking'
+
+    id = db.Column(db.Integer, primary_key=True)
+    
+    # User tracking the shipment
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    user = db.relationship('User', backref='tracked_shipments')
+    
+    # Shipment being tracked
+    shipment_id = db.Column(db.Integer, db.ForeignKey('shipments.id'), nullable=False)
+    shipment = db.relationship('Shipment', backref='trackers')
+    
+    # Tracking metadata
+    added_at = db.Column(db.DateTime, default=datetime.utcnow)
+    notes = db.Column(db.String(255), nullable=True)  # User's personal notes
+    
+    # Unique constraint - user can only track a shipment once
+    __table_args__ = (
+        db.UniqueConstraint('user_id', 'shipment_id', name='unique_user_shipment_tracking'),
+    )
+
+    def __repr__(self):
+        return f'<ShipmentTracking user={self.user_id} shipment={self.shipment_id}>'
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'user_id': self.user_id,
+            'shipment_id': self.shipment_id,
+            'added_at': self.added_at.isoformat() if self.added_at else None,
+            'notes': self.notes
         }

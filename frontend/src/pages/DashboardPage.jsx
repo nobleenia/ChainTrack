@@ -156,7 +156,7 @@ export default function DashboardPage() {
             }
           </p>
         </div>
-        {user?.role !== 'consumer' && (
+        {user?.role === 'manufacturer' && (
           <Link
             to="/products/new"
             className="mt-4 sm:mt-0 inline-flex items-center px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition"
@@ -207,11 +207,12 @@ export default function DashboardPage() {
         ))}
       </div>
 
-      {/* Recent Products - hide for consumers */}
-      {user?.role !== 'consumer' && (
+      {/* Recent Products - show for all roles */}
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm" id="tour-recent-products">
         <div className="px-6 py-4 border-b dark:border-gray-700 flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Recent Products</h2>
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+            {user?.role === 'consumer' ? 'My Products' : 'Recent Products'}
+          </h2>
           <Link 
             to="/products" 
             className="text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 text-sm font-medium flex items-center"
@@ -264,8 +265,14 @@ export default function DashboardPage() {
         ) : (
           <div className="p-12 text-center">
             <Package size={48} className="mx-auto text-gray-300 dark:text-gray-600 mb-4" />
-            <p className="text-gray-500 dark:text-gray-400 mb-4">No products registered yet</p>
-            {user?.role !== 'consumer' && (
+            <p className="text-gray-500 dark:text-gray-400 mb-4">
+              {user?.role === 'consumer' 
+                ? 'No products owned yet. Products you receive through transfers will appear here.' 
+                : user?.role === 'manufacturer'
+                  ? 'No products registered yet'
+                  : 'No products in your custody yet'}
+            </p>
+            {user?.role === 'manufacturer' && (
               <Link
                 to="/products/new"
                 className="inline-flex items-center px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition"
@@ -277,7 +284,6 @@ export default function DashboardPage() {
           </div>
         )}
       </div>
-      )}
 
       {/* Consumer-specific Quick Actions */}
       {user?.role === 'consumer' && (

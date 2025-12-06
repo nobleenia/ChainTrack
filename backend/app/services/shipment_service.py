@@ -12,7 +12,7 @@ import json
 from .. import db
 from ..models import (
     Shipment, ShipmentCheckpoint, DeliveryProof,
-    ShipmentStatus, CheckpointAction, User
+    ShipmentStatus, CheckpointAction, User, ShipmentTracking
 )
 
 logger = logging.getLogger(__name__)
@@ -51,6 +51,7 @@ class ShipmentService:
         delivery_city: Optional[str] = None,
         sender_photo_url: Optional[str] = None,
         sender_photo_ipfs_hash: Optional[str] = None,
+        product_id: Optional[str] = None,
         send_notification: bool = True,
         record_on_blockchain: bool = True
     ) -> Shipment:
@@ -68,6 +69,7 @@ class ShipmentService:
             receiver_name=receiver_name,
             receiver_email=receiver_email,
             receiver_phone=receiver_phone,
+            product_id=product_id,
             description=description,
             package_type=package_type,
             weight=weight,
@@ -176,18 +178,24 @@ class ShipmentService:
         
         Args:
             user_id: User ID
-            role: 'sent', 'handling', or 'all'
+            role: 'sent', 'handling', 'tracked', or 'all'
         """
         if role == 'sent':
             return Shipment.query.filter_by(sender_id=user_id).order_by(Shipment.created_at.desc()).all()
         elif role == 'handling':
             return Shipment.query.filter_by(current_handler_id=user_id).order_by(Shipment.created_at.desc()).all()
+        elif role == 'tracked':
+            # Get shipments the user is explicitly tracking (added via PIN)
+            tracked_shipment_ids = db.session.query(ShipmentTracking.shipment_id).filter_by(user_id=user_id).subquery()
+            return Shipment.query.filter(Shipment.id.in_(tracked_shipment_ids)).order_by(Shipment.created_at.desc()).all()
         else:
-            # All shipments where user is sender or current handler
+            # All shipments where user is sender, current handler, or explicitly tracking
+            tracked_shipment_ids = db.session.query(ShipmentTracking.shipment_id).filter_by(user_id=user_id).subquery()
             return Shipment.query.filter(
                 db.or_(
                     Shipment.sender_id == user_id,
-                    Shipment.current_handler_id == user_id
+                    Shipment.current_handler_id == user_id,
+                    Shipment.id.in_(tracked_shipment_ids)
                 )
             ).order_by(Shipment.created_at.desc()).all()
 
@@ -299,6 +307,17 @@ class ShipmentService:
                 status=template_status,
                 destination=shipment.delivery_city or shipment.delivery_address
             )
+            
+            # If this is a product shipment being delivered, send transfer reminder
+            if action == CheckpointAction.DELIVERED and shipment.product_id:
+                from ..models import Product
+                product = Product.query.filter_by(product_id=shipment.product_id).first()
+                if product:
+                    in_app_notification_service.transfer_reminder(
+                        user_id=shipment.sender_id,
+                        product_name=product.name,
+                        product_id=product.product_id
+                    )
         except Exception as e:
             logger.error(f"Failed to send in-app checkpoint notification: {e}")
         

@@ -5,7 +5,7 @@ SQLAlchemy models for the supply chain platform
 
 from .user import User, UserRole
 from .product import Product, ProductStatus
-from .transfer import Transfer, TransferType
+from .transfer import Transfer, TransferType, TransferStatus
 from .rewards import (
     UserRewards, 
     PointTransaction, 
@@ -22,7 +22,8 @@ from .shipment import (
     ShipmentCheckpoint,
     DeliveryProof,
     ShipmentStatus,
-    CheckpointAction
+    CheckpointAction,
+    ShipmentTracking
 )
 from .courier import (
     CourierAuthorization,
@@ -46,6 +47,7 @@ __all__ = [
     'ProductStatus',
     'Transfer',
     'TransferType',
+    'TransferStatus',
     'UserRewards',
     'PointTransaction',
     'Referral',
@@ -60,6 +62,7 @@ __all__ = [
     'DeliveryProof',
     'ShipmentStatus',
     'CheckpointAction',
+    'ShipmentTracking',
     'CourierAuthorization',
     'CheckpointChain',
     'CourierProfile',

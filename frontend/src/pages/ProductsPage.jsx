@@ -17,7 +17,8 @@ import {
   List,
   RefreshCw,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Eye
 } from 'lucide-react'
 import { productService } from '../services/productService'
 import { useAuthStore } from '../store/authStore'
@@ -27,10 +28,10 @@ import { Button, LoadingSpinner } from '../components/common'
 // Status filter options - match backend ProductStatus enum
 const statusOptions = [
   { value: '', label: 'All Status' },
-  { value: 'registered', label: 'Registered' },
   { value: 'in_transit', label: 'In Transit' },
   { value: 'delivered', label: 'Delivered' },
   { value: 'verified', label: 'Verified' },
+  { value: 'pending_transfer', label: 'Pending Transfer' },
   { value: 'recalled', label: 'Recalled' },
 ]
 
@@ -47,6 +48,13 @@ const categoryOptions = [
   { value: 'other', label: 'Other' },
 ]
 
+// Ownership filter options (for manufacturers only)
+const ownershipOptions = [
+  { value: 'held', label: 'Currently Owned' },
+  { value: 'all', label: 'All Products' },
+  { value: 'manufactured', label: 'Manufactured by Me' },
+]
+
 export default function ProductsPage() {
   // State
   const [products, setProducts] = useState([])
@@ -56,6 +64,7 @@ export default function ProductsPage() {
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState('')
   const [categoryFilter, setCategoryFilter] = useState('')
+  const [ownershipFilter, setOwnershipFilter] = useState('held') // 'held', 'all', 'manufactured'
   const [page, setPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
   const [totalProducts, setTotalProducts] = useState(0)
@@ -75,6 +84,8 @@ export default function ProductsPage() {
         ...(search && { search }),
         ...(statusFilter && { status: statusFilter }),
         ...(categoryFilter && { category: categoryFilter }),
+        // Only send ownership filter for manufacturers
+        ...(isManufacturer && { ownership: ownershipFilter }),
       }
       
       const data = await productService.getProducts(params)
@@ -87,7 +98,7 @@ export default function ProductsPage() {
     } finally {
       setIsLoading(false)
     }
-  }, [page, search, statusFilter, categoryFilter])
+  }, [page, search, statusFilter, categoryFilter, ownershipFilter, isManufacturer])
 
   // Fetch on mount and when filters change
   useEffect(() => {
@@ -97,7 +108,7 @@ export default function ProductsPage() {
   // Reset to page 1 when filters change
   useEffect(() => {
     setPage(1)
-  }, [search, statusFilter, categoryFilter])
+  }, [search, statusFilter, categoryFilter, ownershipFilter])
 
   // Handle search with debounce
   const handleSearchChange = (e) => {
@@ -109,9 +120,11 @@ export default function ProductsPage() {
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Products</h1>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+            {user?.role === 'consumer' ? 'My Products' : 'Products'}
+          </h1>
           <p className="text-gray-500 dark:text-gray-400 mt-1">
-            {totalProducts} product{totalProducts !== 1 ? 's' : ''} registered
+            {totalProducts} product{totalProducts !== 1 ? 's' : ''} {user?.role === 'consumer' ? 'owned' : 'registered'}
           </p>
         </div>
 
@@ -167,6 +180,22 @@ export default function ProductsPage() {
               ))}
             </select>
           </div>
+
+          {/* Ownership Filter - Only for manufacturers */}
+          {isManufacturer && (
+            <div className="relative">
+              <Eye className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+              <select
+                value={ownershipFilter}
+                onChange={(e) => setOwnershipFilter(e.target.value)}
+                className="pl-10 pr-8 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 appearance-none bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 min-w-[180px]"
+              >
+                {ownershipOptions.map(opt => (
+                  <option key={opt.value} value={opt.value}>{opt.label}</option>
+                ))}
+              </select>
+            </div>
+          )}
 
           {/* View Toggle & Refresh */}
           <div className="flex items-center gap-2">
@@ -236,7 +265,9 @@ export default function ProductsPage() {
           <p className="text-gray-500 dark:text-gray-400 mb-6">
             {search || statusFilter || categoryFilter
               ? 'Try adjusting your filters'
-              : 'Get started by registering your first product'}
+              : user?.role === 'consumer'
+                ? 'Products you receive through transfers will appear here'
+                : 'Get started by registering your first product'}
           </p>
           {isManufacturer && !search && !statusFilter && !categoryFilter && (
             <Link to="/products/new">

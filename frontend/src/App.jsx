@@ -26,6 +26,7 @@ import ConfirmDeliveryPage from './pages/dashboard/ConfirmDeliveryPage'
 import ShipmentAnalyticsPage from './pages/dashboard/ShipmentAnalyticsPage'
 import CourierCheckpointPage from './pages/CourierCheckpointPage'
 import ReceiverTrackingPage from './pages/ReceiverTrackingPage'
+import ClaimTransferPage from './pages/ClaimTransferPage'
 
 // Courier Portal Pages
 import CourierLandingPage from './pages/courier/CourierLandingPage'
@@ -90,6 +91,7 @@ function App() {
         <Route path="/verify/:productId?" element={<VerifyPage />} />
         <Route path="/track" element={<TrackPage />} />
         <Route path="/track/:trackingCode" element={<ReceiverTrackingPage />} />
+        <Route path="/claim-transfer/:claimToken" element={<ClaimTransferPage />} />
         <Route path="/courier/checkpoint" element={<CourierCheckpointPage />} />
         
         {/* Courier Portal Routes */}
