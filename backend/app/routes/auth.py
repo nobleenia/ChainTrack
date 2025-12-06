@@ -134,9 +134,12 @@ def login():
     """
     Authenticate user and return tokens
     
+    If 2FA is enabled, returns requires_2fa=True and user must verify OTP
+    
     Request Body:
         - email: string (required)
         - password: string (required)
+        - otp_code: string (optional, for 2FA verification)
     """
     data = request.get_json()
     
@@ -175,6 +178,40 @@ def login():
     if not user.is_active:
         return jsonify({'error': 'Account is deactivated'}), 403
     
+    # Check if 2FA is enabled
+    from ..services.two_factor_service import two_factor_service
+    
+    if two_factor_service.is_2fa_enabled(user):
+        otp_code = data.get('otp_code', '').strip()
+        
+        if not otp_code:
+            # 2FA enabled but no OTP provided - send OTP and return
+            import secrets
+            temp_token = secrets.token_hex(16)
+            
+            # Send OTP email
+            success, message = two_factor_service.send_login_otp(user)
+            
+            if not success:
+                return jsonify({'error': f'Failed to send verification code: {message}'}), 500
+            
+            return jsonify({
+                'requires_2fa': True,
+                'message': 'Verification code sent to your email',
+                'email': _mask_email(user.email),
+                'temp_token': temp_token,  # Used to maintain session
+                'expires_in_minutes': 10
+            }), 200
+        
+        # OTP provided - verify it
+        valid, message = two_factor_service.verify_login_otp(user, otp_code)
+        
+        if not valid:
+            return jsonify({
+                'error': message,
+                'requires_2fa': True
+            }), 401
+    
     # Clear failed attempts on successful login
     AccountLockoutManager.clear_attempts(email)
     
@@ -192,6 +229,20 @@ def login():
         'access_token': access_token,
         'refresh_token': refresh_token
     }), 200
+
+
+def _mask_email(email: str) -> str:
+    """Mask email for display (e.g., n***e@gmail.com)"""
+    if not email or '@' not in email:
+        return '***'
+    
+    local, domain = email.split('@')
+    if len(local) <= 2:
+        masked_local = local[0] + '***'
+    else:
+        masked_local = local[0] + '***' + local[-1]
+    
+    return f"{masked_local}@{domain}"
 
 
 @bp.route('/logout', methods=['POST'])

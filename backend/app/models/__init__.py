@@ -39,6 +39,7 @@ from .notification import (
     NotificationType,
     NotificationCategory
 )
+from .two_factor import TwoFactorAuth
 
 __all__ = [
     'User',
@@ -70,5 +71,6 @@ __all__ = [
     'CourierActivity',
     'Notification',
     'NotificationType',
-    'NotificationCategory'
+    'NotificationCategory',
+    'TwoFactorAuth'
 ]
