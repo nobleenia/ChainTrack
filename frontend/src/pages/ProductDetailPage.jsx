@@ -437,7 +437,7 @@ export default function ProductDetailPage() {
             {/* Action Buttons */}
             <div className="flex flex-wrap gap-3">
               <Link to={`/verify?id=${product?.product_id}`}>
-                <Button variant="outline" leftIcon={<Shield size={18} />}>>
+                <Button variant="outline" leftIcon={<Shield size={18} />}>
                   Verify Product
                 </Button>
               </Link>
