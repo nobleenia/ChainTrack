@@ -9,7 +9,7 @@ Flask-JWT-Extended>=4.6.0
 
 # Database
 SQLAlchemy>=2.0.0
-# psycopg2-binary>=2.9.0  # Uncomment for PostgreSQL
+psycopg2-binary>=2.9.0  # PostgreSQL adapter
 
 # Security
 Werkzeug>=3.0.0

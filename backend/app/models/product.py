@@ -56,7 +56,7 @@ class Product(db.Model):
     ipfs_hash = db.Column(db.String(100), nullable=True)  # For storing additional metadata
     
     # QR Code
-    qr_code_url = db.Column(db.String(255), nullable=True)
+    qr_code_url = db.Column(db.Text, nullable=True)
     
     # Relationships
     manufacturer_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
