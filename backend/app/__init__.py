@@ -93,7 +93,7 @@ def create_app(config_name='development'):
     blockchain_service.init_app(app)
     
     # Register blueprints
-    from .routes import auth, products, transfers, verification, rewards, shipments, notifications, couriers
+    from .routes import auth, products, transfers, verification, rewards, shipments, notifications, couriers, tokens
     from .routes.uploads import uploads_bp
     from .routes.courier_portal import bp as courier_portal_bp
     app.register_blueprint(auth.bp, url_prefix='/api/auth')
@@ -106,6 +106,7 @@ def create_app(config_name='development'):
     app.register_blueprint(notifications.bp, url_prefix='/api/notifications')
     app.register_blueprint(couriers.bp, url_prefix='/api/couriers')
     app.register_blueprint(courier_portal_bp, url_prefix='/api/courier-portal')
+    app.register_blueprint(tokens.bp, url_prefix='/api/tokens')
     
     # Initialize Swagger UI for API documentation
     from .swagger import init_swagger

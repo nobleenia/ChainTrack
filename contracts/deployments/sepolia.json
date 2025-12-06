@@ -1,18 +1,25 @@
 {
   "network": "sepolia",
   "deployer": "0x2D7B510c225C95ff9AEf657E046Fe358e1290a83",
-  "timestamp": "2025-12-03T15:03:57.662Z",
-  "blockNumber": 9760880,
+  "timestamp": "2025-12-06T16:58:12.853Z",
+  "blockNumber": 9782821,
   "contracts": {
     "ProductRegistry": {
-      "address": "0x141878E69201172C2aeeC39C4882b61089f64177",
+      "address": "0xB3f85815B224Ed0b7E001aFE97F3607f7478214e",
       "deployer": "0x2D7B510c225C95ff9AEf657E046Fe358e1290a83",
-      "timestamp": "2025-12-03T15:02:00.515Z"
+      "timestamp": "2025-12-06T16:56:49.390Z"
     },
     "ShipmentRegistry": {
-      "address": "0xd0Db8e81115297194659543c47BFda3b061B059b",
+      "address": "0x7dBC364332E7FD6a5A0569c0797C7272291Ad9dd",
       "deployer": "0x2D7B510c225C95ff9AEf657E046Fe358e1290a83",
-      "timestamp": "2025-12-03T15:02:48.836Z"
+      "timestamp": "2025-12-06T16:57:01.575Z"
+    },
+    "ChainTrackToken": {
+      "address": "0x1eD9C16BaA65F32EEF00639b112B792be498b43a",
+      "deployer": "0x2D7B510c225C95ff9AEf657E046Fe358e1290a83",
+      "admin": "0x2D7B510c225C95ff9AEf657E046Fe358e1290a83",
+      "minter": "0x2D7B510c225C95ff9AEf657E046Fe358e1290a83",
+      "timestamp": "2025-12-06T16:57:13.312Z"
     }
   }
 }

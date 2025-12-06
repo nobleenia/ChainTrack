@@ -5,6 +5,7 @@ const fs = require("fs");
  * Deploy all ChainTrack contracts
  * - ProductRegistry: For product registration and verification
  * - ShipmentRegistry: For P2P delivery tracking
+ * - ChainTrackToken: ERC-20 reward token (CTK)
  */
 async function main() {
   console.log("=== ChainTrack Contract Deployment ===\n");
@@ -48,20 +49,39 @@ async function main() {
     timestamp: new Date().toISOString(),
   };
 
+  // ===== Deploy ChainTrackToken =====
+  console.log("3. Deploying ChainTrackToken (CTK)...");
+  const ChainTrackToken = await hre.ethers.getContractFactory("ChainTrackToken");
+  // deployer is both admin and initial minter
+  const chainTrackToken = await ChainTrackToken.deploy(deployer.address, deployer.address);
+  await chainTrackToken.waitForDeployment();
+  const chainTrackTokenAddress = await chainTrackToken.getAddress();
+  console.log("   ChainTrackToken deployed to:", chainTrackTokenAddress);
+
+  deployments.ChainTrackToken = {
+    address: chainTrackTokenAddress,
+    deployer: deployer.address,
+    admin: deployer.address,
+    minter: deployer.address,
+    timestamp: new Date().toISOString(),
+  };
+
   // Wait for block confirmations
   if (!isLocalNetwork) {
-    console.log("\n3. Waiting for block confirmations...");
+    console.log("\n4. Waiting for block confirmations...");
     await productRegistry.deploymentTransaction().wait(5);
     await shipmentRegistry.deploymentTransaction().wait(5);
+    await chainTrackToken.deploymentTransaction().wait(5);
     console.log("   Confirmations received.");
   } else {
     await productRegistry.deploymentTransaction().wait(1);
     await shipmentRegistry.deploymentTransaction().wait(1);
+    await chainTrackToken.deploymentTransaction().wait(1);
   }
 
   // Verify on Etherscan (only on public networks)
   if (!isLocalNetwork) {
-    console.log("\n4. Verifying contracts on Etherscan...");
+    console.log("\n5. Verifying contracts on Etherscan...");
     
     try {
       await hre.run("verify:verify", {
@@ -82,6 +102,16 @@ async function main() {
     } catch (error) {
       console.log("   ShipmentRegistry verification failed:", error.message);
     }
+
+    try {
+      await hre.run("verify:verify", {
+        address: chainTrackTokenAddress,
+        constructorArguments: [deployer.address, deployer.address],
+      });
+      console.log("   ChainTrackToken verified!");
+    } catch (error) {
+      console.log("   ChainTrackToken verification failed:", error.message);
+    }
   }
 
   // Log deployment summary
@@ -91,6 +121,7 @@ async function main() {
   console.log("\nContracts:");
   console.log("  ProductRegistry:", productRegistryAddress);
   console.log("  ShipmentRegistry:", shipmentRegistryAddress);
+  console.log("  ChainTrackToken:", chainTrackTokenAddress);
   console.log("========================\n");
 
   // Save deployment info
@@ -118,6 +149,7 @@ async function main() {
 # Generated: ${new Date().toISOString()}
 PRODUCT_REGISTRY_ADDRESS=${productRegistryAddress}
 SHIPMENT_REGISTRY_ADDRESS=${shipmentRegistryAddress}
+CHAINTRACK_TOKEN_ADDRESS=${chainTrackTokenAddress}
 `;
 
   fs.writeFileSync(

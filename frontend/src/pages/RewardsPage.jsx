@@ -23,9 +23,12 @@ import {
   Shield,
   Users,
   Calendar,
-  Award
+  Award,
+  Wallet,
+  ExternalLink
 } from 'lucide-react'
 import { rewardsService } from '../services/rewardsService'
+import { tokenService } from '../services/tokenService'
 import { Button, LoadingSpinner } from '../components/common'
 
 // Tier colors and icons
@@ -48,7 +51,16 @@ export default function RewardsPage() {
   const [copied, setCopied] = useState(false)
   const [convertAmount, setConvertAmount] = useState('')
   const [showConvertModal, setShowConvertModal] = useState(false)
+  const [showClaimModal, setShowClaimModal] = useState(false)
   const [dailyBonusMessage, setDailyBonusMessage] = useState(null)
+  
+  // Token claiming state
+  const [claimableTokens, setClaimableTokens] = useState(null)
+  const [walletAddress, setWalletAddress] = useState('')
+  const [savedWallet, setSavedWallet] = useState(null)
+  const [isClaimingTokens, setIsClaimingTokens] = useState(false)
+  const [claimResult, setClaimResult] = useState(null)
+  const [tokenInfo, setTokenInfo] = useState(null)
 
   useEffect(() => {
     fetchData()
@@ -66,6 +78,23 @@ export default function RewardsPage() {
       setHistory(historyData.transactions)
       setLeaderboard(leaderboardData)
       setReferralCode(referralData)
+      
+      // Fetch token-related data
+      try {
+        const [claimable, wallet, info] = await Promise.all([
+          tokenService.getClaimable(),
+          tokenService.getMyWallet(),
+          tokenService.getTokenInfo()
+        ])
+        setClaimableTokens(claimable)
+        setSavedWallet(wallet)
+        setTokenInfo(info)
+        if (wallet?.wallet_address) {
+          setWalletAddress(wallet.wallet_address)
+        }
+      } catch (tokenError) {
+        console.log('Token service not available:', tokenError)
+      }
     } catch (error) {
       console.error('Failed to fetch rewards data:', error)
     } finally {
@@ -119,6 +148,64 @@ export default function RewardsPage() {
       alert(error.response?.data?.error || 'Conversion failed')
     } finally {
       setIsConverting(false)
+    }
+  }
+
+  const handleClaimTokens = async () => {
+    if (!walletAddress) {
+      alert('Please enter a wallet address')
+      return
+    }
+
+    setIsClaimingTokens(true)
+    setClaimResult(null)
+    
+    try {
+      const result = await tokenService.claimTokens(walletAddress)
+      setClaimResult({
+        success: true,
+        message: result.message,
+        txHash: result.transaction_hash,
+        tokens: result.tokens_claimed,
+        etherscanUrl: result.etherscan_url
+      })
+      
+      // Refresh data
+      const [claimable, rewardsData] = await Promise.all([
+        tokenService.getClaimable(),
+        rewardsService.getBalance()
+      ])
+      setClaimableTokens(claimable)
+      setRewards(rewardsData)
+      
+      // Save wallet if not already saved
+      if (!savedWallet?.wallet_address) {
+        await tokenService.saveWallet(walletAddress)
+        setSavedWallet({ wallet_address: walletAddress, has_wallet: true })
+      }
+    } catch (error) {
+      setClaimResult({
+        success: false,
+        message: error.response?.data?.error || 'Failed to claim tokens'
+      })
+    } finally {
+      setIsClaimingTokens(false)
+    }
+  }
+
+  const connectMetaMask = async () => {
+    if (typeof window.ethereum === 'undefined') {
+      alert('Please install MetaMask to connect your wallet')
+      return
+    }
+
+    try {
+      const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' })
+      if (accounts[0]) {
+        setWalletAddress(accounts[0])
+      }
+    } catch (error) {
+      console.error('Failed to connect MetaMask:', error)
     }
   }
 
@@ -210,14 +297,25 @@ export default function RewardsPage() {
             <span className="text-xs font-medium text-gray-400 uppercase">CTK Tokens</span>
           </div>
           <p className="text-3xl font-bold text-gray-900 dark:text-gray-100">
-            {rewards?.ctk_tokens?.toFixed(2) || '0.00'}
+            {claimableTokens?.token_balance || rewards?.ctk_tokens?.toFixed(2) || '0'}
           </p>
-          <button
-            onClick={() => setShowConvertModal(true)}
-            className="text-sm text-primary-600 hover:text-primary-700 mt-1 flex items-center"
-          >
-            Convert points <ChevronRight size={14} />
-          </button>
+          <div className="flex flex-col gap-1 mt-1">
+            {claimableTokens?.claimable_tokens > 0 && (
+              <button
+                onClick={() => setShowClaimModal(true)}
+                className="text-sm text-green-600 hover:text-green-700 flex items-center font-medium"
+              >
+                <Wallet size={14} className="mr-1" />
+                Claim {claimableTokens.claimable_tokens} CTK to wallet
+              </button>
+            )}
+            <button
+              onClick={() => setShowConvertModal(true)}
+              className="text-sm text-primary-600 hover:text-primary-700 flex items-center"
+            >
+              Convert points <ChevronRight size={14} />
+            </button>
+          </div>
         </motion.div>
 
         {/* Current Tier */}
@@ -425,7 +523,7 @@ export default function RewardsPage() {
               
               <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 mb-4">
                 <p className="text-sm text-gray-600 dark:text-gray-400">Conversion Rate</p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">1,000 points = 1 CTK</p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{claimableTokens?.points_per_token || 100} points = 1 CTK</p>
               </div>
 
               <div className="mb-4">
@@ -447,9 +545,9 @@ export default function RewardsPage() {
               </div>
 
               {convertAmount && !isNaN(parseInt(convertAmount)) && (
-                <div className="bg-primary-50 rounded-lg p-3 mb-4">
-                  <p className="text-sm text-primary-700">
-                    You'll receive: <strong>{(parseInt(convertAmount) / 1000).toFixed(4)} CTK</strong>
+                <div className="bg-primary-50 dark:bg-primary-900/20 rounded-lg p-3 mb-4">
+                  <p className="text-sm text-primary-700 dark:text-primary-300">
+                    You'll receive: <strong>{(parseInt(convertAmount) / (claimableTokens?.points_per_token || 100)).toFixed(2)} CTK</strong>
                   </p>
                 </div>
               )}
@@ -470,6 +568,132 @@ export default function RewardsPage() {
                 >
                   Convert
                 </Button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Claim Tokens Modal */}
+      <AnimatePresence>
+        {showClaimModal && (
+          <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="bg-white dark:bg-gray-800 rounded-xl p-6 max-w-md w-full"
+            >
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
+                Claim CTK Tokens to Wallet
+              </h3>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+                Transfer your earned tokens to your Ethereum wallet
+              </p>
+
+              {/* Token Info */}
+              <div className="bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20 rounded-lg p-4 mb-4">
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-sm text-gray-600 dark:text-gray-400">Available Points</span>
+                  <span className="font-semibold text-gray-900 dark:text-gray-100">
+                    {claimableTokens?.available_points?.toLocaleString() || 0}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-sm text-gray-600 dark:text-gray-400">Claimable Tokens</span>
+                  <span className="font-bold text-lg text-purple-600">
+                    {claimableTokens?.claimable_tokens || 0} CTK
+                  </span>
+                </div>
+                <div className="text-xs text-gray-500 dark:text-gray-400">
+                  Rate: {claimableTokens?.points_per_token || 100} points = 1 CTK
+                </div>
+              </div>
+
+              {/* Wallet Input */}
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Wallet Address
+                </label>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={walletAddress}
+                    onChange={(e) => setWalletAddress(e.target.value)}
+                    placeholder="0x..."
+                    className="flex-1 px-4 py-2 border dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 font-mono text-sm"
+                  />
+                  <button
+                    onClick={connectMetaMask}
+                    className="px-3 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 flex items-center gap-1 text-sm"
+                    title="Connect MetaMask"
+                  >
+                    <Wallet size={16} />
+                  </button>
+                </div>
+                {savedWallet?.wallet_address && (
+                  <p className="text-xs text-green-600 dark:text-green-400 mt-1">
+                    ✓ Saved wallet: {savedWallet.wallet_address.slice(0, 6)}...{savedWallet.wallet_address.slice(-4)}
+                  </p>
+                )}
+              </div>
+
+              {/* Result Message */}
+              {claimResult && (
+                <div className={`rounded-lg p-4 mb-4 ${
+                  claimResult.success 
+                    ? 'bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800' 
+                    : 'bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800'
+                }`}>
+                  <p className={`text-sm font-medium ${
+                    claimResult.success ? 'text-green-700 dark:text-green-300' : 'text-red-700 dark:text-red-300'
+                  }`}>
+                    {claimResult.message}
+                  </p>
+                  {claimResult.txHash && (
+                    <a
+                      href={claimResult.etherscanUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs text-blue-600 hover:text-blue-700 flex items-center gap-1 mt-2"
+                    >
+                      View on Etherscan <ExternalLink size={12} />
+                    </a>
+                  )}
+                </div>
+              )}
+
+              {/* Network Info */}
+              {tokenInfo?.available && (
+                <div className="text-xs text-gray-500 dark:text-gray-400 mb-4 flex items-center gap-2">
+                  <span className="w-2 h-2 bg-green-500 rounded-full"></span>
+                  Connected to {tokenInfo.network === 'sepolia' ? 'Sepolia Testnet' : tokenInfo.network}
+                </div>
+              )}
+
+              <div className="flex gap-3">
+                <Button
+                  variant="outline"
+                  fullWidth
+                  onClick={() => {
+                    setShowClaimModal(false)
+                    setClaimResult(null)
+                  }}
+                >
+                  {claimResult?.success ? 'Close' : 'Cancel'}
+                </Button>
+                {!claimResult?.success && (
+                  <Button
+                    fullWidth
+                    onClick={handleClaimTokens}
+                    isLoading={isClaimingTokens}
+                    disabled={!walletAddress || claimableTokens?.claimable_tokens === 0}
+                    className="bg-gradient-to-r from-purple-500 to-blue-500"
+                  >
+                    <Wallet size={16} className="mr-2" />
+                    Claim Tokens
+                  </Button>
+                )}
               </div>
             </motion.div>
           </div>
