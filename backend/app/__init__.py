@@ -114,11 +114,12 @@ def create_app(config_name='development'):
     from .swagger import init_swagger
     init_swagger(app)
     
-    # Health check endpoint
+    # Health check endpoints
+    @app.route('/health')
     @app.route('/api/health')
     def health_check():
-        """Basic health check"""
-        return {'status': 'healthy', 'service': 'chaintrack-api'}
+        """Basic health check for hosting platforms"""
+        return {'status': 'healthy', 'service': 'chaintrack-api', 'version': '2.0.0'}
     
     @app.route('/api/health/ready')
     def readiness_check():

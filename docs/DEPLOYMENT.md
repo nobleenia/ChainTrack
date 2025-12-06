@@ -215,7 +215,7 @@ DEPLOYER_PRIVATE_KEY=your_private_key_without_0x
 ETHERSCAN_API_KEY=your_etherscan_api_key
 ```
 
-### Step 3: Deploy Contracts
+### Step 2: Deploy Contracts
 
 ```bash
 # Install dependencies
@@ -228,12 +228,25 @@ npm run compile
 npm run deploy:sepolia
 ```
 
+### Step 3: Current Deployed Contracts (Sepolia)
+
+> ✅ **Contracts are already deployed!** Use these addresses:
+
+| Contract | Address |
+|----------|---------|
+| **ProductRegistry** | `0x141878E69201172C2aeeC39C4882b61089f64177` |
+| **ShipmentRegistry** | `0xd0Db8e81115297194659543c47BFda3b061B059b` |
+| **ChainTrackToken** | `0x1eD9C16BaA65F32EEF00639b112B792be498b43a` |
+
+Verify on Etherscan: https://sepolia.etherscan.io/address/0x141878E69201172C2aeeC39C4882b61089f64177
+
 ### Step 4: Update Backend
 
 Copy the deployed contract addresses to your backend environment:
 ```env
-CONTRACT_ADDRESS=0x...  # ProductRegistry address
-SHIPMENT_REGISTRY_ADDRESS=0x...  # ShipmentRegistry address
+PRODUCT_REGISTRY_ADDRESS=0x141878E69201172C2aeeC39C4882b61089f64177
+SHIPMENT_REGISTRY_ADDRESS=0xd0Db8e81115297194659543c47BFda3b061B059b
+TOKEN_ADDRESS=0x1eD9C16BaA65F32EEF00639b112B792be498b43a
 ```
 
 ---
