@@ -183,8 +183,8 @@ class TokenService:
         if not user_rewards:
             return (0, 0)
         
-        # Available points = total earned - already claimed
-        available_points = user_rewards.total_points - user_rewards.claimed_points
+        # Available points = current_points (not yet converted to tokens)
+        available_points = user_rewards.current_points
         
         # Calculate whole tokens (no partial tokens)
         claimable_tokens = available_points // self.points_per_token
@@ -251,15 +251,16 @@ class TokenService:
             if receipt['status'] != 1:
                 return (False, "Transaction failed on blockchain", tx_hash_hex)
             
-            # Update database
-            user_rewards.claimed_points += claimable_points
-            user_rewards.token_balance += claimable_tokens
+            # Update database - deduct points and add tokens
+            user_rewards.current_points -= claimable_points  # Deduct from available points
+            user_rewards.ctk_tokens += claimable_tokens       # Add to token balance
+            user_rewards.tokens_converted += claimable_tokens # Track total conversions
             
             # Record the transaction
             claim_tx = PointTransaction(
                 user_id=user_id,
-                action=PointActionType.TOKEN_CLAIM,
-                points=-claimable_points,  # Negative because points are being claimed
+                action=PointActionType.TOKEN_CONVERSION,  # Use TOKEN_CONVERSION action
+                points=-claimable_points,  # Negative because points are being converted
                 description=f"Claimed {claimable_tokens} CTK tokens",
                 reference_type='token_claim',
                 reference_id=tx_hash_hex
