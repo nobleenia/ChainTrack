@@ -341,9 +341,9 @@ export default function ProductDetailPage() {
           {/* QR Code */}
           <div className="flex-shrink-0">
             <div className="w-48 h-48 bg-gray-100 dark:bg-gray-700 rounded-xl flex items-center justify-center border-2 border-dashed border-gray-300 dark:border-gray-600">
-              {product?.qr_code ? (
+              {product?.qr_code_url ? (
                 <img 
-                  src={`data:image/png;base64,${product.qr_code}`} 
+                  src={product.qr_code_url} 
                   alt="Product QR Code"
                   className="w-full h-full object-contain p-2"
                 />

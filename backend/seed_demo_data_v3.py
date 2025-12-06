@@ -34,6 +34,7 @@ from app.models import (
     CourierAuthorization
 )
 from app.models.courier_profile import CourierProfile
+from app.services.qr_service import generate_qr_code
 
 app = create_app('development')
 
@@ -527,6 +528,8 @@ def seed_products(users):
     """Create demo products"""
     print_section("CREATING PRODUCTS")
     
+    from app.services.qr_service import generate_qr_code
+    
     products = []
     with app.app_context():
         manufacturer = User.query.filter_by(role=UserRole.MANUFACTURER).first()
@@ -534,7 +537,13 @@ def seed_products(users):
         for product_data in DEMO_PRODUCTS:
             existing = Product.query.filter_by(batch_number=product_data["batch_number"]).first()
             if existing:
-                print_info(f"Product exists: {product_data['name'][:40]}...")
+                # Generate QR code if missing
+                if not existing.qr_code_url:
+                    qr_url = f"http://localhost:5173/verify/{existing.product_id}"
+                    existing.qr_code_url = generate_qr_code(existing.product_id, qr_url)
+                    print_info(f"Generated QR for existing: {product_data['name'][:40]}...")
+                else:
+                    print_info(f"Product exists: {product_data['name'][:40]}...")
                 products.append(existing)
                 continue
             
@@ -552,7 +561,13 @@ def seed_products(users):
                 blockchain_hash=generate_fake_tx_hash(),
                 blockchain_block=generate_fake_block_number()
             )
+            
+            # Generate QR code for new product
             db.session.add(product)
+            db.session.flush()  # Get ID before generating QR
+            qr_url = f"http://localhost:5173/verify/{product.product_id}"
+            product.qr_code_url = generate_qr_code(product.product_id, qr_url)
+            
             print_success(f"Created: {product_data['name'][:50]}...")
             products.append(product)
         

@@ -122,6 +122,13 @@ def seed_demo():
                 verification_count=5
             )
             db.session.add(product)
+            db.session.flush()  # Get ID before generating QR
+            
+            # Generate QR code
+            from app.services.qr_service import generate_qr_code
+            from flask import current_app
+            qr_url = f"{current_app.config.get('QR_CODE_BASE_URL', 'http://localhost:5173/verify')}/{product.product_id}"
+            product.qr_code_url = generate_qr_code(product.product_id, qr_url)
     
     db.session.commit()
     print('Demo data seeded successfully.')
