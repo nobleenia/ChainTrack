@@ -1,6 +1,11 @@
 """
 Notification Service for ChainTrack
-Handles email and SMS notifications for shipment status updates
+Handles email, SMS, and WhatsApp notifications for shipment status updates
+
+Supported providers:
+- Email: Brevo (free 300/day), SendGrid (fallback)
+- WhatsApp: Twilio WhatsApp Business API
+- SMS: Twilio (disabled by default)
 """
 
 import os
@@ -26,8 +31,79 @@ class NotificationProvider(ABC):
         pass
 
 
-class EmailProvider(NotificationProvider):
-    """Email notification provider using SendGrid"""
+class BrevoEmailProvider(NotificationProvider):
+    """
+    Email notification provider using Brevo (Sendinblue)
+    Free tier: 300 emails/day
+    Sign up at: https://www.brevo.com/
+    """
+    
+    def __init__(self):
+        self.api_key = os.environ.get('BREVO_API_KEY')
+        self.from_email = os.environ.get('NOTIFICATION_FROM_EMAIL', 'noreply@chaintrack.io')
+        self.from_name = os.environ.get('NOTIFICATION_FROM_NAME', 'ChainTrack')
+        
+    def is_configured(self) -> bool:
+        return bool(self.api_key)
+    
+    def send(self, to: str, subject: str, body: str, html_body: str = None, **kwargs) -> Tuple[bool, str]:
+        """
+        Send an email via Brevo (Sendinblue) API
+        
+        Args:
+            to: Recipient email address
+            subject: Email subject
+            body: Plain text body
+            html_body: Optional HTML body
+            
+        Returns:
+            Tuple of (success, message)
+        """
+        if not self.is_configured():
+            logger.warning("Brevo not configured, skipping email notification")
+            return False, "Email service not configured"
+        
+        try:
+            import sib_api_v3_sdk
+            from sib_api_v3_sdk.rest import ApiException
+            
+            # Configure API key
+            configuration = sib_api_v3_sdk.Configuration()
+            configuration.api_key['api-key'] = self.api_key
+            
+            # Create API instance
+            api_instance = sib_api_v3_sdk.TransactionalEmailsApi(
+                sib_api_v3_sdk.ApiClient(configuration)
+            )
+            
+            # Build email
+            send_smtp_email = sib_api_v3_sdk.SendSmtpEmail(
+                to=[{"email": to}],
+                sender={"email": self.from_email, "name": self.from_name},
+                subject=subject,
+                text_content=body,
+                html_content=html_body if html_body else f"<pre>{body}</pre>"
+            )
+            
+            # Send email
+            response = api_instance.send_transac_email(send_smtp_email)
+            
+            logger.info(f"Brevo email sent successfully to {to}, message_id: {response.message_id}")
+            return True, f"Email sent successfully (ID: {response.message_id})"
+            
+        except ImportError:
+            logger.error("Brevo SDK (sib-api-v3-sdk) not installed. Install with: pip install sib-api-v3-sdk")
+            return False, "Brevo SDK not installed"
+        except ApiException as e:
+            logger.error(f"Brevo API error: {e}")
+            return False, f"Brevo API error: {str(e)}"
+        except Exception as e:
+            logger.error(f"Brevo email error: {str(e)}")
+            return False, str(e)
+
+
+class SendGridEmailProvider(NotificationProvider):
+    """Email notification provider using SendGrid (fallback)"""
     
     def __init__(self):
         self.api_key = os.environ.get('SENDGRID_API_KEY')
@@ -74,30 +150,139 @@ class EmailProvider(NotificationProvider):
             response = sg.client.mail.send.post(request_body=mail.get())
             
             if response.status_code in [200, 201, 202]:
-                logger.info(f"Email sent successfully to {to}")
+                logger.info(f"SendGrid email sent successfully to {to}")
                 return True, "Email sent successfully"
             else:
-                logger.error(f"Email failed: {response.status_code}")
+                logger.error(f"SendGrid email failed: {response.status_code}")
                 return False, f"Email failed with status {response.status_code}"
                 
         except ImportError:
             logger.error("SendGrid library not installed")
             return False, "SendGrid library not installed"
         except Exception as e:
-            logger.error(f"Email error: {str(e)}")
+            logger.error(f"SendGrid email error: {str(e)}")
             return False, str(e)
 
 
-class SMSProvider(NotificationProvider):
-    """SMS notification provider using Twilio"""
+class EmailProvider(NotificationProvider):
+    """
+    Smart email provider that tries Brevo first (free), then falls back to SendGrid
+    """
+    
+    def __init__(self):
+        self.brevo = BrevoEmailProvider()
+        self.sendgrid = SendGridEmailProvider()
+        
+    def is_configured(self) -> bool:
+        return self.brevo.is_configured() or self.sendgrid.is_configured()
+    
+    def send(self, to: str, subject: str, body: str, html_body: str = None, **kwargs) -> Tuple[bool, str]:
+        """Send email, trying Brevo first then SendGrid as fallback"""
+        # Try Brevo first (free tier)
+        if self.brevo.is_configured():
+            success, message = self.brevo.send(to, subject, body, html_body, **kwargs)
+            if success:
+                return success, message
+            logger.warning(f"Brevo failed, trying SendGrid fallback: {message}")
+        
+        # Fallback to SendGrid
+        if self.sendgrid.is_configured():
+            return self.sendgrid.send(to, subject, body, html_body, **kwargs)
+        
+        return False, "No email provider configured (set BREVO_API_KEY or SENDGRID_API_KEY)"
+
+
+class WhatsAppProvider(NotificationProvider):
+    """
+    WhatsApp notification provider using Twilio WhatsApp Business API
+    
+    Setup:
+    1. Create Twilio account at https://www.twilio.com/
+    2. Enable WhatsApp sandbox or get approved WhatsApp Business number
+    3. For sandbox: Users must send "join <sandbox-keyword>" to your sandbox number first
+    4. Set environment variables: TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_WHATSAPP_FROM
+    
+    Note: WhatsApp has a 24-hour session window for free-form messages.
+    After 24h without user reply, only template messages can be sent.
+    """
     
     def __init__(self):
         self.account_sid = os.environ.get('TWILIO_ACCOUNT_SID')
         self.auth_token = os.environ.get('TWILIO_AUTH_TOKEN')
-        self.from_number = os.environ.get('TWILIO_FROM_NUMBER')
+        # WhatsApp number format: whatsapp:+14155238886 (Twilio sandbox) or your approved number
+        self.from_number = os.environ.get('TWILIO_WHATSAPP_FROM', 'whatsapp:+14155238886')
         
     def is_configured(self) -> bool:
         return all([self.account_sid, self.auth_token, self.from_number])
+    
+    def send(self, to: str, subject: str, body: str, **kwargs) -> Tuple[bool, str]:
+        """
+        Send a WhatsApp message via Twilio
+        
+        Args:
+            to: Recipient phone number (with country code, e.g., +1234567890)
+            subject: Not used for WhatsApp, but included for interface consistency
+            body: Message body
+            
+        Returns:
+            Tuple of (success, message)
+        """
+        if not self.is_configured():
+            logger.warning("Twilio WhatsApp not configured, skipping WhatsApp notification")
+            return False, "WhatsApp service not configured"
+        
+        try:
+            from twilio.rest import Client
+            
+            client = Client(self.account_sid, self.auth_token)
+            
+            # Ensure phone number has + prefix and whatsapp: prefix
+            if not to.startswith('+'):
+                to = '+' + to
+            if not to.startswith('whatsapp:'):
+                to = 'whatsapp:' + to
+            
+            # Ensure from number has whatsapp: prefix
+            from_number = self.from_number
+            if not from_number.startswith('whatsapp:'):
+                from_number = 'whatsapp:' + from_number
+            
+            message = client.messages.create(
+                body=body,
+                from_=from_number,
+                to=to
+            )
+            
+            logger.info(f"WhatsApp message sent successfully to {to}, SID: {message.sid}")
+            return True, f"WhatsApp message sent (SID: {message.sid})"
+            
+        except ImportError:
+            logger.error("Twilio library not installed")
+            return False, "Twilio library not installed"
+        except Exception as e:
+            error_msg = str(e)
+            # Provide helpful error messages for common issues
+            if "not a valid WhatsApp" in error_msg:
+                logger.error(f"WhatsApp error: Recipient hasn't opted in. They need to message your sandbox first.")
+                return False, "Recipient must opt-in to WhatsApp messages first"
+            logger.error(f"WhatsApp error: {error_msg}")
+            return False, error_msg
+
+
+class SMSProvider(NotificationProvider):
+    """
+    SMS notification provider using Twilio
+    Note: SMS costs money per message. Consider using WhatsApp instead (free within 24h window)
+    """
+    
+    def __init__(self):
+        self.account_sid = os.environ.get('TWILIO_ACCOUNT_SID')
+        self.auth_token = os.environ.get('TWILIO_AUTH_TOKEN')
+        self.from_number = os.environ.get('TWILIO_SMS_FROM')  # Different from WhatsApp number
+        self.enabled = os.environ.get('SMS_ENABLED', 'false').lower() == 'true'
+        
+    def is_configured(self) -> bool:
+        return self.enabled and all([self.account_sid, self.auth_token, self.from_number])
     
     def send(self, to: str, subject: str, body: str, **kwargs) -> Tuple[bool, str]:
         """
@@ -288,6 +473,7 @@ ChainTrack Team''',
     def __init__(self):
         self.email_provider = EmailProvider()
         self.sms_provider = SMSProvider()
+        self.whatsapp_provider = WhatsAppProvider()
         self.base_url = os.environ.get('FRONTEND_URL', 'http://localhost:5173')
         
     @property
@@ -297,6 +483,10 @@ ChainTrack Team''',
     @property
     def is_sms_configured(self) -> bool:
         return self.sms_provider.is_configured()
+    
+    @property
+    def is_whatsapp_configured(self) -> bool:
+        return self.whatsapp_provider.is_configured()
     
     def get_tracking_url(self, tracking_id: str) -> str:
         """Generate the tracking URL for a shipment"""
@@ -331,24 +521,27 @@ ChainTrack Team''',
         email: Optional[str] = None,
         phone: Optional[str] = None,
         send_email: bool = True,
-        send_sms: bool = True
+        send_sms: bool = False,  # SMS disabled by default (costs money)
+        send_whatsapp: bool = True  # WhatsApp preferred (free within 24h window)
     ) -> Dict[str, Any]:
         """
-        Send notification via email and/or SMS
+        Send notification via email, WhatsApp, and/or SMS
         
         Args:
             template_name: Name of the template to use
             data: Template data (tracking_id, recipient_name, etc.)
             email: Recipient email address
-            phone: Recipient phone number
+            phone: Recipient phone number (used for WhatsApp and SMS)
             send_email: Whether to send email
-            send_sms: Whether to send SMS
+            send_sms: Whether to send SMS (disabled by default - costs money)
+            send_whatsapp: Whether to send WhatsApp (preferred over SMS)
             
         Returns:
             Dict with results for each channel
         """
         results = {
             'email': {'sent': False, 'message': None},
+            'whatsapp': {'sent': False, 'message': None},
             'sms': {'sent': False, 'message': None}
         }
         
@@ -364,8 +557,15 @@ ChainTrack Team''',
             success, message = self.email_provider.send(email, subject, body)
             results['email'] = {'sent': success, 'message': message}
         
-        # Send SMS
-        if send_sms and phone:
+        # Send WhatsApp (preferred over SMS - free within 24h session window)
+        if send_whatsapp and phone:
+            whatsapp_body = self._render_template(template_name, data, 'sms')  # Use SMS template for WhatsApp
+            
+            success, message = self.whatsapp_provider.send(phone, '', whatsapp_body)
+            results['whatsapp'] = {'sent': success, 'message': message}
+        
+        # Send SMS only if explicitly enabled and WhatsApp failed or not sent
+        if send_sms and phone and not results['whatsapp']['sent']:
             sms_body = self._render_template(template_name, data, 'sms')
             
             success, message = self.sms_provider.send(phone, '', sms_body)

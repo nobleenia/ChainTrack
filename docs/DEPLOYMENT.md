@@ -88,12 +88,21 @@ DEPLOYER_PRIVATE_KEY=<your deployer wallet key>
 FRONTEND_URL=https://your-frontend-domain.vercel.app
 QR_CODE_BASE_URL=https://your-frontend-domain.vercel.app/verify
 
-# Optional - Notifications
-PINATA_API_KEY=
-PINATA_API_SECRET=
-SENDGRID_API_KEY=
+# Email Notifications (FREE - 300/day)
+# Sign up at: https://www.brevo.com/
+BREVO_API_KEY=your_brevo_api_key
+NOTIFICATION_FROM_EMAIL=noreply@yourdomain.com
+NOTIFICATION_FROM_NAME=ChainTrack
+
+# WhatsApp Notifications (FREE within 24h window)
+# Sign up at: https://www.twilio.com/
 TWILIO_ACCOUNT_SID=
 TWILIO_AUTH_TOKEN=
+TWILIO_WHATSAPP_FROM=whatsapp:+14155238886
+
+# Optional - IPFS for photos
+PINATA_API_KEY=
+PINATA_API_SECRET=
 ```
 
 6. Deploy will start automatically
